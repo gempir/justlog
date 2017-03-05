@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/op/go-logging"
+	"github.com/gempir/gempbotgo/twitch"
+	"gopkg.in/redis.v3"
 )
 
 var (
@@ -15,9 +17,13 @@ var (
 )
 
 type config struct {
-	IrcAddress string `json:"irc_address"`
-	BrokerPass string `json:"broker_pass"`
-	APIPort    string `json:"api_port"`
+	IrcAddress       string `json:"irc_address"`
+	IrcUser          string `json:"irc_user"`
+	IrcToken         string `json:"irc_token"`
+	APIPort          string `json:"api_port"`
+	RedisAddress     string `json:"redis_address"`
+	RedisPassword    string `json:"redis_password"`
+	RedisDatabase    int64  `json:"redis_database"`
 }
 
 func main() {
@@ -28,6 +34,14 @@ func main() {
 		Log.Fatal(err)
 	}
 
+	rClient := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddress,
+		Password: cfg.RedisPassword,
+		DB:       cfg.RedisDatabase,
+	})
+
+	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, Log, *rClient)
+	bot.CreateConnection()
 }
 
 func initLogger() logging.Logger {
@@ -36,7 +50,7 @@ func initLogger() logging.Logger {
 	backend := logging.NewLogBackend(os.Stdout, "", 0)
 
 	format := logging.MustStringFormatter(
-		`%{color}%{time:2006-01-02 15:04:05.000} %{shortfile:-15s} %{level:.4s}%{color:reset} %{message}`,
+		`%{color}%{time:2006-01-02 15:04:05.000} %{level:.4s}%{color:reset} %{message}`,
 	)
 	logging.SetFormatter(format)
 	backendLeveled := logging.AddModuleLevel(backend)

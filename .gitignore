@@ -2,3 +2,4 @@ gempbotgo
 vendor/
 glide.lock
 .idea/
+config.json

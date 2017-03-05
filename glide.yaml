@@ -2,3 +2,5 @@ package: github.com/gempir/gempbotgo
 import:
 - package: github.com/op/go-logging
   version: ^1.0.0
+- package: gopkg.in/redis.v5
+  version: ^5.2.9
