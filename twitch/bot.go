@@ -103,13 +103,29 @@ func (bot *bot) parseMessage(msg string) {
 	message = actionReg.ReplaceAllLiteralString(message, "")
 	message = actionReg2.ReplaceAllLiteralString(message, "")
 
+	split5 := strings.Replace(split2[0], " :" + username + "!" + username + "@" + username, "", -1)
+	tags := strings.Split(strings.Replace(split5, "@", "", 1), ";")
 
-	bot.log.Debug("SPLIT" + split2[0])
+	tagMap := make(map[string]string)
 
-	//split5 := strings.Replace(split2[0], " :" + username + "!" + username + "@" + username, "", -1)
-	//tags := strings.Replace(split5, "@", "", 1)
+	for _,tag := range tags {
+		tagSplit := strings.Split(tag, "=")
+		tagMap[tagSplit[0]] = tagSplit[1]
+	}
 
-	user := newUser(username)
+	subscriber, turbo, mod := false, false, false
+
+	if tagMap["subscriber"] == "1" {
+		subscriber = true
+	}
+	if tagMap["turbo"] == "1" {
+		turbo = true
+	}
+	if tagMap["mod"] == "1" {
+		mod = true
+	}
+
+	user := newUser(username, tagMap["user-id"], tagMap["color"], tagMap["display-name"], mod, subscriber, turbo)
 	bot.messages <- newMessage(message, user, "#" + channel)
 }
 
