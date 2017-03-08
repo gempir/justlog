@@ -2,6 +2,7 @@
   "irc_address": "irc.chat.twitch.tv:6667",
   "irc_user": "gempbot",
   "irc_token": "oauth:123123123",
+  "log_path": "/var/twitch_logs/",
   "api_port": "8025",
   "redis_address": "127.0.0.1:6379",
   "redis_password": "asdasd",

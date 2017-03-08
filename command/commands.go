@@ -15,6 +15,6 @@ func NewHandler(logger logging.Logger) handler {
 	}
 }
 
-func (h *handler) HandleMessage(msg twitch.Message) {
-	h.log.Debug(msg.Text)
+func (h *handler) HandleCommand(msg twitch.Message) {
+
 }

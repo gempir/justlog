@@ -9,6 +9,8 @@ import (
 	"github.com/gempir/gempbotgo/twitch"
 	"gopkg.in/redis.v3"
 	"github.com/gempir/gempbotgo/command"
+	"strings"
+	"github.com/gempir/gempbotgo/filelog"
 )
 
 var (
@@ -20,6 +22,7 @@ type config struct {
 	IrcAddress       string `json:"irc_address"`
 	IrcUser          string `json:"irc_user"`
 	IrcToken         string `json:"irc_token"`
+	LogPath			 string `json:"log_path"`
 	APIPort          string `json:"api_port"`
 	RedisAddress     string `json:"redis_address"`
 	RedisPassword    string `json:"redis_password"`
@@ -43,10 +46,18 @@ func main() {
 	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, Log, *rClient)
 	go bot.CreateConnection()
 
+	fileLogger := filelog.NewFileLogger(cfg.LogPath, Log)
 	cmdHandler := command.NewHandler(Log)
 
+
 	for msg := range bot.Messages {
-		cmdHandler.HandleMessage(msg)
+
+		fileLogger.LogMessage(msg)
+
+		if strings.HasPrefix(msg.Text, "!") {
+			cmdHandler.HandleCommand(msg)
+		}
+
 	}
 }
 

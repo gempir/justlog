@@ -124,7 +124,7 @@ func (bot *bot) parseMessage(msg string) {
 	}
 
 	user := newUser(username, tagMap["User-id"], tagMap["color"], tagMap["display-name"], mod, subscriber, turbo)
-	bot.Messages <- newMessage(message, user, "#" + channel)
+	bot.Messages <- newMessage(message, user, channel)
 }
 
 func (bot *bot) join(channel string) {
