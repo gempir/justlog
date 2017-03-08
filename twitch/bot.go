@@ -12,7 +12,7 @@ import (
 )
 
 type bot struct {
-	messages chan message
+	Messages chan Message
 	ircAddress string
 	ircUser string
 	ircToken string
@@ -30,7 +30,7 @@ var (
 
 func NewBot(ircAddress string, ircUser string, ircToken string, logger logging.Logger, rClient redis.Client) bot {
 	return bot{
-		messages: make(chan message),
+		Messages: make(chan Message),
 		ircAddress: ircAddress,
 		ircUser: ircUser,
 		ircToken: ircToken,
@@ -46,11 +46,10 @@ func (bot *bot) CreateConnection() {
 		bot.log.Error(err.Error())
 		return
 	}
-	bot.log.Debugf("new connection %s", conn.RemoteAddr())
+	bot.log.Debugf("new IRC connection %s", conn.RemoteAddr())
 	fmt.Fprintf(conn, "PASS %s\r\n", bot.ircToken)
 	fmt.Fprintf(conn, "NICK %s\r\n", bot.ircUser)
 	fmt.Fprintf(conn, "JOIN %s\r\n", "#" + bot.ircUser)
-	bot.log.Debugf("PASS %s\r\n", bot.ircToken)
 	go bot.joinDefault()
 
 	reader := bufio.NewReader(conn)
@@ -86,7 +85,6 @@ func (bot *bot) joinDefault() {
 }
 
 func (bot *bot) parseMessage(msg string) {
-	bot.log.Debug(msg)
 
 	if !strings.Contains(msg, ".tmi.twitch.tv PRIVMSG ") {
 		return
@@ -125,8 +123,8 @@ func (bot *bot) parseMessage(msg string) {
 		mod = true
 	}
 
-	user := newUser(username, tagMap["user-id"], tagMap["color"], tagMap["display-name"], mod, subscriber, turbo)
-	bot.messages <- newMessage(message, user, "#" + channel)
+	user := newUser(username, tagMap["User-id"], tagMap["color"], tagMap["display-name"], mod, subscriber, turbo)
+	bot.Messages <- newMessage(message, user, "#" + channel)
 }
 
 func (bot *bot) join(channel string) {

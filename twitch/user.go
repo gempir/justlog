@@ -1,6 +1,6 @@
 package twitch
 
-type user struct {
+type User struct {
 	Username string
 	UserId string
 	Color string
@@ -11,8 +11,8 @@ type user struct {
 	Emotes map[string][]string
 }
 
-func newUser(username string, userId string, color string, displayName string, mod bool, subscriber bool, turbo bool) user {
-	return user{
+func newUser(username string, userId string, color string, displayName string, mod bool, subscriber bool, turbo bool) User {
+	return User{
 		Username: username,
 		UserId: userId,
 		Color: color,

@@ -8,11 +8,11 @@ import (
 	"github.com/op/go-logging"
 	"github.com/gempir/gempbotgo/twitch"
 	"gopkg.in/redis.v3"
+	"github.com/gempir/gempbotgo/command"
 )
 
 var (
 	cfg config
-	// Log logger from go-logging
 	Log logging.Logger
 )
 
@@ -41,7 +41,13 @@ func main() {
 	})
 
 	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, Log, *rClient)
-	bot.CreateConnection()
+	go bot.CreateConnection()
+
+	cmdHandler := command.NewHandler(Log)
+
+	for msg := range bot.Messages {
+		cmdHandler.HandleMessage(msg)
+	}
 }
 
 func initLogger() logging.Logger {

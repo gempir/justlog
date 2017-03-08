@@ -1,13 +1,13 @@
 package twitch
 
-type message struct {
-	Text string
-	User user
+type Message struct {
+	Text    string
+	User    User
 	Channel string
 }
 
-func newMessage(text string, user user, channel string) message {
-	return message{
+func newMessage(text string, user User, channel string) Message {
+	return Message{
 		Text: text,
 		User: user,
 		Channel: channel,
