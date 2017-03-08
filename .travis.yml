@@ -5,7 +5,8 @@ go:
  - 1.7.1
 
 script:
- - curl https://glide.sh/get | sh
+ - go get -v github.com/Masterminds/glide
+ - cd $GOPATH/src/github.com/Masterminds/glide && git checkout 84607742b10f492430762d038e954236bbaf23f7 && go install && cd -
  - glide install
  - make
  - make test
