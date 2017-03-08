@@ -11,6 +11,7 @@ import (
 	"github.com/gempir/gempbotgo/command"
 	"strings"
 	"github.com/gempir/gempbotgo/filelog"
+	"time"
 )
 
 var (
@@ -22,6 +23,7 @@ type config struct {
 	IrcAddress       string `json:"irc_address"`
 	IrcUser          string `json:"irc_user"`
 	IrcToken         string `json:"irc_token"`
+	Admin			 string `json:"admin"`
 	LogPath			 string `json:"log_path"`
 	APIPort          string `json:"api_port"`
 	RedisAddress     string `json:"redis_address"`
@@ -30,6 +32,7 @@ type config struct {
 }
 
 func main() {
+	startTime := time.Now()
 	Log = initLogger()
 	var err error
 	cfg, err = readConfig("config.json")
@@ -47,7 +50,7 @@ func main() {
 	go bot.CreateConnection()
 
 	fileLogger := filelog.NewFileLogger(cfg.LogPath, Log)
-	cmdHandler := command.NewHandler(Log)
+	cmdHandler := command.NewHandler(cfg.Admin, startTime, Log)
 
 
 	for msg := range bot.Messages {
