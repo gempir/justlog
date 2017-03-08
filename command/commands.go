@@ -10,13 +10,15 @@ import (
 
 type handler struct {
 	admin string
+	bot twitch.Bot
 	startTime time.Time
 	log logging.Logger
 }
 
-func NewHandler(admin string, startTime time.Time, logger logging.Logger) handler {
+func NewHandler(admin string, bot twitch.Bot, startTime time.Time, logger logging.Logger) handler {
 	return handler{
 		admin: admin,
+		bot: bot,
 		startTime: startTime,
 		log: logger,
 	}
@@ -25,7 +27,7 @@ func NewHandler(admin string, startTime time.Time, logger logging.Logger) handle
 func (h *handler) HandleCommand(msg twitch.Message) {
 	if msg.User.Username == strings.ToLower(h.admin) {
 		uptime := formatDiff(diff(h.startTime, time.Now()))
-		h.log.Debug(h.admin + ", uptime: " + uptime)
+		h.bot.Say(h.admin + ", uptime: " + uptime, msg.Channel)
 	}
 }
 

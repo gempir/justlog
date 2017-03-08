@@ -11,7 +11,7 @@ import (
 	"gopkg.in/redis.v3"
 )
 
-type bot struct {
+type Bot struct {
 	Messages chan Message
 	ircAddress string
 	ircUser string
@@ -28,8 +28,8 @@ var (
 	actionReg2  = regexp.MustCompile(`([\x{0001}]+)`)
 )
 
-func NewBot(ircAddress string, ircUser string, ircToken string, logger logging.Logger, rClient redis.Client) bot {
-	return bot{
+func NewBot(ircAddress string, ircUser string, ircToken string, logger logging.Logger, rClient redis.Client) Bot {
+	return Bot{
 		Messages: make(chan Message),
 		ircAddress: ircAddress,
 		ircUser: ircUser,
@@ -39,7 +39,12 @@ func NewBot(ircAddress string, ircUser string, ircToken string, logger logging.L
 	}
 }
 
-func (bot *bot) CreateConnection() {
+func (bot *Bot) Say(text string, channel string) {
+	bot.log.Infof("PRIVMSG %s :%s", channel, text)
+	fmt.Fprintf(*mainConn, "PRIVMSG %s :%s\r\n", channel, text)
+}
+
+func (bot *Bot) CreateConnection() {
 	conn, err := net.Dial("tcp", bot.ircAddress)
 	mainConn = &conn
 	if err != nil {
@@ -47,9 +52,9 @@ func (bot *bot) CreateConnection() {
 		return
 	}
 	bot.log.Debugf("new IRC connection %s", conn.RemoteAddr())
-	fmt.Fprintf(conn, "PASS %s\r\n", bot.ircToken)
-	fmt.Fprintf(conn, "NICK %s\r\n", bot.ircUser)
-	fmt.Fprintf(conn, "JOIN %s\r\n", "#" + bot.ircUser)
+	fmt.Fprintf(*mainConn, "PASS %s\r\n", bot.ircToken)
+	fmt.Fprintf(*mainConn, "NICK %s\r\n", bot.ircUser)
+	fmt.Fprintf(*mainConn, "JOIN %s\r\n", "#" + bot.ircUser)
 	go bot.joinDefault()
 
 	reader := bufio.NewReader(conn)
@@ -71,7 +76,7 @@ func (bot *bot) CreateConnection() {
 	defer bot.CreateConnection()
 }
 
-func (bot *bot) joinDefault() {
+func (bot *Bot) joinDefault() {
 	val, err := bot.rClient.HGetAll("channels").Result()
 	if err != nil {
 		bot.log.Error(err.Error())
@@ -84,7 +89,7 @@ func (bot *bot) joinDefault() {
 	}
 }
 
-func (bot *bot) parseMessage(msg string) {
+func (bot *Bot) parseMessage(msg string) {
 
 	if !strings.Contains(msg, ".tmi.twitch.tv PRIVMSG ") {
 		return
@@ -127,7 +132,7 @@ func (bot *bot) parseMessage(msg string) {
 	bot.Messages <- newMessage(message, user, channel)
 }
 
-func (bot *bot) join(channel string) {
+func (bot *Bot) join(channel string) {
 	bot.log.Info("JOIN " + channel)
 	fmt.Fprintf(*mainConn, "JOIN %s\r\n", channel)
 }

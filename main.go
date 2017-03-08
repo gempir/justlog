@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/op/go-logging"
-	"github.com/gempir/gempbotgo/twitch"
 	"gopkg.in/redis.v3"
+
+	"github.com/gempir/gempbotgo/twitch"
 	"github.com/gempir/gempbotgo/command"
-	"strings"
 	"github.com/gempir/gempbotgo/filelog"
-	"time"
 )
 
 var (
@@ -50,7 +51,7 @@ func main() {
 	go bot.CreateConnection()
 
 	fileLogger := filelog.NewFileLogger(cfg.LogPath, Log)
-	cmdHandler := command.NewHandler(cfg.Admin, startTime, Log)
+	cmdHandler := command.NewHandler(cfg.Admin, bot, startTime, Log)
 
 
 	for msg := range bot.Messages {
