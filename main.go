@@ -13,6 +13,7 @@ import (
 	"github.com/gempir/gempbotgo/twitch"
 	"github.com/gempir/gempbotgo/command"
 	"github.com/gempir/gempbotgo/filelog"
+	"github.com/gempir/gempbotgo/api"
 )
 
 var (
@@ -46,6 +47,9 @@ func main() {
 		Password: cfg.RedisPassword,
 		DB:       cfg.RedisDatabase,
 	})
+
+	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath, Log)
+	go apiServer.Init()
 
 	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, Log, *rClient)
 	go bot.CreateConnection()
