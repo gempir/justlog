@@ -54,8 +54,8 @@ func (bot *Bot) CreateConnection() {
 	bot.log.Debugf("new IRC connection %s", conn.RemoteAddr())
 	fmt.Fprintf(*mainConn, "PASS %s\r\n", bot.ircToken)
 	fmt.Fprintf(*mainConn, "NICK %s\r\n", bot.ircUser)
-	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/tags")
-	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/commands")
+	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/tags\r\n")
+	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/commands\r\n")
 	fmt.Fprintf(*mainConn, "JOIN %s\r\n", "#" + bot.ircUser)
 
 	go bot.joinDefault()
@@ -93,8 +93,6 @@ func (bot *Bot) joinDefault() {
 }
 
 func (bot *Bot) parseMessage(msg string) {
-
-	bot.log.Debug(msg)
 
 	if !strings.Contains(msg, ".tmi.twitch.tv PRIVMSG ") {
 		return
