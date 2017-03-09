@@ -32,7 +32,7 @@ func NewBot(ircAddress string, ircUser string, ircToken string, logger logging.L
 	return Bot{
 		Messages: make(chan Message),
 		ircAddress: ircAddress,
-		ircUser: ircUser,
+		ircUser: strings.ToLower(ircUser),
 		ircToken: ircToken,
 		log: logger,
 		rClient: rClient,
@@ -54,7 +54,10 @@ func (bot *Bot) CreateConnection() {
 	bot.log.Debugf("new IRC connection %s", conn.RemoteAddr())
 	fmt.Fprintf(*mainConn, "PASS %s\r\n", bot.ircToken)
 	fmt.Fprintf(*mainConn, "NICK %s\r\n", bot.ircUser)
+	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/tags")
+	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/commands")
 	fmt.Fprintf(*mainConn, "JOIN %s\r\n", "#" + bot.ircUser)
+
 	go bot.joinDefault()
 
 	reader := bufio.NewReader(conn)
@@ -90,6 +93,8 @@ func (bot *Bot) joinDefault() {
 }
 
 func (bot *Bot) parseMessage(msg string) {
+
+	bot.log.Debug(msg)
 
 	if !strings.Contains(msg, ".tmi.twitch.tv PRIVMSG ") {
 		return

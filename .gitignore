@@ -4,3 +4,4 @@ glide.lock
 .idea/
 config.json
 logs/
+coverage-all.out
