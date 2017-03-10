@@ -8,10 +8,10 @@ type User struct {
 	Mod bool
 	Subscriber bool
 	Turbo bool
-	Emotes map[string][]string
+	Emotes []Emote
 }
 
-func newUser(username string, userId string, color string, displayName string, mod bool, subscriber bool, turbo bool) User {
+func newUser(username string, userId string, color string, displayName string, mod bool, subscriber bool, turbo bool, emotes []Emote) User {
 	return User{
 		Username: username,
 		UserId: userId,
@@ -20,5 +20,6 @@ func newUser(username string, userId string, color string, displayName string, m
 		Mod: mod,
 		Subscriber: subscriber,
 		Turbo: turbo,
+		Emotes: emotes,
 	}
 }
