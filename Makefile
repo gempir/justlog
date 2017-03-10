@@ -7,7 +7,7 @@ install:
 	go install
 
 test:
-	go test -v
+	go test -v $(shell go list ./... | grep -v /vendor/)
 
 cover:
 	echo "mode: count" > coverage-all.out

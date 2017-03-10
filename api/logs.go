@@ -61,7 +61,6 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 		file = file + ".gz"
 		f, err := os.Open(file)
 		if err != nil {
-			s.log.Error(err.Error())
 			errJSON := new(ErrorJSON)
 			errJSON.Error = "error finding logs"
 			return c.JSON(http.StatusNotFound, errJSON)
@@ -69,7 +68,6 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 		gz, err := gzip.NewReader(f)
 		scanner := bufio.NewScanner(gz)
 		if err != nil {
-			s.log.Error(err.Error())
 			errJSON := new(ErrorJSON)
 			errJSON.Error = "error finding logs"
 			return c.JSON(http.StatusNotFound, errJSON)
@@ -79,10 +77,8 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 			line := scanner.Text()
 			content += line + "\r\n"
 		}
-		s.log.Debug(file)
 		return c.String(http.StatusOK, content)
 	} else {
-		s.log.Debug(file)
 		return c.File(file)
 	}
 
@@ -121,22 +117,17 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	file := userLogs[rand.Intn(len(userLogs))]
-	s.log.Debug(file, len(userLogs))
 
 	f, err := os.Open(file)
 	defer f.Close()
 	if err != nil {
-		s.log.Error(err.Error())
 		return c.JSON(http.StatusNotFound, errJSON)
 	}
 	scanner := bufio.NewScanner(f)
 
 	if strings.HasSuffix(file, ".gz") {
-		gz, err := gzip.NewReader(f)
+		gz, _ := gzip.NewReader(f)
 		scanner = bufio.NewScanner(gz)
-		if err != nil {
-			s.log.Error(err.Error())
-		}
 	}
 
 	for scanner.Scan() {
@@ -145,7 +136,6 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	if err := scanner.Err(); err != nil {
-		s.log.Error(scanner.Err().Error())
 		errJSON := new(ErrorJSON)
 		errJSON.Error = "error finding logs"
 		return c.JSON(http.StatusNotFound, errJSON)
@@ -158,7 +148,6 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 
 	ranNum := rand.Intn(len(lines))
 	line := lines[ranNum]
-	s.log.Debug(line)
 	lineSplit := strings.SplitN(line, "]", 2)
 	return c.String(http.StatusOK, lineSplit[1])
 }

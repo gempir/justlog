@@ -14,11 +14,12 @@ import (
 	"github.com/gempir/gempbotgo/command"
 	"github.com/gempir/gempbotgo/filelog"
 	"github.com/gempir/gempbotgo/api"
+	"github.com/gempir/gempbotgo/combo"
 )
 
 var (
-	cfg config
-	Log logging.Logger
+	cfg    config
+	logger logging.Logger
 )
 
 type config struct {
@@ -35,11 +36,11 @@ type config struct {
 
 func main() {
 	startTime := time.Now()
-	Log = initLogger()
+	logger = initLogger()
 	var err error
 	cfg, err = readConfig("config.json")
 	if err != nil {
-		Log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	rClient := redis.NewClient(&redis.Options{
@@ -48,22 +49,23 @@ func main() {
 		DB:       cfg.RedisDatabase,
 	})
 
-	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath, Log)
+	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath)
 	go apiServer.Init()
 
-	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, Log, *rClient)
+	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, *rClient)
 	go bot.CreateConnection()
 
-	fileLogger := filelog.NewFileLogger(cfg.LogPath, Log)
-	cmdHandler := command.NewHandler(cfg.Admin, bot, startTime, Log)
-
+	fileLogger := filelog.NewFileLogger(cfg.LogPath)
+	cmdHandler := command.NewHandler(cfg.Admin, bot, startTime, logger)
+	comboHandler := combo.NewHandler()
 
 	for msg := range bot.Messages {
 
-		fileLogger.LogMessage(msg)
+		go fileLogger.LogMessage(msg)
+		go comboHandler.HandleMessage(msg)
 
 		if strings.HasPrefix(msg.Text, "!") {
-			cmdHandler.HandleCommand(msg)
+			go cmdHandler.HandleCommand(msg)
 		}
 
 	}

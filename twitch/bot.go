@@ -3,7 +3,6 @@ package twitch
 import (
 	"bufio"
 	"fmt"
-	"github.com/op/go-logging"
 	"net"
 	"net/textproto"
 	"regexp"
@@ -16,7 +15,6 @@ type Bot struct {
 	ircAddress string
 	ircUser string
 	ircToken string
-	log logging.Logger
 	rClient redis.Client
 }
 
@@ -28,30 +26,26 @@ var (
 	actionReg2  = regexp.MustCompile(`([\x{0001}]+)`)
 )
 
-func NewBot(ircAddress string, ircUser string, ircToken string, logger logging.Logger, rClient redis.Client) Bot {
+func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Client) Bot {
 	return Bot{
 		Messages: make(chan Message),
 		ircAddress: ircAddress,
 		ircUser: strings.ToLower(ircUser),
 		ircToken: ircToken,
-		log: logger,
 		rClient: rClient,
 	}
 }
 
 func (bot *Bot) Say(text string, channel string) {
-	bot.log.Infof("PRIVMSG %s :%s", channel, text)
 	fmt.Fprintf(*mainConn, "PRIVMSG %s :%s\r\n", channel, text)
 }
 
-func (bot *Bot) CreateConnection() {
+func (bot *Bot) CreateConnection() error {
 	conn, err := net.Dial("tcp", bot.ircAddress)
 	mainConn = &conn
 	if err != nil {
-		bot.log.Error(err.Error())
-		return
+		return err
 	}
-	bot.log.Debugf("new IRC connection %s", conn.RemoteAddr())
 	fmt.Fprintf(*mainConn, "PASS %s\r\n", bot.ircToken)
 	fmt.Fprintf(*mainConn, "NICK %s\r\n", bot.ircUser)
 	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/tags\r\n")
@@ -65,8 +59,7 @@ func (bot *Bot) CreateConnection() {
 	for {
 		line, err := tp.ReadLine()
 		if err != nil {
-			bot.log.Error(err.Error())
-			break
+			return err
 		}
 		messages := strings.Split(line, "\r\n")
 		if len(messages) == 0 {
@@ -77,13 +70,11 @@ func (bot *Bot) CreateConnection() {
 		}
 	}
 	defer bot.CreateConnection()
+	return nil
 }
 
 func (bot *Bot) joinDefault() {
-	val, err := bot.rClient.HGetAll("channels").Result()
-	if err != nil {
-		bot.log.Error(err.Error())
-	}
+	val,_ := bot.rClient.HGetAll("channels").Result()
 	for _, element := range val {
 		if element == "1" || element == "0" {
 			continue
@@ -136,6 +127,5 @@ func (bot *Bot) parseMessage(msg string) {
 }
 
 func (bot *Bot) join(channel string) {
-	bot.log.Info("JOIN " + channel)
 	fmt.Fprintf(*mainConn, "JOIN %s\r\n", channel)
 }
