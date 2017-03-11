@@ -61,12 +61,30 @@ func main() {
 
 	for msg := range bot.Messages {
 
-		go fileLogger.LogMessageForUser(msg)
-		go fileLogger.LogMessageForChannel(msg)
+		go func() {
+			err := fileLogger.LogMessageForUser(msg)
+			if err != nil {
+				logger.Error(err.Error())
+			}
+		}()
+
+		go func() {
+			err := fileLogger.LogMessageForChannel(msg)
+			if err != nil {
+				logger.Error(err.Error())
+			}
+		}()
+
 		go comboHandler.HandleMessage(msg)
 
+
 		if strings.HasPrefix(msg.Text, "!") {
-			go cmdHandler.HandleCommand(msg)
+			go func() {
+				err := cmdHandler.HandleCommand(msg)
+				if err != nil {
+					logger.Error(err.Error())
+				}
+			}()
 		}
 
 	}
@@ -78,7 +96,7 @@ func initLogger() logging.Logger {
 	backend := logging.NewLogBackend(os.Stdout, "", 0)
 
 	format := logging.MustStringFormatter(
-		`%{color}%{time:2006-01-02 15:04:05.000} %{level:.4s}%{color:reset} %{message}`,
+		`%{color}%{shortfile:-15s} %{level:.4s}%{color:reset} %{message}`,
 	)
 	logging.SetFormatter(format)
 	backendLeveled := logging.AddModuleLevel(backend)

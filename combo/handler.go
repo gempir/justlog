@@ -15,7 +15,7 @@ func NewHandler() Handler {
 }
 
 
-func (h *Handler) HandleMessage(msg twitch.Message){
+func (h *Handler) HandleMessage(msg twitch.Message) {
 
 	// filter out messages without emotes
 	if len(msg.User.Emotes) == 0 {

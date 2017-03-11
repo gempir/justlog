@@ -24,7 +24,7 @@ func NewHandler(admin string, bot twitch.Bot, startTime time.Time, logger loggin
 	}
 }
 
-func (h *handler) HandleCommand(msg twitch.Message) {
+func (h *handler) HandleCommand(msg twitch.Message) error {
 	if msg.User.Username == strings.ToLower(h.admin) {
 
 		if strings.ToLower(msg.Text) == "!status" {
@@ -32,6 +32,7 @@ func (h *handler) HandleCommand(msg twitch.Message) {
 			h.bot.Say(msg.Channel, h.admin + ", uptime: " + uptime, true)
 		}
 	}
+	return nil
 }
 
 func formatDiff(years, months, days, hours, mins, secs int) string {
