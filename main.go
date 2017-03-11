@@ -61,7 +61,8 @@ func main() {
 
 	for msg := range bot.Messages {
 
-		go fileLogger.LogMessage(msg)
+		go fileLogger.LogMessageForUser(msg)
+		go fileLogger.LogMessageForChannel(msg)
 		go comboHandler.HandleMessage(msg)
 
 		if strings.HasPrefix(msg.Text, "!") {

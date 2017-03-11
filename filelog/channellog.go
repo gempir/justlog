@@ -7,17 +7,7 @@ import (
 	"fmt"
 )
 
-type Logger struct {
-	logPath string
-}
-
-func NewFileLogger(logPath string) Logger {
-	return Logger{
-		logPath: logPath,
-	}
-}
-
-func (l *Logger) LogMessage(msg twitch.Message) error {
+func (l *Logger) LogMessageForChannel(msg twitch.Message) error {
 	year := msg.Timestamp.Year()
 	month := msg.Timestamp.Month()
 	channel := strings.Replace(msg.Channel, "#", "", 1)
@@ -25,7 +15,7 @@ func (l *Logger) LogMessage(msg twitch.Message) error {
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"%s/%d/%s/%s.txt", channel, year, month, msg.User.Username)
+	filename := fmt.Sprintf(l.logPath+"%s/%d/%s/channel.txt", channel, year, month)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
@@ -37,5 +27,7 @@ func (l *Logger) LogMessage(msg twitch.Message) error {
 	if _, err = file.WriteString(contents); err != nil {
 		return err
 	}
+
 	return nil
 }
+
