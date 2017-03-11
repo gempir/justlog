@@ -108,7 +108,7 @@ func initLogger() logging.Logger {
 	backend := logging.NewLogBackend(os.Stdout, "", 0)
 
 	format := logging.MustStringFormatter(
-		`%{color}%{shortfile:-15s} %{level:.4s}%{color:reset} %{message}`,
+		`%{color}%{level} %{shortfile}%{color:reset} %{message}`,
 	)
 	logging.SetFormatter(format)
 	backendLeveled := logging.AddModuleLevel(backend)
