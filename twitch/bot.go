@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/textproto"
-	"regexp"
 	"strings"
 	"gopkg.in/redis.v5"
 	"github.com/op/go-logging"
@@ -21,13 +20,6 @@ type Bot struct {
 	channels map[Channel]bool
 	connection net.Conn
 }
-
-var (
-	userReg        = regexp.MustCompile(`:\w+!\w+@\w+\.tmi\.twitch\.tv`)
-	channelReg  = regexp.MustCompile(`#\w+\s:`)
-	actionReg    = regexp.MustCompile(`^\x{0001}ACTION\s`)
-	actionReg2  = regexp.MustCompile(`([\x{0001}]+)`)
-)
 
 func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Client, logger logging.Logger) Bot {
 	channels := make(map[Channel]bool)
@@ -48,7 +40,7 @@ func (bot *Bot) Say(channel Channel, text string, adminCommand bool) {
 	if !bot.channels[channel] && !adminCommand {
 		return
 	}
-	bot.send(fmt.Sprintf("PRIVMSG %s :%s\r\n", channel.Name, text))
+	bot.send(fmt.Sprintf("Message %s :%s", channel.Name, text))
 }
 
 func (bot *Bot) CreatePersistentConnection() error {
@@ -92,26 +84,24 @@ func (bot *Bot) readConnection(conn net.Conn) error {
 }
 
 func (bot *Bot) setupConnection() {
-	bot.send(fmt.Sprintf("PASS %s\r\n", bot.ircToken))
-	bot.send(fmt.Sprintf("NICK %s\r\n", bot.ircUser))
-	bot.send("CAP REQ :twitch.tv/tags\r\n")
-	bot.send("CAP REQ :twitch.tv/commands\r\n")
-	bot.send(fmt.Sprintf("JOIN %s\r\n", "#" + bot.ircUser))
+	bot.send(fmt.Sprintf("PASS %s", bot.ircToken))
+	bot.send(fmt.Sprintf("NICK %s", bot.ircUser))
+	bot.send("CAP REQ :twitch.tv/tags")
+	bot.send("CAP REQ :twitch.tv/commands")
+	bot.send(fmt.Sprintf("JOIN %s", "#" + bot.ircUser))
 }
 
 func (bot *Bot) send(line string) {
 	bot.logger.Debug("SEND | " + line)
-	fmt.Fprint(bot.connection, line)
+	fmt.Fprint(bot.connection, line + "\r\n")
 }
 
 func (bot *Bot) handleLine(line string) {
 	if strings.HasPrefix(line, "PING") {
 		bot.send(fmt.Sprintf(strings.Replace(line, "PING", "PONG", 1)))
 	}
-	if strings.Contains(line, ".tmi.twitch.tv PRIVMSG ") {
-		bot.Messages <- parseMessage(line)
-	} else if !strings.Contains(line, "tmi.twitch.tv USERSTATE ") {
-		bot.logger.Debug(line)
+	if strings.HasPrefix(line, "@") {
+		bot.Messages <- *bot.parseMessage(line)
 	}
 }
 
@@ -129,5 +119,5 @@ func (bot *Bot) joinDefault() {
 }
 
 func (bot *Bot) join(channel Channel) {
-	bot.send(fmt.Sprintf("JOIN %s\r\n", channel.Name))
+	bot.send(fmt.Sprintf("JOIN %s", channel.Name))
 }

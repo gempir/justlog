@@ -34,6 +34,12 @@ type config struct {
 	RedisDatabase    int    `json:"redis_database"`
 }
 
+var (
+	fileLogger filelog.Logger
+	cmdHandler command.Handler
+	comboHandler combo.Handler
+)
+
 func main() {
 	startTime := time.Now()
 	logger = initLogger()
@@ -60,38 +66,39 @@ func main() {
 		}
 	}()
 
-	fileLogger := filelog.NewFileLogger(cfg.LogPath)
-	cmdHandler := command.NewHandler(cfg.Admin, &bot, startTime, logger)
-	comboHandler := combo.NewHandler()
+	fileLogger = filelog.NewFileLogger(cfg.LogPath)
+	cmdHandler = command.NewHandler(cfg.Admin, &bot, startTime, logger)
+	comboHandler = combo.NewHandler()
 
 	for msg := range bot.Messages {
 
-		go func() {
-			err := fileLogger.LogMessageForUser(msg)
-			if err != nil {
-				logger.Error(err.Error())
-			}
-		}()
-
-		go func() {
-			err := fileLogger.LogMessageForChannel(msg)
-			if err != nil {
-				logger.Error(err.Error())
-			}
-		}()
-
-		go comboHandler.HandleMessage(msg)
-
-
-		if strings.HasPrefix(msg.Text, "!") {
+		if msg.Type == twitch.PRIVMSG || msg.Type == twitch.CLEARCHAT {
 			go func() {
-				err := cmdHandler.HandleCommand(msg)
+				err := fileLogger.LogMessageForUser(msg)
 				if err != nil {
 					logger.Error(err.Error())
 				}
 			}()
-		}
 
+			go func() {
+				err := fileLogger.LogMessageForChannel(msg)
+				if err != nil {
+					logger.Error(err.Error())
+				}
+			}()
+
+			go comboHandler.HandleMessage(msg)
+
+
+			if strings.HasPrefix(msg.Text, "!") {
+				go func() {
+					err := cmdHandler.HandleCommand(msg)
+					if err != nil {
+						logger.Error(err.Error())
+					}
+				}()
+			}
+		}
 	}
 }
 

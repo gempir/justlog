@@ -8,15 +8,15 @@ import (
 	"fmt"
 )
 
-type handler struct {
+type Handler struct {
 	admin string
 	bot *twitch.Bot
 	startTime time.Time
 	log logging.Logger
 }
 
-func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, logger logging.Logger) handler {
-	return handler{
+func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, logger logging.Logger) Handler {
+	return Handler{
 		admin: admin,
 		bot: bot,
 		startTime: startTime,
@@ -24,8 +24,8 @@ func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, logger loggi
 	}
 }
 
-func (h *handler) HandleCommand(msg twitch.Message) error {
-	if msg.User.Username == strings.ToLower(h.admin) {
+func (h *Handler) HandleCommand(msg twitch.Message) error {
+	if msg.Username == strings.ToLower(h.admin) {
 
 		if strings.ToLower(msg.Text) == "!status" {
 			uptime := formatDiff(diff(h.startTime, time.Now()))
