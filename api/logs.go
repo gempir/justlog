@@ -29,7 +29,7 @@ type Msg struct {
 	Duration      string `json:"duration"`
 }
 
-func (s *Server) getCurrentChannelLogs(c echo.Context) error {
+func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	channel = strings.TrimSpace(channel)
 	year    := strconv.Itoa(time.Now().Year())
@@ -41,7 +41,60 @@ func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
+func (s *Server) getCurrentChannelLogs(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+	channel = strings.TrimSpace(channel)
+	year    := strconv.Itoa(time.Now().Year())
+	month   := time.Now().Month().String()
+
+	redirectURL := fmt.Sprintf("/channel/%s/%s/%s", channel, year, month)
+	return c.Redirect(303, redirectURL)
+}
+
 func (s *Server) getDatedChannelLogs(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+	channel = strings.TrimSpace(channel)
+	year := c.Param("year")
+	month := strings.Title(c.Param("month"))
+
+	if year == "" || month == "" {
+		year = strconv.Itoa(time.Now().Year())
+		month = time.Now().Month().String()
+	}
+
+	content := ""
+
+	file := fmt.Sprintf(s.logPath+"%s/%s/%s/channel.txt", channel, year, month)
+	if _, err := os.Stat(file + ".gz"); err == nil {
+		file = file + ".gz"
+		f, err := os.Open(file)
+		if err != nil {
+			errJSON := new(ErrorJSON)
+			errJSON.Error = "error finding logs"
+			return c.JSON(http.StatusNotFound, errJSON)
+		}
+		gz, err := gzip.NewReader(f)
+		scanner := bufio.NewScanner(gz)
+		if err != nil {
+			errJSON := new(ErrorJSON)
+			errJSON.Error = "error finding logs"
+			return c.JSON(http.StatusNotFound, errJSON)
+		}
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			content += line + "\r\n"
+		}
+		return c.String(http.StatusOK, content)
+	} else {
+		return c.File(file)
+	}
+
+}
+
+
+
+func (s *Server) getDatedUserLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	channel = strings.TrimSpace(channel)
 	year := c.Param("year")
