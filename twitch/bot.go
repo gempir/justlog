@@ -55,6 +55,7 @@ func (bot *Bot) CreateConnection() error {
 	conn, err := net.Dial("tcp", bot.ircAddress)
 	mainConn = &conn
 	if err != nil {
+		bot.logger.Error(err.Error())
 		return err
 	}
 	fmt.Fprintf(*mainConn, "PASS %s\r\n", bot.ircToken)
@@ -70,6 +71,7 @@ func (bot *Bot) CreateConnection() error {
 	for {
 		line, err := tp.ReadLine()
 		if err != nil {
+			bot.logger.Error(err.Error())
 			return err
 		}
 		messages := strings.Split(line, "\r\n")

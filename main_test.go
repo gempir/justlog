@@ -26,5 +26,5 @@ func TestCanReadConfig(t *testing.T) {
 	assert.Equal(t, "8025", cfg.APIPort, "Invalid config data")
 	assert.Equal(t, "127.0.0.1:6379", cfg.RedisAddress, "Invalid config data")
 	assert.Equal(t, "asdasd", cfg.RedisPassword, "Invalid config data")
-	assert.Equal(t, int64(0), cfg.RedisDatabase, "Invalid config data")
+	assert.Equal(t, int(0), cfg.RedisDatabase, "Invalid config data")
 }
