@@ -66,7 +66,7 @@ func (bot *Bot) CreateConnection() error {
 
 	go bot.joinDefault()
 
-	reader := bufio.NewReader(conn)
+	reader := bufio.NewReader(*mainConn)
 	tp := textproto.NewReader(reader)
 	for {
 		line, err := tp.ReadLine()
@@ -79,9 +79,13 @@ func (bot *Bot) CreateConnection() error {
 			continue
 		}
 		for _, msg := range messages {
+			if strings.HasPrefix(line, "PING") {
+				fmt.Fprintf(*mainConn, strings.Replace(line, "PING", "PONG", 1))
+			}
 			if strings.Contains(msg, ".tmi.twitch.tv PRIVMSG ") {
 				bot.Messages <- parseMessage(msg)
 			}
+
 		}
 	}
 	defer bot.CreateConnection()
