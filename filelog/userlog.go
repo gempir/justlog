@@ -20,7 +20,7 @@ func NewFileLogger(logPath string) Logger {
 func (l *Logger) LogMessageForUser(msg twitch.Message) error {
 	year := msg.Timestamp.Year()
 	month := msg.Timestamp.Month()
-	channel := strings.Replace(msg.Channel, "#", "", 1)
+	channel := strings.Replace(msg.Channel.Name, "#", "", 1)
 	err := os.MkdirAll(fmt.Sprintf(l.logPath+"%s/%d/%s/", channel, year, month), 0755)
 	if err != nil {
 		return err

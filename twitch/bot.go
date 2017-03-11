@@ -7,7 +7,8 @@ import (
 	"net/textproto"
 	"regexp"
 	"strings"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
+	"github.com/op/go-logging"
 )
 
 type Bot struct {
@@ -16,6 +17,8 @@ type Bot struct {
 	ircUser string
 	ircToken string
 	rClient redis.Client
+	logger logging.Logger
+	channels map[Channel]bool
 }
 
 var (
@@ -26,18 +29,26 @@ var (
 	actionReg2  = regexp.MustCompile(`([\x{0001}]+)`)
 )
 
-func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Client) Bot {
+func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Client, logger logging.Logger) Bot {
+	channels := make(map[Channel]bool)
+	channels[NewChannel(ircUser)] = true
+
 	return Bot{
 		Messages: make(chan Message),
 		ircAddress: ircAddress,
 		ircUser: strings.ToLower(ircUser),
 		ircToken: ircToken,
 		rClient: rClient,
+		logger: logger,
+		channels: channels,
 	}
 }
 
-func (bot *Bot) Say(text string, channel string) {
-	fmt.Fprintf(*mainConn, "PRIVMSG %s :%s\r\n", channel, text)
+func (bot *Bot) Say(channel Channel, text string, adminCommand bool) {
+	if !bot.channels[channel] && !adminCommand {
+		return
+	}
+	fmt.Fprintf(*mainConn, "PRIVMSG %s :%s\r\n", channel.Name, text)
 }
 
 func (bot *Bot) CreateConnection() error {
@@ -77,14 +88,17 @@ func (bot *Bot) CreateConnection() error {
 
 func (bot *Bot) joinDefault() {
 	val,_ := bot.rClient.HGetAll("channels").Result()
-	for _, element := range val {
-		if element == "1" || element == "0" {
-			continue
+	for channelStr, activeNum := range val {
+		channel := NewChannel(channelStr)
+		active := false
+		if activeNum == "1" {
+			active = true
 		}
-		go bot.join(element)
+		bot.channels[channel] = active
+		go bot.join(channel)
 	}
 }
 
-func (bot *Bot) join(channel string) {
-	fmt.Fprintf(*mainConn, "JOIN %s\r\n", channel)
+func (bot *Bot) join(channel Channel) {
+	fmt.Fprintf(*mainConn, "JOIN %s\r\n", channel.Name)
 }

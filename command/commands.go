@@ -29,7 +29,7 @@ func (h *handler) HandleCommand(msg twitch.Message) {
 
 		if strings.ToLower(msg.Text) == "!status" {
 			uptime := formatDiff(diff(h.startTime, time.Now()))
-			h.bot.Say(h.admin + ", uptime: " + uptime, msg.Channel)
+			h.bot.Say(msg.Channel, h.admin + ", uptime: " + uptime, true)
 		}
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/op/go-logging"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 
 	"github.com/gempir/gempbotgo/twitch"
 	"github.com/gempir/gempbotgo/command"
@@ -31,7 +31,7 @@ type config struct {
 	APIPort          string `json:"api_port"`
 	RedisAddress     string `json:"redis_address"`
 	RedisPassword    string `json:"redis_password"`
-	RedisDatabase    int64  `json:"redis_database"`
+	RedisDatabase    int    `json:"redis_database"`
 }
 
 func main() {
@@ -52,7 +52,7 @@ func main() {
 	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath)
 	go apiServer.Init()
 
-	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, *rClient)
+	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, *rClient, logger)
 	go bot.CreateConnection()
 
 	fileLogger := filelog.NewFileLogger(cfg.LogPath)

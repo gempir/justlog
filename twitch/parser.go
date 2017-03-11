@@ -44,7 +44,7 @@ func parseMessage(msg string) Message {
 
 
 	user := newUser(username, tagMap["User-id"], tagMap["color"], tagMap["display-name"], mod, subscriber, turbo, emotes)
-	return newMessage(message, user, channel)
+	return newMessage(message, user, NewChannel(channel))
 }
 
 
