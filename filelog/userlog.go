@@ -1,10 +1,10 @@
 package filelog
 
 import (
-	"github.com/gempir/gempbotgo/twitch"
-	"strings"
-	"os"
 	"fmt"
+	"github.com/gempir/gempbotgo/twitch"
+	"os"
+	"strings"
 )
 
 type Logger struct {
@@ -39,4 +39,3 @@ func (l *Logger) LogMessageForUser(msg twitch.Message) error {
 	}
 	return nil
 }
-

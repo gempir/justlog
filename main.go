@@ -10,11 +10,11 @@ import (
 	"github.com/op/go-logging"
 	"gopkg.in/redis.v5"
 
-	"github.com/gempir/gempbotgo/twitch"
-	"github.com/gempir/gempbotgo/command"
-	"github.com/gempir/gempbotgo/filelog"
 	"github.com/gempir/gempbotgo/api"
 	"github.com/gempir/gempbotgo/combo"
+	"github.com/gempir/gempbotgo/command"
+	"github.com/gempir/gempbotgo/filelog"
+	"github.com/gempir/gempbotgo/twitch"
 )
 
 var (
@@ -23,20 +23,20 @@ var (
 )
 
 type config struct {
-	IrcAddress       string `json:"irc_address"`
-	IrcUser          string `json:"irc_user"`
-	IrcToken         string `json:"irc_token"`
-	Admin			 string `json:"admin"`
-	LogPath			 string `json:"log_path"`
-	APIPort          string `json:"api_port"`
-	RedisAddress     string `json:"redis_address"`
-	RedisPassword    string `json:"redis_password"`
-	RedisDatabase    int    `json:"redis_database"`
+	IrcAddress    string `json:"irc_address"`
+	IrcUser       string `json:"irc_user"`
+	IrcToken      string `json:"irc_token"`
+	Admin         string `json:"admin"`
+	LogPath       string `json:"log_path"`
+	APIPort       string `json:"api_port"`
+	RedisAddress  string `json:"redis_address"`
+	RedisPassword string `json:"redis_password"`
+	RedisDatabase int    `json:"redis_database"`
 }
 
 var (
-	fileLogger filelog.Logger
-	cmdHandler command.Handler
+	fileLogger   filelog.Logger
+	cmdHandler   command.Handler
 	comboHandler combo.Handler
 )
 
@@ -88,7 +88,6 @@ func main() {
 			}()
 
 			go comboHandler.HandleMessage(msg)
-
 
 			if strings.HasPrefix(msg.Text, "!") {
 				go func() {

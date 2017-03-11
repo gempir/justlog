@@ -3,21 +3,21 @@ package twitch
 import (
 	"bufio"
 	"fmt"
+	"github.com/op/go-logging"
+	"gopkg.in/redis.v5"
 	"net"
 	"net/textproto"
 	"strings"
-	"gopkg.in/redis.v5"
-	"github.com/op/go-logging"
 )
 
 type Bot struct {
-	Messages chan Message
+	Messages   chan Message
 	ircAddress string
-	ircUser string
-	ircToken string
-	rClient redis.Client
-	logger logging.Logger
-	channels map[Channel]bool
+	ircUser    string
+	ircToken   string
+	rClient    redis.Client
+	logger     logging.Logger
+	channels   map[Channel]bool
 	connection net.Conn
 }
 
@@ -26,13 +26,13 @@ func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Cl
 	channels[NewChannel(ircUser)] = true
 
 	return Bot{
-		Messages: make(chan Message),
+		Messages:   make(chan Message),
 		ircAddress: ircAddress,
-		ircUser: strings.ToLower(ircUser),
-		ircToken: ircToken,
-		rClient: rClient,
-		logger: logger,
-		channels: channels,
+		ircUser:    strings.ToLower(ircUser),
+		ircToken:   ircToken,
+		rClient:    rClient,
+		logger:     logger,
+		channels:   channels,
 	}
 }
 
@@ -88,12 +88,12 @@ func (bot *Bot) setupConnection() {
 	bot.send(fmt.Sprintf("NICK %s", bot.ircUser))
 	bot.send("CAP REQ :twitch.tv/tags")
 	bot.send("CAP REQ :twitch.tv/commands")
-	bot.send(fmt.Sprintf("JOIN %s", "#" + bot.ircUser))
+	bot.send(fmt.Sprintf("JOIN %s", "#"+bot.ircUser))
 }
 
 func (bot *Bot) send(line string) {
 	bot.logger.Debug("SEND | " + line)
-	fmt.Fprint(bot.connection, line + "\r\n")
+	fmt.Fprint(bot.connection, line+"\r\n")
 }
 
 func (bot *Bot) handleLine(line string) {
@@ -106,7 +106,7 @@ func (bot *Bot) handleLine(line string) {
 }
 
 func (bot *Bot) joinDefault() {
-	val,_ := bot.rClient.HGetAll("channels").Result()
+	val, _ := bot.rClient.HGetAll("channels").Result()
 	for channelStr, activeNum := range val {
 		channel := NewChannel(channelStr)
 		active := false

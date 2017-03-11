@@ -32,8 +32,8 @@ type Msg struct {
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	channel = strings.TrimSpace(channel)
-	year    := time.Now().Year()
-	month   := time.Now().Month().String()
+	year := time.Now().Year()
+	month := time.Now().Month().String()
 	username := c.Param("username")
 	username = strings.ToLower(strings.TrimSpace(username))
 
@@ -43,10 +43,10 @@ func (s *Server) getCurrentUserLogs(c echo.Context) error {
 
 func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
-	channel  = strings.TrimSpace(channel)
-	year    := time.Now().Year()
-	month   := time.Now().Month().String()
-	day     := time.Now().Day()
+	channel = strings.TrimSpace(channel)
+	year := time.Now().Year()
+	month := time.Now().Month().String()
+	day := time.Now().Day()
 
 	redirectURL := fmt.Sprintf("/channel/%s/%d/%s/%d", channel, year, month, day)
 	return c.Redirect(303, redirectURL)
@@ -93,8 +93,6 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 	}
 
 }
-
-
 
 func (s *Server) getDatedUserLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
@@ -161,7 +159,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 			if _, err := os.Stat(path); err == nil {
 				userLogs = append(userLogs, path)
 			} else if _, err := os.Stat(path + ".gz"); err == nil {
-				userLogs = append(userLogs, path + ".gz")
+				userLogs = append(userLogs, path+".gz")
 			}
 		}
 	}

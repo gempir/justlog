@@ -1,26 +1,26 @@
 package command
 
 import (
+	"fmt"
 	"github.com/gempir/gempbotgo/twitch"
 	"github.com/op/go-logging"
 	"strings"
 	"time"
-	"fmt"
 )
 
 type Handler struct {
-	admin string
-	bot *twitch.Bot
+	admin     string
+	bot       *twitch.Bot
 	startTime time.Time
-	log logging.Logger
+	log       logging.Logger
 }
 
 func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, logger logging.Logger) Handler {
 	return Handler{
-		admin: admin,
-		bot: bot,
+		admin:     admin,
+		bot:       bot,
 		startTime: startTime,
-		log: logger,
+		log:       logger,
 	}
 }
 
@@ -29,7 +29,7 @@ func (h *Handler) HandleCommand(msg twitch.Message) error {
 
 		if strings.ToLower(msg.Text) == "!status" {
 			uptime := formatDiff(diff(h.startTime, time.Now()))
-			h.bot.Say(msg.Channel, h.admin + ", uptime: " + uptime, true)
+			h.bot.Say(msg.Channel, h.admin+", uptime: "+uptime, true)
 		}
 	}
 	return nil

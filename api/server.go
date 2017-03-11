@@ -6,13 +6,13 @@ import (
 )
 
 type Server struct {
-	port string
+	port    string
 	logPath string
 }
 
 func NewServer(port string, logPath string) Server {
 	return Server{
-		port: port,
+		port:    port,
 		logPath: logPath,
 	}
 }

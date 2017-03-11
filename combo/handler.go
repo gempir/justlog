@@ -9,11 +9,8 @@ type Handler struct {
 }
 
 func NewHandler() Handler {
-	return Handler{
-
-	}
+	return Handler{}
 }
-
 
 func (h *Handler) HandleMessage(msg twitch.Message) {
 

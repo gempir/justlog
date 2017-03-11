@@ -1,16 +1,16 @@
 package twitch
 
 import (
-	"strings"
-	"strconv"
-	"time"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type msgType int
 
 const (
-	PRIVMSG   msgType = iota + 1
+	PRIVMSG msgType = iota + 1
 	CLEARCHAT
 	RANDOM
 )
