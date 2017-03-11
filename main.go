@@ -53,10 +53,15 @@ func main() {
 	go apiServer.Init()
 
 	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, *rClient, logger)
-	go bot.CreateConnection()
+	go func() {
+		err := bot.CreatePersistentConnection()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	fileLogger := filelog.NewFileLogger(cfg.LogPath)
-	cmdHandler := command.NewHandler(cfg.Admin, bot, startTime, logger)
+	cmdHandler := command.NewHandler(cfg.Admin, &bot, startTime, logger)
 	comboHandler := combo.NewHandler()
 
 	for msg := range bot.Messages {

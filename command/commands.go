@@ -10,12 +10,12 @@ import (
 
 type handler struct {
 	admin string
-	bot twitch.Bot
+	bot *twitch.Bot
 	startTime time.Time
 	log logging.Logger
 }
 
-func NewHandler(admin string, bot twitch.Bot, startTime time.Time, logger logging.Logger) handler {
+func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, logger logging.Logger) handler {
 	return handler{
 		admin: admin,
 		bot: bot,

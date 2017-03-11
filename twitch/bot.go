@@ -19,10 +19,10 @@ type Bot struct {
 	rClient redis.Client
 	logger logging.Logger
 	channels map[Channel]bool
+	connection net.Conn
 }
 
 var (
-	mainConn   *net.Conn
 	userReg        = regexp.MustCompile(`:\w+!\w+@\w+\.tmi\.twitch\.tv`)
 	channelReg  = regexp.MustCompile(`#\w+\s:`)
 	actionReg    = regexp.MustCompile(`^\x{0001}ACTION\s`)
@@ -48,25 +48,32 @@ func (bot *Bot) Say(channel Channel, text string, adminCommand bool) {
 	if !bot.channels[channel] && !adminCommand {
 		return
 	}
-	fmt.Fprintf(*mainConn, "PRIVMSG %s :%s\r\n", channel.Name, text)
+	bot.send(fmt.Sprintf("PRIVMSG %s :%s\r\n", channel.Name, text))
 }
 
-func (bot *Bot) CreateConnection() error {
-	conn, err := net.Dial("tcp", bot.ircAddress)
-	mainConn = &conn
-	if err != nil {
-		bot.logger.Error(err.Error())
-		return err
+func (bot *Bot) CreatePersistentConnection() error {
+	for {
+		conn, err := net.Dial("tcp", bot.ircAddress)
+		bot.connection = conn
+		if err != nil {
+			bot.logger.Error(err.Error())
+			return err
+		}
+
+		bot.setupConnection()
+		bot.joinDefault()
+
+		err = bot.readConnection(conn)
+		if err != nil {
+			bot.logger.Error("connection read error, redialing")
+			continue
+		}
 	}
-	fmt.Fprintf(*mainConn, "PASS %s\r\n", bot.ircToken)
-	fmt.Fprintf(*mainConn, "NICK %s\r\n", bot.ircUser)
-	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/tags\r\n")
-	fmt.Fprint(*mainConn, "CAP REQ :twitch.tv/commands\r\n")
-	fmt.Fprintf(*mainConn, "JOIN %s\r\n", "#" + bot.ircUser)
+	return nil
+}
 
-	go bot.joinDefault()
-
-	reader := bufio.NewReader(*mainConn)
+func (bot *Bot) readConnection(conn net.Conn) error {
+	reader := bufio.NewReader(conn)
 	tp := textproto.NewReader(reader)
 	for {
 		line, err := tp.ReadLine()
@@ -79,17 +86,33 @@ func (bot *Bot) CreateConnection() error {
 			continue
 		}
 		for _, msg := range messages {
-			if strings.HasPrefix(line, "PING") {
-				fmt.Fprintf(*mainConn, strings.Replace(line, "PING", "PONG", 1))
-			}
-			if strings.Contains(msg, ".tmi.twitch.tv PRIVMSG ") {
-				bot.Messages <- parseMessage(msg)
-			}
-
+			bot.handleLine(msg)
 		}
 	}
-	defer bot.CreateConnection()
-	return nil
+}
+
+func (bot *Bot) setupConnection() {
+	bot.send(fmt.Sprintf("PASS %s\r\n", bot.ircToken))
+	bot.send(fmt.Sprintf("NICK %s\r\n", bot.ircUser))
+	bot.send("CAP REQ :twitch.tv/tags\r\n")
+	bot.send("CAP REQ :twitch.tv/commands\r\n")
+	bot.send(fmt.Sprintf("JOIN %s\r\n", "#" + bot.ircUser))
+}
+
+func (bot *Bot) send(line string) {
+	bot.logger.Debug("SEND | " + line)
+	fmt.Fprint(bot.connection, line)
+}
+
+func (bot *Bot) handleLine(line string) {
+	if strings.HasPrefix(line, "PING") {
+		bot.send(fmt.Sprintf(strings.Replace(line, "PING", "PONG", 1)))
+	}
+	if strings.Contains(line, ".tmi.twitch.tv PRIVMSG ") {
+		bot.Messages <- parseMessage(line)
+	} else if !strings.Contains(line, "tmi.twitch.tv USERSTATE ") {
+		bot.logger.Debug(line)
+	}
 }
 
 func (bot *Bot) joinDefault() {
@@ -106,5 +129,5 @@ func (bot *Bot) joinDefault() {
 }
 
 func (bot *Bot) join(channel Channel) {
-	fmt.Fprintf(*mainConn, "JOIN %s\r\n", channel.Name)
+	bot.send(fmt.Sprintf("JOIN %s\r\n", channel.Name))
 }
