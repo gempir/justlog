@@ -40,7 +40,7 @@ func (bot *Bot) Say(channel Channel, text string, adminCommand bool) {
 	if !bot.channels[channel] && !adminCommand {
 		return
 	}
-	bot.send(fmt.Sprintf("Message %s :%s", channel.Name, text))
+	bot.send(fmt.Sprintf("PRIVMSG %s :%s", channel.Name, text))
 }
 
 func (bot *Bot) CreatePersistentConnection() error {
