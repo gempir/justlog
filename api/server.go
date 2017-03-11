@@ -26,7 +26,7 @@ func (s *Server) Init() {
 	})
 	e.GET("/channel/:channel/user/:username", s.getCurrentUserLogs)
 	e.GET("/channel/:channel", s.getCurrentChannelLogs)
-	e.GET("/channel/:channel/:year/:month", s.getDatedChannelLogs)
+	e.GET("/channel/:channel/:year/:month/:day", s.getDatedChannelLogs)
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getDatedUserLogs)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuote)
 

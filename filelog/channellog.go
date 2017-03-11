@@ -11,11 +11,12 @@ func (l *Logger) LogMessageForChannel(msg twitch.Message) error {
 	year := msg.Time.Year()
 	month := msg.Time.Month()
 	channel := strings.Replace(msg.Channel.Name, "#", "", 1)
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"%s/%d/%s/", channel, year, month), 0755)
+	day := msg.Time.Day()
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"%s/%d/%s/%d", channel, year, month, day), 0755)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"%s/%d/%s/channel.txt", channel, year, month)
+	filename := fmt.Sprintf(l.logPath+"%s/%d/%s/%d/channel.txt", channel, year, month, day)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {

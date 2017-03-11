@@ -32,22 +32,23 @@ type Msg struct {
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	channel = strings.TrimSpace(channel)
-	year    := strconv.Itoa(time.Now().Year())
+	year    := time.Now().Year()
 	month   := time.Now().Month().String()
 	username := c.Param("username")
 	username = strings.ToLower(strings.TrimSpace(username))
 
-	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%s/%s", channel, username, year, month)
+	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%s", channel, username, year, month)
 	return c.Redirect(303, redirectURL)
 }
 
 func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
-	channel = strings.TrimSpace(channel)
-	year    := strconv.Itoa(time.Now().Year())
+	channel  = strings.TrimSpace(channel)
+	year    := time.Now().Year()
 	month   := time.Now().Month().String()
+	day     := time.Now().Day()
 
-	redirectURL := fmt.Sprintf("/channel/%s/%s/%s", channel, year, month)
+	redirectURL := fmt.Sprintf("/channel/%s/%d/%s/%d", channel, year, month, day)
 	return c.Redirect(303, redirectURL)
 }
 
@@ -56,6 +57,7 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 	channel = strings.TrimSpace(channel)
 	year := c.Param("year")
 	month := strings.Title(c.Param("month"))
+	day := c.Param("day")
 
 	if year == "" || month == "" {
 		year = strconv.Itoa(time.Now().Year())
@@ -64,7 +66,7 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 
 	content := ""
 
-	file := fmt.Sprintf(s.logPath+"%s/%s/%s/channel.txt", channel, year, month)
+	file := fmt.Sprintf(s.logPath+"%s/%s/%s/%s/channel.txt", channel, year, month, day)
 	if _, err := os.Stat(file + ".gz"); err == nil {
 		file = file + ".gz"
 		f, err := os.Open(file)
