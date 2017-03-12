@@ -68,7 +68,7 @@ func main() {
 
 	fileLogger = filelog.NewFileLogger(cfg.LogPath)
 	cmdHandler = command.NewHandler(cfg.Admin, &bot, startTime, logger)
-	comboHandler = combo.NewHandler()
+	comboHandler = combo.NewHandler(&bot)
 
 	for msg := range bot.Messages {
 

@@ -24,7 +24,7 @@ type Message struct {
 	UserType    string            `json:"userType"`
 	Color       string            `json:"color"`
 	Badges      map[string]int    `json:"badges"`
-	Emotes      map[string]*Emote `json:"emotes"`
+	Emotes      []*Emote 		  `json:"emotes"`
 	Tags        map[string]string `json:"tags"`
 	Text        string            `json:"text"`
 }
@@ -153,8 +153,8 @@ func parseBadges(badges string) map[string]int {
 
 // 25:0-4,6-10,12-16/1902:18-22/88:24-31,33-40
 
-func parseTwitchEmotes(emoteTag, text string) map[string]*Emote {
-	emotes := map[string]*Emote{}
+func parseTwitchEmotes(emoteTag, text string) []*Emote {
+	emotes := []*Emote{}
 
 	if emoteTag == "" {
 		return emotes
@@ -177,7 +177,7 @@ func parseTwitchEmotes(emoteTag, text string) map[string]*Emote {
 			Name:  string(runes[start : end+1]),
 		}
 
-		emotes[e.Name] = e
+		emotes = append(emotes, e)
 	}
 	return emotes
 }
