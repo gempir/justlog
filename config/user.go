@@ -21,7 +21,7 @@ func (uCfg *UserConfig) IsEnabled(channel, key string) bool {
 		return true
 	}
 
-	res, err := uCfg.rClient.HGet(channel, key).Result()
+	res, err := uCfg.rClient.HGet(channel + ":config", key).Result()
 
 	if err != nil {
 		return false
