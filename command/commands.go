@@ -6,6 +6,7 @@ import (
 	"github.com/op/go-logging"
 	"strings"
 	"time"
+	"github.com/gempir/gempbotgo/modules"
 )
 
 type Handler struct {
@@ -29,7 +30,7 @@ func (h *Handler) HandleCommand(msg twitch.Message) error {
 
 		if strings.ToLower(msg.Text) == "!status" {
 			uptime := formatDiff(diff(h.startTime, time.Now()))
-			h.bot.Say(msg.Channel, h.admin+", uptime: "+uptime, true)
+			h.bot.Say(msg.Channel, h.admin+", uptime: "+uptime, modules.STATUS)
 		}
 	}
 	return nil

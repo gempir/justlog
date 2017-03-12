@@ -15,14 +15,15 @@ import (
 	"github.com/gempir/gempbotgo/command"
 	"github.com/gempir/gempbotgo/filelog"
 	"github.com/gempir/gempbotgo/twitch"
+	"github.com/gempir/gempbotgo/config"
 )
 
 var (
-	cfg    config
+	cfg    sysConfig
 	logger logging.Logger
 )
 
-type config struct {
+type sysConfig struct {
 	IrcAddress    string `json:"irc_address"`
 	IrcUser       string `json:"irc_user"`
 	IrcToken      string `json:"irc_token"`
@@ -58,7 +59,9 @@ func main() {
 	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath)
 	go apiServer.Init()
 
-	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, *rClient, logger)
+	userConfig := config.NewUserConfig(*rClient)
+
+	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, userConfig, *rClient, logger)
 	go func() {
 		err := bot.CreatePersistentConnection()
 		if err != nil {
@@ -115,7 +118,7 @@ func initLogger() logging.Logger {
 	return *logger
 }
 
-func readConfig(path string) (config, error) {
+func readConfig(path string) (sysConfig, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		return cfg, err
@@ -123,7 +126,7 @@ func readConfig(path string) (config, error) {
 	return unmarshalConfig(file)
 }
 
-func unmarshalConfig(file []byte) (config, error) {
+func unmarshalConfig(file []byte) (sysConfig, error) {
 	err := json.Unmarshal(file, &cfg)
 	if err != nil {
 		return cfg, err

@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/textproto"
 	"strings"
+	"github.com/gempir/gempbotgo/config"
 )
 
 type Bot struct {
@@ -15,13 +16,13 @@ type Bot struct {
 	ircAddress string
 	ircUser    string
 	ircToken   string
+	userConfig config.UserConfig
 	rClient    redis.Client
 	logger     logging.Logger
-	channels   map[Channel]bool
 	connection net.Conn
 }
 
-func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Client, logger logging.Logger) Bot {
+func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.UserConfig,rClient redis.Client, logger logging.Logger) Bot {
 	channels := make(map[Channel]bool)
 	channels[NewChannel(ircUser)] = true
 
@@ -30,17 +31,16 @@ func NewBot(ircAddress string, ircUser string, ircToken string, rClient redis.Cl
 		ircAddress: ircAddress,
 		ircUser:    strings.ToLower(ircUser),
 		ircToken:   ircToken,
+		userConfig: uCfg,
 		rClient:    rClient,
 		logger:     logger,
-		channels:   channels,
 	}
 }
 
-func (bot *Bot) Say(channel Channel, text string, adminCommand bool) {
-	if !bot.channels[channel] && !adminCommand {
-		return
+func (bot *Bot) Say(channel Channel, text string, responseType string) {
+	if bot.userConfig.IsEnabled(channel.Name, responseType) {
+		bot.send(fmt.Sprintf("PRIVMSG %s :%s", channel.Name, text))
 	}
-	bot.send(fmt.Sprintf("PRIVMSG %s :%s", channel.Name, text))
 }
 
 func (bot *Bot) CreatePersistentConnection() error {
@@ -107,13 +107,8 @@ func (bot *Bot) handleLine(line string) {
 
 func (bot *Bot) joinDefault() {
 	val, _ := bot.rClient.HGetAll("channels").Result()
-	for channelStr, activeNum := range val {
+	for channelStr := range val {
 		channel := NewChannel(channelStr)
-		active := false
-		if activeNum == "1" {
-			active = true
-		}
-		bot.channels[channel] = active
 		go bot.join(channel)
 	}
 }

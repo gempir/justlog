@@ -3,6 +3,7 @@ package combo
 import (
 	"github.com/gempir/gempbotgo/twitch"
 	"fmt"
+	"github.com/gempir/gempbotgo/modules"
 )
 
 type Handler struct {
@@ -20,7 +21,7 @@ func NewHandler(bot *twitch.Bot) Handler {
 func (h *Handler) HandleMessage(msg twitch.Message) {
 
 	if h.comboCount > 3 && (len(msg.Emotes) != 1 || h.lastEmote != *msg.Emotes[0]) {
-		h.bot.Say(msg.Channel, fmt.Sprintf("/me %dx %s COMBO", h.comboCount, h.lastEmote.Name), false)
+		h.bot.Say(msg.Channel, fmt.Sprintf("/me %dx %s COMBO", h.comboCount, h.lastEmote.Name), modules.COMBO)
 		h.comboCount = 1
 	}
 
