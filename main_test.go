@@ -13,7 +13,7 @@ func TestCanInitLogger(t *testing.T) {
 }
 
 func TestCanReadConfig(t *testing.T) {
-	cfg, err := readConfig("sysConfig.example.json")
+	cfg, err := readConfig("config.example.json")
 	if err != nil {
 		t.Fatal("error reading sysConfig", err)
 	}
