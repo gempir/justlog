@@ -8,21 +8,23 @@ import (
 
 type Handler struct {
 	bot       *twitch.Bot
-	lastEmote twitch.Emote
-	comboCount int
+	lastEmote map[twitch.Channel]twitch.Emote
+	comboCount map[twitch.Channel]int
 }
 
 func NewHandler(bot *twitch.Bot) Handler {
 	return Handler{
 		bot: bot,
+		lastEmote: make(map[twitch.Channel]twitch.Emote),
+		comboCount:make(map[twitch.Channel]int),
 	}
 }
 
 func (h *Handler) HandleMessage(msg twitch.Message) {
 
-	if h.comboCount > 3 && (len(msg.Emotes) != 1 || h.lastEmote != *msg.Emotes[0]) {
-		h.bot.Say(msg.Channel, fmt.Sprintf("/me %dx %s COMBO", h.comboCount, h.lastEmote.Name), modules.COMBO)
-		h.comboCount = 1
+	if h.comboCount[msg.Channel] > 3 && (len(msg.Emotes) != 1 || h.lastEmote[msg.Channel] != *msg.Emotes[0]) {
+		h.bot.Say(msg.Channel, fmt.Sprintf("/me %dx %s COMBO", h.comboCount[msg.Channel], h.lastEmote[msg.Channel].Name), modules.COMBO)
+		h.comboCount[msg.Channel] = 1
 	}
 
 
@@ -31,18 +33,18 @@ func (h *Handler) HandleMessage(msg twitch.Message) {
 		return
 	}
 
-	if h.lastEmote.ID == "" {
-		h.lastEmote = *msg.Emotes[0]
-		h.comboCount = 1
+	if h.lastEmote[msg.Channel].ID == "" {
+		h.lastEmote[msg.Channel] = *msg.Emotes[0]
+		h.comboCount[msg.Channel] = 1
 		return
 	}
 
-	if h.lastEmote == *msg.Emotes[0] {
-		h.comboCount++
+	if h.lastEmote[msg.Channel] == *msg.Emotes[0] {
+		h.comboCount[msg.Channel]++
 	}
 
-	if h.lastEmote != *msg.Emotes[0] {
-		h.lastEmote = *msg.Emotes[0]
-		h.comboCount = 1
+	if h.lastEmote[msg.Channel] != *msg.Emotes[0] {
+		h.lastEmote[msg.Channel] = *msg.Emotes[0]
+		h.comboCount[msg.Channel] = 1
 	}
 }
