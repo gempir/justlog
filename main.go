@@ -62,6 +62,7 @@ func main() {
 	userConfig := config.NewUserConfig(*rClient)
 
 	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, userConfig, *rClient, logger)
+	go bot.InitBttvEmoteCache()
 	go func() {
 		err := bot.CreatePersistentConnection()
 		if err != nil {

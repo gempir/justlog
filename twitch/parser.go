@@ -13,6 +13,9 @@ const (
 	PRIVMSG msgType = iota + 1
 	CLEARCHAT
 	RANDOM
+	TWITCHEMOTE = "TWITCHEMOTE"
+	BTTVEMOTE = "BTTVEMOTE"
+	BTTVCHANNELEMOTE = "BTTVCHANNELEMOTE"
 )
 
 type Message struct {
@@ -69,6 +72,7 @@ func (bot *Bot) parseMessage(line string) *Message {
 			time.Duration(time.Duration(seconds)*time.Second),
 			msg.Tags["ban-reason"])
 	}
+	msg = bot.addBttvEmotes(*msg)
 	return msg
 }
 
@@ -171,7 +175,7 @@ func parseTwitchEmotes(emoteTag, text string) []*Emote {
 		end, _ := strconv.Atoi(sp[1])
 		id := spl[0]
 		e := &Emote{
-			Type:  "twitch",
+			Type:  TWITCHEMOTE,
 			ID:    id,
 			Count: strings.Count(emoteSlice[i], "-"),
 			Name:  string(runes[start : end+1]),

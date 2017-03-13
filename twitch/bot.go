@@ -9,6 +9,12 @@ import (
 	"net/textproto"
 	"strings"
 	"github.com/gempir/gempbotgo/config"
+	"io/ioutil"
+	"net/http"
+)
+
+var (
+	logger logging.Logger
 )
 
 type Bot struct {
@@ -20,11 +26,15 @@ type Bot struct {
 	rClient    redis.Client
 	logger     logging.Logger
 	connection net.Conn
+	globalBttvEmotes map[string]Emote
+	channelBttvEmotes map[Channel]map[string]Emote
 }
 
-func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.UserConfig,rClient redis.Client, logger logging.Logger) Bot {
+func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.UserConfig,rClient redis.Client, loggerMain logging.Logger) Bot {
 	channels := make(map[Channel]bool)
 	channels[NewChannel(ircUser)] = true
+
+	logger = logger
 
 	return Bot{
 		Messages:   make(chan Message),
@@ -33,7 +43,9 @@ func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.User
 		ircToken:   ircToken,
 		userConfig: uCfg,
 		rClient:    rClient,
-		logger:     logger,
+		logger:     loggerMain,
+		globalBttvEmotes: make(map[string]Emote),
+		channelBttvEmotes: make(map[Channel]map[string]Emote),
 	}
 }
 
@@ -92,7 +104,6 @@ func (bot *Bot) setupConnection() {
 }
 
 func (bot *Bot) send(line string) {
-	bot.logger.Debug("SEND | " + line)
 	fmt.Fprint(bot.connection, line+"\r\n")
 }
 
@@ -115,4 +126,18 @@ func (bot *Bot) joinDefault() {
 
 func (bot *Bot) join(channel Channel) {
 	bot.send(fmt.Sprintf("JOIN %s", channel.Name))
+}
+
+func (bot *Bot) httpRequest(url string) ([]byte, error) {
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		bot.logger.Error(err.Error())
+		return nil, err
+	}
+	return contents, nil
 }
