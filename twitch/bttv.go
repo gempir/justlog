@@ -33,21 +33,23 @@ func (bot *Bot) addBttvEmotes(msg Message) *Message {
 	msgSplit := strings.Split(msg.Text, " ")
 
 	for _, word := range msgSplit {
+		bot.mutex.Lock()
 		if val, ok := bot.channelBttvEmotes[msg.Channel][word]; ok {
 			msg.Emotes = append(msg.Emotes, &val)
 		}
 		if val, ok := bot.globalBttvEmotes[word]; ok {
 			msg.Emotes = append(msg.Emotes, &val)
 		}
+		bot.mutex.Unlock()
 	}
 
 	return &msg
 }
 
 func (bot *Bot) onSuccessChannel(emotes gobttv.ChannelResponse) {
-
+	bot.mutex.Lock()
 	bot.channelBttvEmotes[channel] = make(map[string]Emote)
-
+	bot.mutex.Unlock()
 	for _, bttvEmote := range emotes.Emotes {
 
 		emote := Emote{
@@ -55,8 +57,9 @@ func (bot *Bot) onSuccessChannel(emotes gobttv.ChannelResponse) {
 			ID: bttvEmote.ID,
 			Type: BTTVCHANNELEMOTE,
 		}
-
+		bot.mutex.Lock()
 		bot.channelBttvEmotes[channel][bttvEmote.Code] = emote
+		bot.mutex.Unlock()
 	}
 	bot.logger.Infof("Loaded BTTV Channel Emotes for %s", channel.Name)
 }
@@ -69,8 +72,9 @@ func (bot *Bot) onSuccessGlobal(emotes gobttv.EmotesResponse) {
 			ID: bttvEmote.URL,
 			Type: BTTVEMOTE,
 		}
-
+		bot.mutex.Lock()
 		bot.globalBttvEmotes[bttvEmote.Regex]= emote
+		bot.mutex.Unlock()
 	}
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/gempir/gempbotgo/config"
 	"io/ioutil"
 	"net/http"
+	"sync"
 )
 
 var (
@@ -28,6 +29,7 @@ type Bot struct {
 	connection net.Conn
 	globalBttvEmotes map[string]Emote
 	channelBttvEmotes map[Channel]map[string]Emote
+	mutex sync.Mutex
 }
 
 func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.UserConfig,rClient redis.Client, loggerMain logging.Logger) Bot {
@@ -46,6 +48,7 @@ func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.User
 		logger:     loggerMain,
 		globalBttvEmotes: make(map[string]Emote),
 		channelBttvEmotes: make(map[Channel]map[string]Emote),
+		mutex: sync.Mutex{},
 	}
 }
 

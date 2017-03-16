@@ -2,6 +2,7 @@ PACKAGES = $(shell find ./ -type d -not -path '*/\.*')
 
 build:
 	glide install
+	glide update
 	go build
 
 install:
