@@ -4,12 +4,14 @@ import (
 	"github.com/gempir/gempbotgo/twitch"
 	"fmt"
 	"github.com/gempir/gempbotgo/modules"
+	"sync"
 )
 
 type Handler struct {
 	bot       *twitch.Bot
 	lastEmote map[twitch.Channel]twitch.Emote
 	comboCount map[twitch.Channel]int
+	mutex sync.Mutex
 }
 
 func NewHandler(bot *twitch.Bot) Handler {
@@ -17,11 +19,13 @@ func NewHandler(bot *twitch.Bot) Handler {
 		bot: bot,
 		lastEmote: make(map[twitch.Channel]twitch.Emote),
 		comboCount:make(map[twitch.Channel]int),
+		mutex: sync.Mutex{},
 	}
 }
 
 func (h *Handler) HandleMessage(msg twitch.Message) {
 
+	h.mutex.Lock()
 	if h.comboCount[msg.Channel] > 3 && (len(msg.Emotes) != 1 || h.lastEmote[msg.Channel] != *msg.Emotes[0]) {
 		h.bot.Say(msg.Channel, fmt.Sprintf("/me %dx %s COMBO", h.comboCount[msg.Channel], h.lastEmote[msg.Channel].Name), modules.COMBO)
 		h.comboCount[msg.Channel] = 1
@@ -47,4 +51,5 @@ func (h *Handler) HandleMessage(msg twitch.Message) {
 		h.lastEmote[msg.Channel] = *msg.Emotes[0]
 		h.comboCount[msg.Channel] = 1
 	}
+	h.mutex.Unlock()
 }
