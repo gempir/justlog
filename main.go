@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/op/go-logging"
@@ -33,6 +32,8 @@ type sysConfig struct {
 	RedisAddress  string `json:"redis_address"`
 	RedisPassword string `json:"redis_password"`
 	RedisDatabase int    `json:"redis_database"`
+	CleverBotUser string `json:"cleverbot_user"`
+	CleverBotKey  string `json:"cleverbot_key"`
 }
 
 var (
@@ -71,7 +72,7 @@ func main() {
 	}()
 
 	fileLogger = filelog.NewFileLogger(cfg.LogPath)
-	cmdHandler = command.NewHandler(cfg.Admin, &bot, startTime, logger)
+	cmdHandler = command.NewHandler(cfg.Admin, &bot, startTime, cfg.CleverBotUser, cfg.CleverBotKey, logger)
 	comboHandler = combo.NewHandler(&bot)
 
 	for msg := range bot.Messages {
@@ -93,7 +94,7 @@ func main() {
 
 			go comboHandler.HandleMessage(msg)
 
-			if strings.HasPrefix(msg.Text, "!") {
+			if msg.Command.IsCommand {
 				go func() {
 					err := cmdHandler.HandleCommand(msg)
 					if err != nil {

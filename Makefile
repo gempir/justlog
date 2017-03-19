@@ -1,4 +1,4 @@
-PACKAGES = $(shell find ./ -type d -not -path '*/\.*')
+PACKAGES = $(shell go list ./... | grep -v /vendor/)
 
 build:
 	glide install

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"github.com/gempir/gempbotgo/modules"
+	"github.com/CleverbotIO/go-cleverbot.io"
 )
 
 type Handler struct {
@@ -14,26 +15,50 @@ type Handler struct {
 	bot       *twitch.Bot
 	startTime time.Time
 	log       logging.Logger
+	cleverBot *cleverbot.Session
 }
 
-func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, logger logging.Logger) Handler {
+var (
+	logger logging.Logger
+)
+
+func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, apiUser string, apiKey string, logger logging.Logger) Handler {
+	logger = logger
 	return Handler{
-		admin:     admin,
+		admin:     strings.ToLower(admin),
 		bot:       bot,
 		startTime: startTime,
 		log:       logger,
+		cleverBot: NewCleverBot(apiUser, apiKey),
 	}
+}
+func (h *Handler) handleCleverBotCommand(msg twitch.Message) {
+	output, err := h.cleverBot.Ask(strings.Join(msg.Command.Args, " "))
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	h.bot.Say(msg.Channel, output, modules.CLEVERBOT)
 }
 
 func (h *Handler) HandleCommand(msg twitch.Message) error {
-	if msg.Username == strings.ToLower(h.admin) {
-
-		if strings.ToLower(msg.Text) == "!status" {
-			uptime := formatDiff(diff(h.startTime, time.Now()))
-			h.bot.Say(msg.Channel, h.admin+", uptime: "+uptime, modules.STATUS)
+		switch msg.Command.Name {
+			case "!status":
+				h.handleStatusCommand(msg)
+				break
+			case "!cb":
+				h.handleCleverBotCommand(msg)
+				break
 		}
-	}
+
 	return nil
+}
+
+func (h *Handler) handleStatusCommand(msg twitch.Message) {
+	if msg.Username != h.admin {
+		return
+	}
+	uptime := formatDiff(diff(h.startTime, time.Now()))
+	h.bot.Say(msg.Channel, h.admin+", uptime: "+uptime, modules.STATUS)
 }
 
 func formatDiff(years, months, days, hours, mins, secs int) string {

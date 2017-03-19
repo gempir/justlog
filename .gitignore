@@ -5,3 +5,4 @@ glide.lock
 config.json
 logs/
 coverage-all.out
+coverage.out

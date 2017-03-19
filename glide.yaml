@@ -9,3 +9,4 @@ import:
 - package: github.com/labstack/echo
   version: ^3.1.0-rc.1
 - package: github.com/pajlada/gobttv
+- package: github.com/CleverbotIO/go-cleverbot.io

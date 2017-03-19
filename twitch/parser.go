@@ -10,11 +10,11 @@ import (
 type msgType int
 
 const (
-	PRIVMSG msgType = iota + 1
+	PRIVMSG          msgType = iota + 1
 	CLEARCHAT
 	RANDOM
-	TWITCHEMOTE = "TWITCHEMOTE"
-	BTTVEMOTE = "BTTVEMOTE"
+	EMOTE            = "EMOTE"
+	BTTVEMOTE        = "BTTVEMOTE"
 	BTTVCHANNELEMOTE = "BTTVCHANNELEMOTE"
 )
 
@@ -30,6 +30,7 @@ type Message struct {
 	Emotes      []*Emote 		  `json:"emotes"`
 	Tags        map[string]string `json:"tags"`
 	Text        string            `json:"text"`
+	Command		Command
 }
 
 type Emote struct {
@@ -72,6 +73,7 @@ func (bot *Bot) parseMessage(line string) *Message {
 			time.Duration(time.Duration(seconds)*time.Second),
 			msg.Tags["ban-reason"])
 	}
+	msg.Command = parseCommand(msg.Text)
 	msg = bot.addBttvEmotes(*msg)
 	return msg
 }
@@ -109,11 +111,6 @@ func parseMiddle(msg *Message, middle string) {
 	}
 }
 
-/* @badges=broadcaster/1;color=#0B8E70;display-name=nuuls;emotes=;
-id=0cabc0b9-bb6e-448c-9688-1b8ea654dc27;mod=1;room-id=100229878;
-subscriber=0;tmi-sent-ts=1482614970705;turbo=0;user-id=100229878;
-user-type=mod :nuuls!nuuls@nuuls.tmi.twitch.tv PRIVMSG #nuuls :NaM
-*/
 func parseTags(msg *Message, tagsRaw string) {
 	tags := strings.Split(tagsRaw, ";")
 	for _, tag := range tags {
@@ -155,8 +152,6 @@ func parseBadges(badges string) map[string]int {
 	return m
 }
 
-// 25:0-4,6-10,12-16/1902:18-22/88:24-31,33-40
-
 func parseTwitchEmotes(emoteTag, text string) []*Emote {
 	emotes := []*Emote{}
 
@@ -175,7 +170,7 @@ func parseTwitchEmotes(emoteTag, text string) []*Emote {
 		end, _ := strconv.Atoi(sp[1])
 		id := spl[0]
 		e := &Emote{
-			Type:  TWITCHEMOTE,
+			Type:  EMOTE,
 			ID:    id,
 			Count: strings.Count(emoteSlice[i], "-"),
 			Name:  string(runes[start : end+1]),
@@ -184,4 +179,21 @@ func parseTwitchEmotes(emoteTag, text string) []*Emote {
 		emotes = append(emotes, e)
 	}
 	return emotes
+}
+
+func parseCommand(text string) Command {
+	cmd := new(Command)
+
+	if !strings.HasPrefix(text, "!") {
+		cmd.IsCommand = false
+		return *cmd
+	}
+	cmd.IsCommand = true
+
+	argsFull := strings.Split(text, " ")
+	cmd.Name = argsFull[0]
+	args := append(argsFull[:0], argsFull[0+1:]...)
+	cmd.Args = args
+
+	return *cmd
 }

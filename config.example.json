@@ -7,5 +7,7 @@
   "api_port": "8025",
   "redis_address": "127.0.0.1:6379",
   "redis_password": "asdasd",
-  "redis_database": 0
+  "redis_database": 0,
+  "cleverbot_user": "",
+  "cleverbot_key": ""
 }
