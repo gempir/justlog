@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 	"github.com/gempir/gempbotgo/modules"
-	"github.com/CleverbotIO/go-cleverbot.io"
 )
 
 type Handler struct {
@@ -15,12 +14,7 @@ type Handler struct {
 	bot       *twitch.Bot
 	startTime time.Time
 	log       logging.Logger
-	cleverBot *cleverbot.Session
 }
-
-var (
-	logger logging.Logger
-)
 
 func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, apiUser string, apiKey string, logger logging.Logger) Handler {
 	logger = logger
@@ -29,24 +23,13 @@ func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, apiUser stri
 		bot:       bot,
 		startTime: startTime,
 		log:       logger,
-		cleverBot: NewCleverBot(apiUser, apiKey),
 	}
-}
-func (h *Handler) handleCleverBotCommand(msg twitch.Message) {
-	output, err := h.cleverBot.Ask(strings.Join(msg.Command.Args, " "))
-	if err != nil {
-		logger.Error(err.Error())
-	}
-	h.bot.Say(msg.Channel, output, modules.CLEVERBOT)
 }
 
 func (h *Handler) HandleCommand(msg twitch.Message) error {
 		switch msg.Command.Name {
 			case "!status":
 				h.handleStatusCommand(msg)
-				break
-			case "!cb":
-				h.handleCleverBotCommand(msg)
 				break
 		}
 
