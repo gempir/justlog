@@ -169,34 +169,21 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, errJSON)
 	}
 
-	file := userLogs[rand.Intn(len(userLogs))]
+	for _, logFile := range userLogs {
+		f,_ := os.Open(logFile)
 
-	f, err := os.Open(file)
-	defer f.Close()
-	if err != nil {
-		return c.JSON(http.StatusNotFound, errJSON)
-	}
-	scanner := bufio.NewScanner(f)
+		scanner := bufio.NewScanner(f)
 
-	if strings.HasSuffix(file, ".gz") {
-		gz, _ := gzip.NewReader(f)
-		scanner = bufio.NewScanner(gz)
-	}
+		if strings.HasSuffix(logFile, ".gz") {
+			gz, _ := gzip.NewReader(f)
+			scanner = bufio.NewScanner(gz)
+		}
 
-	for scanner.Scan() {
-		line := scanner.Text()
-		lines = append(lines, line)
-	}
-
-	if err := scanner.Err(); err != nil {
-		errJSON := new(ErrorJSON)
-		errJSON.Error = "error finding logs"
-		return c.JSON(http.StatusNotFound, errJSON)
-	}
-	if len(lines) < 1 {
-		errJSON := new(ErrorJSON)
-		errJSON.Error = "error finding logs"
-		return c.JSON(http.StatusNotFound, errJSON)
+		for scanner.Scan() {
+			line := scanner.Text()
+			lines = append(lines, line)
+		}
+		f.Close()
 	}
 
 	ranNum := rand.Intn(len(lines))
