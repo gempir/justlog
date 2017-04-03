@@ -1,18 +1,17 @@
 package config
 
 import (
-	"gopkg.in/redis.v5"
 	"github.com/gempir/gempbotgo/modules"
+	"gopkg.in/redis.v5"
 )
 
-
 type UserConfig struct {
-	rClient    redis.Client
+	rClient redis.Client
 }
 
 func NewUserConfig(rClient redis.Client) UserConfig {
 	return UserConfig{
-		rClient:    rClient,
+		rClient: rClient,
 	}
 }
 
@@ -21,7 +20,7 @@ func (uCfg *UserConfig) IsEnabled(channel, key string) bool {
 		return true
 	}
 
-	res, err := uCfg.rClient.HGet(channel + ":config", key).Result()
+	res, err := uCfg.rClient.HGet(channel+":config", key).Result()
 
 	if err != nil {
 		return false
@@ -31,4 +30,3 @@ func (uCfg *UserConfig) IsEnabled(channel, key string) bool {
 	}
 	return false
 }
-

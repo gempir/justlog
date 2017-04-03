@@ -3,15 +3,14 @@ package twitch
 import (
 	"bufio"
 	"fmt"
+	"github.com/gempir/gempbotgo/config"
 	"github.com/op/go-logging"
 	"gopkg.in/redis.v5"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"net/textproto"
 	"strings"
-	"github.com/gempir/gempbotgo/config"
-	"io/ioutil"
-	"net/http"
-	"sync"
 )
 
 var (
@@ -27,12 +26,9 @@ type Bot struct {
 	rClient    redis.Client
 	logger     logging.Logger
 	connection net.Conn
-	globalBttvEmotes map[string]Emote
-	channelBttvEmotes map[Channel]map[string]Emote
-	mutex sync.Mutex
 }
 
-func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.UserConfig,rClient redis.Client, loggerMain logging.Logger) Bot {
+func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.UserConfig, rClient redis.Client, loggerMain logging.Logger) Bot {
 	channels := make(map[Channel]bool)
 	channels[NewChannel(ircUser)] = true
 
@@ -46,9 +42,6 @@ func NewBot(ircAddress string, ircUser string, ircToken string, uCfg config.User
 		userConfig: uCfg,
 		rClient:    rClient,
 		logger:     loggerMain,
-		globalBttvEmotes: make(map[string]Emote),
-		channelBttvEmotes: make(map[Channel]map[string]Emote),
-		mutex: sync.Mutex{},
 	}
 }
 

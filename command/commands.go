@@ -2,11 +2,11 @@ package command
 
 import (
 	"fmt"
+	"github.com/gempir/gempbotgo/modules"
 	"github.com/gempir/gempbotgo/twitch"
 	"github.com/op/go-logging"
 	"strings"
 	"time"
-	"github.com/gempir/gempbotgo/modules"
 )
 
 type Handler struct {
@@ -27,11 +27,11 @@ func NewHandler(admin string, bot *twitch.Bot, startTime time.Time, apiUser stri
 }
 
 func (h *Handler) HandleCommand(msg twitch.Message) error {
-		switch msg.Command.Name {
-			case "!status":
-				h.handleStatusCommand(msg)
-				break
-		}
+	switch msg.Command.Name {
+	case "!status":
+		h.handleStatusCommand(msg)
+		break
+	}
 
 	return nil
 }

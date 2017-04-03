@@ -10,11 +10,10 @@ import (
 	"gopkg.in/redis.v5"
 
 	"github.com/gempir/gempbotgo/api"
-	"github.com/gempir/gempbotgo/combo"
 	"github.com/gempir/gempbotgo/command"
+	"github.com/gempir/gempbotgo/config"
 	"github.com/gempir/gempbotgo/filelog"
 	"github.com/gempir/gempbotgo/twitch"
-	"github.com/gempir/gempbotgo/config"
 )
 
 var (
@@ -37,9 +36,8 @@ type sysConfig struct {
 }
 
 var (
-	fileLogger   filelog.Logger
-	cmdHandler   command.Handler
-	comboHandler combo.Handler
+	fileLogger filelog.Logger
+	cmdHandler command.Handler
 )
 
 func main() {
@@ -63,7 +61,6 @@ func main() {
 	userConfig := config.NewUserConfig(*rClient)
 
 	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, userConfig, *rClient, logger)
-	go bot.InitBttvEmoteCache()
 	go func() {
 		err := bot.CreatePersistentConnection()
 		if err != nil {
@@ -73,7 +70,6 @@ func main() {
 
 	fileLogger = filelog.NewFileLogger(cfg.LogPath)
 	cmdHandler = command.NewHandler(cfg.Admin, &bot, startTime, cfg.CleverBotUser, cfg.CleverBotKey, logger)
-	comboHandler = combo.NewHandler(&bot)
 
 	for msg := range bot.Messages {
 
@@ -91,8 +87,6 @@ func main() {
 					logger.Error(err.Error())
 				}
 			}()
-
-			go comboHandler.HandleMessage(msg)
 
 			if msg.Command.IsCommand {
 				go func() {

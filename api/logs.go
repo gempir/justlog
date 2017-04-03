@@ -170,7 +170,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	for _, logFile := range userLogs {
-		f,_ := os.Open(logFile)
+		f, _ := os.Open(logFile)
 
 		scanner := bufio.NewScanner(f)
 

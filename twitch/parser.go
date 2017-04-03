@@ -10,12 +10,10 @@ import (
 type msgType int
 
 const (
-	PRIVMSG          msgType = iota + 1
+	PRIVMSG msgType = iota + 1
 	CLEARCHAT
 	RANDOM
-	EMOTE            = "EMOTE"
-	BTTVEMOTE        = "BTTVEMOTE"
-	BTTVCHANNELEMOTE = "BTTVCHANNELEMOTE"
+	EMOTE = "EMOTE"
 )
 
 type Message struct {
@@ -27,10 +25,10 @@ type Message struct {
 	UserType    string            `json:"userType"`
 	Color       string            `json:"color"`
 	Badges      map[string]int    `json:"badges"`
-	Emotes      []*Emote 		  `json:"emotes"`
+	Emotes      []*Emote          `json:"emotes"`
 	Tags        map[string]string `json:"tags"`
 	Text        string            `json:"text"`
-	Command		Command
+	Command     Command
 }
 
 type Emote struct {
@@ -74,7 +72,6 @@ func (bot *Bot) parseMessage(line string) *Message {
 			msg.Tags["ban-reason"])
 	}
 	msg.Command = parseCommand(msg.Text)
-	msg = bot.addBttvEmotes(*msg)
 	return msg
 }
 

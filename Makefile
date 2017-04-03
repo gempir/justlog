@@ -17,3 +17,6 @@ cover:
 		go test -coverprofile=coverage.out -covermode=count $(pkg);\
 		tail -n +2 coverage.out >> coverage-all.out;)
 	go tool cover -html=coverage-all.out
+
+fmt:
+	go fmt ./... 2>&1 | grep -v ^vendor
