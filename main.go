@@ -10,10 +10,10 @@ import (
 	"gopkg.in/redis.v5"
 
 	"github.com/gempir/gempbotgo/api"
-	"github.com/gempir/gempbotgo/command"
-	"github.com/gempir/gempbotgo/config"
 	"github.com/gempir/gempbotgo/filelog"
-	"github.com/gempir/gempbotgo/twitch"
+	"github.com/gempir/go-twitch-irc"
+	"fmt"
+	"strings"
 )
 
 var (
@@ -37,7 +37,6 @@ type sysConfig struct {
 
 var (
 	fileLogger filelog.Logger
-	cmdHandler command.Handler
 )
 
 func main() {
@@ -49,55 +48,51 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath)
+	go apiServer.Init()
+
 	rClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddress,
 		Password: cfg.RedisPassword,
 		DB:       cfg.RedisDatabase,
 	})
 
-	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath)
-	go apiServer.Init()
-
-	userConfig := config.NewUserConfig(*rClient)
-
-	bot := twitch.NewBot(cfg.IrcAddress, cfg.IrcUser, cfg.IrcToken, userConfig, *rClient, logger)
-	go func() {
-		err := bot.CreatePersistentConnection()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-	}()
+	twitchClient := twitch.NewClient(cfg.IrcUser, cfg.IrcToken)
+	twitchClient.SetIrcAddress(cfg.IrcAddress)
 
 	fileLogger = filelog.NewFileLogger(cfg.LogPath)
-	cmdHandler = command.NewHandler(cfg.Admin, &bot, startTime, cfg.CleverBotUser, cfg.CleverBotKey, logger)
 
-	for msg := range bot.Messages {
+	val, _ := rClient.HGetAll("channels").Result()
+	for channelStr := range val {
+		fmt.Println("Joining " + channelStr)
+		go twitchClient.Join(strings.TrimPrefix(channelStr, "#"))
+	}
 
-		if msg.Type == twitch.PRIVMSG || msg.Type == twitch.CLEARCHAT {
+	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
+
+		if message.Type == twitch.PRIVMSG || message.Type == twitch.CLEARCHAT {
 			go func() {
-				err := fileLogger.LogMessageForUser(msg)
+				err := fileLogger.LogMessageForUser(channel, user, message)
 				if err != nil {
 					logger.Error(err.Error())
 				}
 			}()
 
 			go func() {
-				err := fileLogger.LogMessageForChannel(msg)
+				err := fileLogger.LogMessageForChannel(channel, user, message)
 				if err != nil {
 					logger.Error(err.Error())
 				}
 			}()
 
-			if msg.Command.IsCommand {
-				go func() {
-					err := cmdHandler.HandleCommand(msg)
-					if err != nil {
-						logger.Error(err.Error())
-					}
-				}()
+			if user.Username == cfg.Admin && strings.HasPrefix(message.Text, "!status") {
+				uptime := formatDiff(diff(startTime, time.Now()))
+				twitchClient.Say(channel, cfg.Admin+", uptime: "+uptime)
 			}
 		}
-	}
+	})
+
+	fmt.Println(twitchClient.Connect())
 }
 
 func initLogger() logging.Logger {
@@ -128,4 +123,112 @@ func unmarshalConfig(file []byte) (sysConfig, error) {
 		return cfg, err
 	}
 	return cfg, nil
+}
+
+func formatDiff(years, months, days, hours, mins, secs int) string {
+	since := ""
+	if years > 0 {
+		switch years {
+		case 1:
+			since += fmt.Sprintf("%d year ", years)
+			break
+		default:
+			since += fmt.Sprintf("%d years ", years)
+			break
+		}
+	}
+	if months > 0 {
+		switch months {
+		case 1:
+			since += fmt.Sprintf("%d month ", months)
+			break
+		default:
+			since += fmt.Sprintf("%d months ", months)
+			break
+		}
+	}
+	if days > 0 {
+		switch days {
+		case 1:
+			since += fmt.Sprintf("%d day ", days)
+			break
+		default:
+			since += fmt.Sprintf("%d days ", days)
+			break
+		}
+	}
+	if hours > 0 {
+		switch hours {
+		case 1:
+			since += fmt.Sprintf("%d hour ", hours)
+			break
+		default:
+			since += fmt.Sprintf("%d hours ", hours)
+			break
+		}
+	}
+	if mins > 0 && days == 0 && months == 0 && years == 0 {
+		switch mins {
+		case 1:
+			since += fmt.Sprintf("%d min ", mins)
+			break
+		default:
+			since += fmt.Sprintf("%d mins ", mins)
+			break
+		}
+	}
+	if secs > 0 && days == 0 && months == 0 && years == 0 && hours == 0 {
+		switch secs {
+		case 1:
+			since += fmt.Sprintf("%d sec ", secs)
+			break
+		default:
+			since += fmt.Sprintf("%d secs ", secs)
+			break
+		}
+	}
+	return strings.TrimSpace(since)
+}
+
+func diff(a, b time.Time) (year, month, day, hour, min, sec int) {
+	if a.After(b) {
+		a, b = b, a
+	}
+	y1, M1, d1 := a.Date()
+	y2, M2, d2 := b.Date()
+
+	h1, m1, s1 := a.Clock()
+	h2, m2, s2 := b.Clock()
+
+	year = int(y2 - y1)
+	month = int(M2 - M1)
+	day = int(d2 - d1)
+	hour = int(h2 - h1)
+	min = int(m2 - m1)
+	sec = int(s2 - s1)
+
+	// Normalize negative values
+	if sec < 0 {
+		sec += 60
+		min--
+	}
+	if min < 0 {
+		min += 60
+		hour--
+	}
+	if hour < 0 {
+		hour += 24
+		day--
+	}
+	if day < 0 {
+		// days in month:
+		t := time.Date(y1, M1, 32, 0, 0, 0, 0, time.UTC)
+		day += 32 - t.Day()
+		month--
+	}
+	if month < 0 {
+		month += 12
+		year--
+	}
+	return
 }

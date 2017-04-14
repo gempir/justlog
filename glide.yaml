@@ -9,3 +9,5 @@ import:
 - package: github.com/labstack/echo
   version: ^3.1.0-rc.1
 - package: github.com/CleverbotIO/go-cleverbot.io
+- package: github.com/gempir/go-twitch-irc
+  version: ~0.2.0
