@@ -2,8 +2,8 @@ package filelog
 
 import (
 	"fmt"
-	"os"
 	"github.com/gempir/go-twitch-irc"
+	"os"
 )
 
 type Logger struct {

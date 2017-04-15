@@ -2,8 +2,8 @@ package filelog
 
 import (
 	"fmt"
-	"os"
 	"github.com/gempir/go-twitch-irc"
+	"os"
 )
 
 func (l *Logger) LogMessageForChannel(channel string, user twitch.User, message twitch.Message) error {
