@@ -4,7 +4,8 @@
 gempbot is a bot I maintain for a couple of channels. It's features differ from other bots in that it doesn't support
 commands etc. yet, it focuses on logging and providing an api for the logs.
 
-##API
+## API
+
 **Root Domain** `https://api.gempir.com`
 
 ##### All Requests only with HTTPS!
