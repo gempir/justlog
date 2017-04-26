@@ -19,14 +19,11 @@ type ErrorJSON struct {
 	Error string `json:"Error"`
 }
 
-// Msg struct to define a simple message
-type Msg struct {
+type RandomQuoteJSON struct {
 	Channel       string `json:"channel"`
 	Username      string `json:"username"`
 	Message       string `json:"message"`
 	Timestamp     string `json:"timestamp"`
-	UnixTimestamp string `json:"unix_timestamp"`
-	Duration      string `json:"duration"`
 }
 
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
@@ -189,5 +186,18 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	ranNum := rand.Intn(len(lines))
 	line := lines[ranNum]
 	lineSplit := strings.SplitN(line, "]", 2)
+
+	if c.Request().Header.Get("Content-Type") == "application/json"{
+
+		randomQ := RandomQuoteJSON{
+			Channel: channel,
+			Username: username,
+			Message: strings.TrimPrefix(lineSplit[1], " " + username + ": "),
+			Timestamp: strings.TrimPrefix(lineSplit[0], "["),
+		}
+
+		return c.JSON(http.StatusOK, randomQ)
+	}
+
 	return c.String(http.StatusOK, lineSplit[1])
 }
