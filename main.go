@@ -88,7 +88,7 @@ func main() {
 
 			if strings.HasPrefix(message.Text, "!pingall") {
 				uptime := humanize.TimeSince(startTime)
-				twitchClient.Say(channel, cfg.Admin+", uptime: "+uptime)
+				twitchClient.Say(channel, "uptime: "+uptime)
 			}
 
 			if user.Username == cfg.Admin && strings.HasPrefix(message.Text, "!status") {
