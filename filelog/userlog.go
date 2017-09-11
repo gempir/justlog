@@ -2,28 +2,32 @@ package filelog
 
 import (
 	"fmt"
-	"github.com/gempir/go-twitch-irc"
 	"os"
+
+	"github.com/gempir/go-twitch-irc"
 )
 
+// Logger logger struct
 type Logger struct {
 	logPath string
 }
 
+// NewFileLogger create file logger
 func NewFileLogger(logPath string) Logger {
 	return Logger{
 		logPath: logPath,
 	}
 }
 
+// LogMessageForUser log in file
 func (l *Logger) LogMessageForUser(channel string, user twitch.User, message twitch.Message) error {
 	year := message.Time.Year()
 	month := message.Time.Month()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"%s/%d/%s/", channel, year, month), 0755)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%s/", channel, year, month), 0755)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"%s/%d/%s/%s.txt", channel, year, month, user.Username)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%s/%s.txt", channel, year, month, user.Username)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {

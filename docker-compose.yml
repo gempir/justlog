@@ -1,0 +1,11 @@
+version: "3"
+services:
+  gempbotgo:
+    build: ./
+    volumes:
+      - /var/twitch_logs:/var/twitch_logs
+
+  relaybroker:
+    image: gempir/relaybroker:latest
+    ports:
+      - 3333:3333

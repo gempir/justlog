@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/op/go-logging"
-	"gopkg.in/redis.v5"
 
 	"fmt"
+	"strings"
+
 	"github.com/gempir/gempbotgo/api"
 	"github.com/gempir/gempbotgo/filelog"
 	"github.com/gempir/gempbotgo/humanize"
 	"github.com/gempir/go-twitch-irc"
-	"strings"
 )
 
 var (
@@ -23,17 +23,11 @@ var (
 )
 
 type sysConfig struct {
-	IrcAddress    string `json:"irc_address"`
-	IrcUser       string `json:"irc_user"`
-	IrcToken      string `json:"irc_token"`
-	Admin         string `json:"admin"`
-	LogPath       string `json:"log_path"`
-	APIPort       string `json:"api_port"`
-	RedisAddress  string `json:"redis_address"`
-	RedisPassword string `json:"redis_password"`
-	RedisDatabase int    `json:"redis_database"`
-	CleverBotUser string `json:"cleverbot_user"`
-	CleverBotKey  string `json:"cleverbot_key"`
+	IrcAddress string   `json:"irc_address"`
+	IrcUser    string   `json:"irc_user"`
+	IrcToken   string   `json:"irc_token"`
+	Admin      string   `json:"admin"`
+	Channels   []string `json:"channels"`
 }
 
 var (
@@ -44,29 +38,22 @@ func main() {
 	startTime := time.Now()
 	logger = initLogger()
 	var err error
-	cfg, err = readConfig("config.json")
+	cfg, err = readConfig("configs/config.json")
 	if err != nil {
 		logger.Fatal(err)
 	}
 
-	apiServer := api.NewServer(cfg.APIPort, cfg.LogPath)
+	apiServer := api.NewServer("8025", "/var/twitch_logs")
 	go apiServer.Init()
 
-	rClient := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisAddress,
-		Password: cfg.RedisPassword,
-		DB:       cfg.RedisDatabase,
-	})
+	twitchClient := twitch.NewClient("justinfan123123", "oauth:123123123")
+	twitchClient.SetIrcAddress("127.0.0.0:3333")
 
-	twitchClient := twitch.NewClient(cfg.IrcUser, cfg.IrcToken)
-	twitchClient.SetIrcAddress(cfg.IrcAddress)
+	fileLogger = filelog.NewFileLogger("/var/twitch_logs")
 
-	fileLogger = filelog.NewFileLogger(cfg.LogPath)
-
-	val, _ := rClient.HGetAll("channels").Result()
-	for channelStr := range val {
-		fmt.Println("Joining " + channelStr)
-		go twitchClient.Join(strings.TrimPrefix(channelStr, "#"))
+	for _, channel := range cfg.Channels {
+		fmt.Println("Joining " + channel)
+		go twitchClient.Join(strings.TrimPrefix(channel, "#"))
 	}
 
 	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
@@ -98,7 +85,7 @@ func main() {
 		}
 	})
 
-	fmt.Println(twitchClient.Connect())
+	twitchClient.Connect()
 }
 
 func initLogger() logging.Logger {

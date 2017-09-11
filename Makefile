@@ -1,21 +1,12 @@
-PACKAGES = $(shell go list ./... | grep -v /vendor/)
 
-build:
-	glide install
-	go build
+default: dependencies gempbotgo 
 
-install:
-	go install
+.PHONY:
+dependencies:
+	go get github.com/gempir/go-twitch-irc
+	go get github.com/stretchr/testify/assert
+	go get github.com/labstack/echo
 
-test:
-	go test -v $(shell go list ./... | grep -v /vendor/)
-
-cover:
-	echo "mode: count" > coverage-all.out
-	$(foreach pkg,$(PACKAGES),\
-		go test -coverprofile=coverage.out -covermode=count $(pkg);\
-		tail -n +2 coverage.out >> coverage-all.out;)
-	go tool cover -html=coverage-all.out
-
-fmt:
-	go fmt ./... 2>&1 | grep -v ^vendor
+.PHONY: gempbotgo
+gempbotgo:
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gempbotgo .
