@@ -23,11 +23,10 @@ var (
 )
 
 type sysConfig struct {
-	IrcAddress string   `json:"irc_address"`
-	IrcUser    string   `json:"irc_user"`
-	IrcToken   string   `json:"irc_token"`
-	Admin      string   `json:"admin"`
-	Channels   []string `json:"channels"`
+	IrcUser  string   `json:"irc_user"`
+	IrcToken string   `json:"irc_token"`
+	Admin    string   `json:"admin"`
+	Channels []string `json:"channels"`
 }
 
 var (
@@ -47,7 +46,7 @@ func main() {
 	go apiServer.Init()
 
 	twitchClient := twitch.NewClient("justinfan123123", "oauth:123123123")
-	twitchClient.SetIrcAddress("127.0.0.0:3333")
+	twitchClient.SetIrcAddress(getEnv("IRCHOST", "irc.chat.twitch.tv:6667"))
 
 	fileLogger = filelog.NewFileLogger("/var/twitch_logs")
 
@@ -86,6 +85,13 @@ func main() {
 	})
 
 	twitchClient.Connect()
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
 
 func initLogger() logging.Logger {

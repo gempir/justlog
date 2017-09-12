@@ -1,11 +1,17 @@
 version: "3"
 services:
-  gempbotgo:
-    build: ./
-    volumes:
-      - /var/twitch_logs:/var/twitch_logs
-
   relaybroker:
     image: gempir/relaybroker:latest
+    environment:
+      LOGLEVEL: error
+  
+  gempbotgo:
+    build: ./
+    environment:
+      IRCHOST: relaybroker:3333
+    volumes:
+      - /var/twitch_logs:/var/twitch_logs
     ports:
-      - 3333:3333
+      - 8025:8025
+
+  
