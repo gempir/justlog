@@ -25,7 +25,7 @@ func NewServer(port string, logPath string) Server {
 func (s *Server) Init() {
 
 	e := echo.New()
-	e.HideBanner = true
+	//e.HideBanner = true
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
