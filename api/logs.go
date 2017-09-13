@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"compress/gzip"
 	"fmt"
-	"github.com/labstack/echo"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo"
 )
 
 // ErrorJSON simple json for default error response
@@ -19,11 +20,12 @@ type ErrorJSON struct {
 	Error string `json:"Error"`
 }
 
+// RandomQuoteJSON simple json to output rq
 type RandomQuoteJSON struct {
-	Channel       string `json:"channel"`
-	Username      string `json:"username"`
-	Message       string `json:"message"`
-	Timestamp     string `json:"timestamp"`
+	Channel   string `json:"channel"`
+	Username  string `json:"username"`
+	Message   string `json:"message"`
+	Timestamp string `json:"timestamp"`
 }
 
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
@@ -63,7 +65,7 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 
 	content := ""
 
-	file := fmt.Sprintf(s.logPath+"%s/%s/%s/%s/channel.txt", channel, year, month, day)
+	file := fmt.Sprintf(s.logPath+"/%s/%s/%s/%s/channel.txt", channel, year, month, day)
 	if _, err := os.Stat(file + ".gz"); err == nil {
 		file = file + ".gz"
 		f, err := os.Open(file)
@@ -85,10 +87,9 @@ func (s *Server) getDatedChannelLogs(c echo.Context) error {
 			content += line + "\r\n"
 		}
 		return c.String(http.StatusOK, content)
-	} else {
-		return c.File(file)
 	}
 
+	return c.File(file)
 }
 
 func (s *Server) getDatedUserLogs(c echo.Context) error {
@@ -106,7 +107,8 @@ func (s *Server) getDatedUserLogs(c echo.Context) error {
 
 	content := ""
 
-	file := fmt.Sprintf(s.logPath+"%s/%s/%s/%s.txt", channel, year, month, username)
+	file := fmt.Sprintf(s.logPath+"/%s/%s/%s/%s.txt", channel, year, month, username)
+	fmt.Println(file)
 	if _, err := os.Stat(file + ".gz"); err == nil {
 		file = file + ".gz"
 		f, err := os.Open(file)
@@ -128,10 +130,9 @@ func (s *Server) getDatedUserLogs(c echo.Context) error {
 			content += line + "\r\n"
 		}
 		return c.String(http.StatusOK, content)
-	} else {
-		return c.File(file)
 	}
 
+	return c.File(file)
 }
 
 func (s *Server) getRandomQuote(c echo.Context) error {
@@ -152,7 +153,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 		months, _ := ioutil.ReadDir(s.logPath + channel + "/" + year + "/")
 		for _, monthDir := range months {
 			month := monthDir.Name()
-			path := fmt.Sprintf("%s%s/%s/%s/%s.txt", s.logPath, channel, year, month, username)
+			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", s.logPath, channel, year, month, username)
 			if _, err := os.Stat(path); err == nil {
 				userLogs = append(userLogs, path)
 			} else if _, err := os.Stat(path + ".gz"); err == nil {
@@ -187,12 +188,12 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	line := lines[ranNum]
 	lineSplit := strings.SplitN(line, "]", 2)
 
-	if c.Request().Header.Get("Content-Type") == "application/json"{
+	if c.Request().Header.Get("Content-Type") == "application/json" {
 
 		randomQ := RandomQuoteJSON{
-			Channel: channel,
-			Username: username,
-			Message: strings.TrimPrefix(lineSplit[1], " " + username + ": "),
+			Channel:   channel,
+			Username:  username,
+			Message:   strings.TrimPrefix(lineSplit[1], " "+username+": "),
 			Timestamp: strings.TrimPrefix(lineSplit[0], "["),
 		}
 

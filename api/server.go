@@ -14,10 +14,9 @@ type Server struct {
 }
 
 // NewServer create Server
-func NewServer(port string, logPath string) Server {
+func NewServer() Server {
 	return Server{
-		port:    port,
-		logPath: logPath,
+		logPath: "/var/twitch_logs",
 	}
 }
 
@@ -36,6 +35,6 @@ func (s *Server) Init() {
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getDatedUserLogs)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuote)
 
-	log.Printf("starting API on port :%s", s.port)
-	e.Logger.Fatal(e.Start(":" + s.port))
+	log.Println("starting API on port :8025")
+	e.Logger.Fatal(e.Start(":8025"))
 }

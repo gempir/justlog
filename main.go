@@ -42,13 +42,13 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	apiServer := api.NewServer("8025", "/var/twitch_logs")
+	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	twitchClient := twitch.NewClient("justinfan123123", "oauth:123123123")
+	twitchClient := twitch.NewClient(cfg.IrcUser, cfg.IrcToken)
 	twitchClient.SetIrcAddress(getEnv("IRCHOST", "irc.chat.twitch.tv:6667"))
 
-	fileLogger = filelog.NewFileLogger("/var/twitch_logs")
+	fileLogger = filelog.NewFileLogger()
 
 	for _, channel := range cfg.Channels {
 		fmt.Println("Joining " + channel)
