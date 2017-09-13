@@ -4,9 +4,6 @@ go:
  - 1.8.x
 
 script:
- - go get github.com/gempir/go-twitch-irc
- - go get github.com/op/go-logging
- - go get github.com/labstack/echo
- - go get github.com/stretchr/testify/assert
+ - go get -t -v ./...
  - go build
  - go test -v
