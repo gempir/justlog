@@ -108,7 +108,6 @@ func (s *Server) getDatedUserLogs(c echo.Context) error {
 	content := ""
 
 	file := fmt.Sprintf(s.logPath+"/%s/%s/%s/%s.txt", channel, year, month, username)
-	fmt.Println(file)
 	if _, err := os.Stat(file + ".gz"); err == nil {
 		file = file + ".gz"
 		f, err := os.Open(file)
@@ -147,10 +146,10 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	var userLogs []string
 	var lines []string
 
-	years, _ := ioutil.ReadDir(s.logPath + channel)
+	years, _ := ioutil.ReadDir(s.logPath + "/" + channel)
 	for _, yearDir := range years {
 		year := yearDir.Name()
-		months, _ := ioutil.ReadDir(s.logPath + channel + "/" + year + "/")
+		months, _ := ioutil.ReadDir(s.logPath + "/" + channel + "/" + year + "/")
 		for _, monthDir := range months {
 			month := monthDir.Name()
 			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", s.logPath, channel, year, month, username)
