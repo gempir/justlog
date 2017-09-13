@@ -7,11 +7,10 @@ services:
   
   gempbotgo:
     build: ./
+    ports:
+      - "8025:8025"
     environment:
       IRCHOST: relaybroker:3333
     volumes:
       - /var/twitch_logs:/var/twitch_logs
-    ports:
-      - 8025:8025
-
-  
+    
