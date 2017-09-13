@@ -1,15 +1,19 @@
 package api
 
 import (
-	"github.com/labstack/echo"
+	"log"
 	"net/http"
+
+	"github.com/labstack/echo"
 )
 
+// Server api server
 type Server struct {
 	port    string
 	logPath string
 }
 
+// NewServer create Server
 func NewServer(port string, logPath string) Server {
 	return Server{
 		port:    port,
@@ -17,9 +21,11 @@ func NewServer(port string, logPath string) Server {
 	}
 }
 
+// Init api server
 func (s *Server) Init() {
 
 	e := echo.New()
+	//e.HideBanner = true
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -30,5 +36,6 @@ func (s *Server) Init() {
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getDatedUserLogs)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuote)
 
-	e.Logger.Fatal(e.Start("127.0.0.1:" + s.port))
+	log.Printf("starting API on port :%s", s.port)
+	e.Logger.Fatal(e.Start(":" + s.port))
 }
