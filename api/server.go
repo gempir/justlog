@@ -37,5 +37,5 @@ func (s *Server) Init() {
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuote)
 
 	log.Printf("starting API on port :%s", s.port)
-	e.Logger.Fatal(e.Start("127.0.0.1:" + s.port))
+	e.Logger.Fatal(e.Start(":" + s.port))
 }
