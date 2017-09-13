@@ -4,6 +4,6 @@ go:
  - 1.8.x
 
 script:
- - go get
+ - go get ./...
  - go build
  - go test -v
