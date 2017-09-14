@@ -1,17 +1,10 @@
 package main
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestCanInitLogger(t *testing.T) {
-	log := initLogger()
-
-	assert.Equal(t, "logging.Logger", reflect.TypeOf(log).String(), "logger has invalid type")
-}
 
 func TestCanReadConfig(t *testing.T) {
 	cfg, err := readConfig("configs/config.example.json")
