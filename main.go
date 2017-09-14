@@ -3,12 +3,10 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
-	"github.com/op/go-logging"
-
-	"fmt"
 	"strings"
 
 	"github.com/gempir/gempbotgo/api"
@@ -18,8 +16,7 @@ import (
 )
 
 var (
-	cfg    sysConfig
-	logger logging.Logger
+	cfg sysConfig
 )
 
 type sysConfig struct {
@@ -35,11 +32,10 @@ var (
 
 func main() {
 	startTime := time.Now()
-	logger = initLogger()
 	var err error
 	cfg, err = readConfig("configs/config.json")
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal("failed to read config.json")
 	}
 
 	apiServer := api.NewServer()
@@ -51,7 +47,7 @@ func main() {
 	fileLogger = filelog.NewFileLogger()
 
 	for _, channel := range cfg.Channels {
-		fmt.Println("Joining " + channel)
+		log.Println("Joining " + channel)
 		go twitchClient.Join(strings.TrimPrefix(channel, "#"))
 	}
 
@@ -61,14 +57,14 @@ func main() {
 			go func() {
 				err := fileLogger.LogMessageForUser(channel, user, message)
 				if err != nil {
-					logger.Error(err.Error())
+					log.Println(err.Error())
 				}
 			}()
 
 			go func() {
 				err := fileLogger.LogMessageForChannel(channel, user, message)
 				if err != nil {
-					logger.Error(err.Error())
+					log.Println(err.Error())
 				}
 			}()
 
@@ -92,20 +88,6 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
-}
-
-func initLogger() logging.Logger {
-	var logger *logging.Logger
-	logger = logging.MustGetLogger("gempbotgo")
-	backend := logging.NewLogBackend(os.Stdout, "", 0)
-
-	format := logging.MustStringFormatter(
-		`%{color}%{level} %{shortfile}%{color:reset} %{message}`,
-	)
-	logging.SetFormatter(format)
-	backendLeveled := logging.AddModuleLevel(backend)
-	logging.SetBackend(backendLeveled)
-	return *logger
 }
 
 func readConfig(path string) (sysConfig, error) {

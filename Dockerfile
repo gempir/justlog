@@ -2,8 +2,7 @@ FROM golang:latest
 WORKDIR /go/src/github.com/gempir/gempbotgo
 RUN go get github.com/gempir/go-twitch-irc \
     && go get github.com/stretchr/testify/assert \
-	&& go get github.com/labstack/echo \
-	&& go get github.com/op/go-logging
+	&& go get github.com/labstack/echo
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
