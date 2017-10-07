@@ -1,9 +1,9 @@
 language: go
 go:
- - 1.7.1
+ - 1.7.x
  - 1.8.x
+ - 1.9.x
 
 script:
  - go get -t -v ./...
  - go build
- - go test -v

@@ -1,9 +1,7 @@
 FROM golang:latest
 WORKDIR /go/src/github.com/gempir/gempbotgo
-RUN go get github.com/gempir/go-twitch-irc \
-    && go get github.com/stretchr/testify/assert \
-	&& go get github.com/labstack/echo
 COPY . .
+RUN go get ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
 FROM alpine:latest  
