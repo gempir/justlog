@@ -1,6 +1,0 @@
-{
-  "irc_user": "gempbot",
-  "irc_token": "oauth:123123123",
-  "admin": "gempir",
-  "channels": ["gempir", "pajlada"]
-}

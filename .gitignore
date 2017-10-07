@@ -1,7 +1,6 @@
 gempbotgo
 vendor/
 .idea/
-configs/config.json
-logs/
 coverage-all.out
 coverage.out
+.env

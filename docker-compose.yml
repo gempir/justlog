@@ -1,20 +1,11 @@
 version: "3"
 services:
-  relaybroker:
-    image: gempir/relaybroker:latest
-    environment:
-      LOGLEVEL: error
-  
   gempbotgo:
     build: ./
     restart: always
-    depends_on:
-      - relaybroker
     ports:
       - "8025:8025"
-    environment:
-      IRCHOST: relaybroker:3333
+    env_file:
+      - .env
     volumes:
       - /var/twitch_logs:/var/twitch_logs
-      - ./configs:/configs
-    

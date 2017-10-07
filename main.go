@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -16,37 +14,23 @@ import (
 )
 
 var (
-	cfg sysConfig
-)
-
-type sysConfig struct {
-	IrcUser  string   `json:"irc_user"`
-	IrcToken string   `json:"irc_token"`
-	Admin    string   `json:"admin"`
-	Channels []string `json:"channels"`
-}
-
-var (
+	admin      string
 	fileLogger filelog.Logger
 )
 
 func main() {
 	startTime := time.Now()
-	var err error
-	cfg, err = readConfig("configs/config.json")
-	if err != nil {
-		log.Fatal("failed to read config.json")
-	}
+	admin = getEnv("ADMIN")
 
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	twitchClient := twitch.NewClient(cfg.IrcUser, cfg.IrcToken)
-	twitchClient.SetIrcAddress(getEnv("IRCHOST", "irc.chat.twitch.tv:6667"))
+	twitchClient := twitch.NewClient(getEnv("IRCUSER"), getEnv("IRCTOKEN"))
 
 	fileLogger = filelog.NewFileLogger()
 
-	for _, channel := range cfg.Channels {
+	channels := strings.Split(getEnv("CHANNELS"), ",")
+	for _, channel := range channels {
 		log.Println("Joining " + channel)
 		go twitchClient.Join(strings.TrimPrefix(channel, "#"))
 	}
@@ -73,9 +57,9 @@ func main() {
 				twitchClient.Say(channel, "uptime: "+uptime)
 			}
 
-			if user.Username == cfg.Admin && strings.HasPrefix(message.Text, "!status") {
+			if user.Username == admin && strings.HasPrefix(message.Text, "!status") {
 				uptime := humanize.TimeSince(startTime)
-				twitchClient.Say(channel, cfg.Admin+", uptime: "+uptime)
+				twitchClient.Say(channel, admin+", uptime: "+uptime)
 			}
 		}
 	})
@@ -83,25 +67,9 @@ func main() {
 	twitchClient.Connect()
 }
 
-func getEnv(key, fallback string) string {
+func getEnv(key string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
-	return fallback
-}
-
-func readConfig(path string) (sysConfig, error) {
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return cfg, err
-	}
-	return unmarshalConfig(file)
-}
-
-func unmarshalConfig(file []byte) (sysConfig, error) {
-	err := json.Unmarshal(file, &cfg)
-	if err != nil {
-		return cfg, err
-	}
-	return cfg, nil
+	panic("failed to read env: " + key)
 }
