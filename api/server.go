@@ -1,7 +1,7 @@
 package api
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -24,7 +24,7 @@ func NewServer() Server {
 func (s *Server) Init() {
 
 	e := echo.New()
-	//e.HideBanner = true
+	e.HideBanner = true
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -35,6 +35,6 @@ func (s *Server) Init() {
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getDatedUserLogs)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuote)
 
-	log.Println("starting API on port :8025")
+	fmt.Println("starting API on port :8025")
 	e.Logger.Fatal(e.Start(":8025"))
 }

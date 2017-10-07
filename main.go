@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -31,8 +32,8 @@ func main() {
 
 	channels := strings.Split(getEnv("CHANNELS"), ",")
 	for _, channel := range channels {
-		log.Println("Joining " + channel)
-		go twitchClient.Join(strings.TrimPrefix(channel, "#"))
+		fmt.Println("Joining " + channel)
+		twitchClient.Join(channel)
 	}
 
 	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
