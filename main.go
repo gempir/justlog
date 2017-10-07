@@ -38,30 +38,28 @@ func main() {
 
 	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
 
-		if message.Type == twitch.PRIVMSG || message.Type == twitch.CLEARCHAT {
-			go func() {
-				err := fileLogger.LogMessageForUser(channel, user, message)
-				if err != nil {
-					log.Println(err.Error())
-				}
-			}()
-
-			go func() {
-				err := fileLogger.LogMessageForChannel(channel, user, message)
-				if err != nil {
-					log.Println(err.Error())
-				}
-			}()
-
-			if strings.HasPrefix(message.Text, "!pingall") {
-				uptime := humanize.TimeSince(startTime)
-				twitchClient.Say(channel, "uptime: "+uptime)
+		go func() {
+			err := fileLogger.LogMessageForUser(channel, user, message)
+			if err != nil {
+				log.Println(err.Error())
 			}
+		}()
 
-			if user.Username == admin && strings.HasPrefix(message.Text, "!status") {
-				uptime := humanize.TimeSince(startTime)
-				twitchClient.Say(channel, admin+", uptime: "+uptime)
+		go func() {
+			err := fileLogger.LogMessageForChannel(channel, user, message)
+			if err != nil {
+				log.Println(err.Error())
 			}
+		}()
+
+		if strings.HasPrefix(message.Text, "!pingall") {
+			uptime := humanize.TimeSince(startTime)
+			twitchClient.Say(channel, "uptime: "+uptime)
+		}
+
+		if user.Username == admin && strings.HasPrefix(message.Text, "!status") {
+			uptime := humanize.TimeSince(startTime)
+			twitchClient.Say(channel, admin+", uptime: "+uptime)
 		}
 	})
 
