@@ -3,9 +3,22 @@ services:
   gempbotgo:
     build: ./
     restart: always
+    depends_on:
+      - "database"
     ports:
       - "8025:8025"
     env_file:
       - .env
     volumes:
       - /var/twitch_logs:/var/twitch_logs
+  database:
+    image: mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - /data:/var/lib/mysql
+    logging:
+      driver: "none"
+    
