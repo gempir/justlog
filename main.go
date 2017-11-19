@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -11,26 +12,36 @@ import (
 	"github.com/gempir/gempbotgo/api"
 	"github.com/gempir/gempbotgo/filelog"
 	"github.com/gempir/gempbotgo/humanize"
+	"github.com/gempir/gempbotgo/store"
 	"github.com/gempir/go-twitch-irc"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
 	admin      string
 	fileLogger filelog.Logger
+	db         *sql.DB
 )
 
 func main() {
 	startTime := time.Now()
-	admin = getEnv("ADMIN")
+	admin = os.Getenv("ADMIN")
 
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	twitchClient := twitch.NewClient(getEnv("IRCUSER"), getEnv("IRCTOKEN"))
+	time.Sleep(time.Second * 3)
+	store, err := store.NewClient(os.Getenv("DSN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	twitchClient := twitch.NewClient(os.Getenv("IRCUSER"), os.Getenv("IRCTOKEN"))
 
 	fileLogger = filelog.NewFileLogger()
 
-	channels := strings.Split(getEnv("CHANNELS"), ",")
+	channels := store.GetAllChannels()
 	for _, channel := range channels {
 		fmt.Println("Joining " + channel)
 		twitchClient.Join(channel)
@@ -64,11 +75,4 @@ func main() {
 	})
 
 	twitchClient.Connect()
-}
-
-func getEnv(key string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	panic("failed to read env: " + key)
 }
