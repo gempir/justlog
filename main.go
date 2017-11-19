@@ -31,7 +31,7 @@ func main() {
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 10)
 	store, err := store.NewClient(os.Getenv("DSN"))
 	if err != nil {
 		log.Fatal(err)
@@ -66,6 +66,14 @@ func main() {
 		if strings.HasPrefix(message.Text, "!pingall") {
 			uptime := humanize.TimeSince(startTime)
 			twitchClient.Say(channel, "uptime: "+uptime)
+		}
+
+		if user.Username == admin && strings.HasPrefix(message.Text, "!join ") {
+			joinChannel := strings.Replace(message.Text, "!join ", "", 1)
+			store.AddChannel(joinChannel)
+			fmt.Println("Joining " + joinChannel)
+			twitchClient.Join(joinChannel)
+			twitchClient.Say(channel, admin+", joining: #"+joinChannel)
 		}
 
 		if user.Username == admin && strings.HasPrefix(message.Text, "!status") {

@@ -42,3 +42,16 @@ func (c *Client) GetAllChannels() []string {
 
 	return channels
 }
+
+// AddChannel persist channel
+func (c *Client) AddChannel(channel string) {
+	stmt, err := c.db.Prepare("INSERT channels SET name=?")
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	_, err = stmt.Exec(channel)
+	if err != nil {
+		log.Println(err.Error())
+	}
+}
