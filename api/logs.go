@@ -186,6 +186,32 @@ func (s *Server) getDatedUserLogs(c echo.Context) error {
 		return c.String(http.StatusOK, content)
 	}
 
+	if c.Request().Header.Get("Content-Type") == "application/json" {
+
+		openFile, err := os.Open(file)
+		if err != nil {
+			errJSON := new(ErrorJSON)
+			errJSON.Error = "error finding logs"
+			return c.JSON(http.StatusNotFound, errJSON)
+		}
+		defer openFile.Close()
+
+		scanner := bufio.NewScanner(openFile)
+
+		messages := []LogMessage{}
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			result := logReg.FindStringSubmatch(line)
+
+			message := LogMessage{Username: result[2], Message: result[3], Timestamp: result[1]}
+
+			messages = append(messages, message)
+		}
+
+		return c.JSON(http.StatusOK, messages)
+	}
+
 	return c.File(file)
 }
 
