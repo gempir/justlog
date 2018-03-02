@@ -19,6 +19,7 @@ services:
       - MYSQL_ROOT_PASSWORD=password
     volumes:
       - /data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     logging:
       driver: "none"
     

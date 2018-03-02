@@ -28,6 +28,11 @@ type RandomQuoteJSON struct {
 	Timestamp string `json:"timestamp"`
 }
 
+// AllChannelsJSON api response
+type AllChannelsJSON struct {
+	Channels []string `json:"channels"`
+}
+
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	channel = strings.TrimSpace(channel)
@@ -40,6 +45,28 @@ func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
+func (s *Server) getAllChannels(c echo.Context) error {
+
+	files, err := ioutil.ReadDir(s.logPath)
+	if err != nil {
+		errJSON := new(ErrorJSON)
+		errJSON.Error = "error finding logs"
+		return c.JSON(http.StatusNotFound, errJSON)
+	}
+
+	channels := []string{}
+
+	for _, file := range files {
+		fmt.Println(file.Name())
+		channels = append(channels, file.Name())
+	}
+
+	response := new(AllChannelsJSON)
+	response.Channels = channels
+
+	return c.JSON(http.StatusOK, response)
+}
+
 func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	channel = strings.TrimSpace(channel)
@@ -48,7 +75,7 @@ func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	day := time.Now().Day()
 
 	redirectURL := fmt.Sprintf("/channel/%s/%d/%s/%d", channel, year, month, day)
-	return c.Redirect(303, redirectURL)
+	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
 func (s *Server) getDatedChannelLogs(c echo.Context) error {
