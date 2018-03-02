@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	logReg = regexp.MustCompile(`(?P\[.*\])\s(?P.*):\s(?P.*)`)
+	logReg = regexp.MustCompile(`(\[.*\])\s(.*):\s(.*)`)
 )
 
 // ErrorJSON simple json for default error response
