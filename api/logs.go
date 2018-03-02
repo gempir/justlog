@@ -8,11 +8,16 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo"
+)
+
+var (
+	logReg = regexp.MustCompile(`(?P\[.*\])\s(?P.*):\s(?P.*)`)
 )
 
 // ErrorJSON simple json for default error response
@@ -31,6 +36,13 @@ type RandomQuoteJSON struct {
 // AllChannelsJSON api response
 type AllChannelsJSON struct {
 	Channels []string `json:"channels"`
+}
+
+// LogMessage for json
+type LogMessage struct {
+	Username  string `json:"username"`
+	Message   string `json:"message"`
+	Timestamp string `json:"timestamp"`
 }
 
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
@@ -149,6 +161,22 @@ func (s *Server) getDatedUserLogs(c echo.Context) error {
 			errJSON := new(ErrorJSON)
 			errJSON.Error = "error finding logs"
 			return c.JSON(http.StatusNotFound, errJSON)
+		}
+
+		if c.Request().Header.Get("Content-Type") == "application/json" {
+
+			messages := []LogMessage{}
+
+			for scanner.Scan() {
+				line := scanner.Text()
+				result := logReg.FindStringSubmatch(line)
+
+				message := LogMessage{Username: result[2], Message: result[3], Timestamp: result[1]}
+
+				messages = append(messages, message)
+			}
+
+			return c.JSON(http.StatusOK, messages)
 		}
 
 		for scanner.Scan() {
