@@ -14,6 +14,8 @@ for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         if re.search(month, subdir, re.IGNORECASE):
             continue  # current month should be ignored
+        if file == "channels":
+            continue
         log = os.path.join(subdir, file)
         if re.search('.gz', file):
             continue  # already gzipped this
