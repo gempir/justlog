@@ -44,9 +44,12 @@ func main() {
 	for _, channel := range channels {
 		fmt.Println("Joining " + channel)
 		twitchClient.Join(channel)
+		apiServer.AddChannel(channel)
 	}
 
 	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
+
+		apiServer.AddUsername(user.Username)
 
 		go func() {
 			err := fileLogger.LogMessageForUser(channel, user, message)

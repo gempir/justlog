@@ -38,6 +38,11 @@ type AllChannelsJSON struct {
 	Channels []string `json:"channels"`
 }
 
+// AllChannelsJSON api response
+type AllUsernamesJSON struct {
+	Usernames []string `json:"usernames"`
+}
+
 // LogMessage for json
 type LogMessage struct {
 	Username  string `json:"username"`
@@ -58,23 +63,20 @@ func (s *Server) getCurrentUserLogs(c echo.Context) error {
 }
 
 func (s *Server) getAllChannels(c echo.Context) error {
-
-	files, err := ioutil.ReadDir(s.logPath)
-	if err != nil {
-		errJSON := new(ErrorJSON)
-		errJSON.Error = "error finding logs"
-		return c.JSON(http.StatusNotFound, errJSON)
-	}
-
-	channels := []string{}
-
-	for _, file := range files {
-		fmt.Println(file.Name())
-		channels = append(channels, file.Name())
-	}
-
 	response := new(AllChannelsJSON)
-	response.Channels = channels
+	response.Channels = s.channels
+
+	return c.JSON(http.StatusOK, response)
+}
+
+func (s *Server) getAllUsernames(c echo.Context) error {
+	response := new(AllUsernamesJSON)
+
+	usernames := []string{}
+	for username := range s.usernames {
+		usernames = append(usernames, username)
+	}
+	response.Usernames = usernames
 
 	return c.JSON(http.StatusOK, response)
 }
