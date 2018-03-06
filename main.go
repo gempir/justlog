@@ -49,8 +49,6 @@ func main() {
 
 	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
 
-		apiServer.AddUsername(user.Username)
-
 		go func() {
 			err := fileLogger.LogMessageForUser(channel, user, message)
 			if err != nil {
