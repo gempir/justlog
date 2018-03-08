@@ -1,17 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('TestBuild') {
-      steps {
-        sh 'go build'
-      }
-    }
-    stage('Testing') {
-      steps {
-        sh 'go test'
-      }
-    }
-    stage('Docker Build') {
+    stage('Build') {
       steps {
         sh '''docker build .
 docker tag gempbotgo_gempbotgo gempir/gempbotgo
@@ -27,8 +17,8 @@ docker push gempir/gempbotgo
     stage('Deploy') {
       steps {
         sh '''cd /home/gempir/gempbotgo
-docker-compose pull
-docker-compose up'''
+docker-compose -f prod.yml pull
+docker-compose -f prod.yml up -d'''
       }
     }
   }
