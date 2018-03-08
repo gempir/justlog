@@ -18,7 +18,7 @@ docker push gempir/gempbotgo
       steps {
         sh '''cd /home/gempir/gempbotgo
 docker-compose pull
-docker-compose up'''
+docker-compose up -d'''
       }
     }
   }
