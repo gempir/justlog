@@ -17,8 +17,8 @@ docker push gempir/gempbotgo
     stage('Deploy') {
       steps {
         sh '''cd /home/gempir/gempbotgo
-docker-compose pull
-docker-compose up -d'''
+docker-compose -f prod.yml pull
+docker-compose -f prod.yml up -d'''
       }
     }
   }
