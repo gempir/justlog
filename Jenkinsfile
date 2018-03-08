@@ -1,17 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('TestBuild') {
-      steps {
-        sh 'go build'
-      }
-    }
-    stage('Testing') {
-      steps {
-        sh 'go test'
-      }
-    }
-    stage('Docker Build') {
+    stage('Build') {
       steps {
         sh '''docker build .
 docker tag gempbotgo_gempbotgo gempir/gempbotgo
