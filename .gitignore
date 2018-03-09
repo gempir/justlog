@@ -4,4 +4,3 @@ vendor/
 coverage-all.out
 coverage.out
 .env
-logs/

@@ -31,7 +31,8 @@ func main() {
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	store, err := store.NewClient("/var/twitch_logs/channels")
+	time.Sleep(time.Second * 10)
+	store, err := store.NewClient(os.Getenv("DSN"))
 	if err != nil {
 		log.Fatal(err)
 	}

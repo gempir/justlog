@@ -1,58 +1,57 @@
 package store
 
 import (
-	"bufio"
+	"database/sql"
 	"log"
-	"os"
 )
 
 // Client store client for persisting and reading data
 type Client struct {
-	channelsFile string
+	db *sql.DB
 }
 
 // NewClient create new store client
-func NewClient(channelsFile string) (*Client, error) {
+func NewClient(dsn string) (*Client, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Client{
-		channelsFile: channelsFile,
+		db: db,
 	}, nil
 }
 
 // GetAllChannels get all channels to
 func (c *Client) GetAllChannels() []string {
-
-	channels := []string{}
-
-	f, err := os.Open(c.channelsFile)
+	rows, err := c.db.Query("SELECT name FROM channels")
 	if err != nil {
 		log.Println(err.Error())
-		return []string{}
 	}
 
-	scanner := bufio.NewScanner(f)
-	if err != nil {
-		log.Println(err.Error())
-		return []string{}
-	}
+	var channels []string
 
-	for scanner.Scan() {
-		channels = append(channels, scanner.Text())
+	for rows.Next() {
+		var channel string
+		err = rows.Scan(&channel)
+		if err != nil {
+			log.Println(err)
+		}
+		channels = append(channels, channel)
 	}
 
 	return channels
 }
 
 // AddChannel persist channel
-func (c *Client) AddChannel(channel string) error {
-	f, err := os.OpenFile(c.channelsFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+func (c *Client) AddChannel(channel string) {
+	stmt, err := c.db.Prepare("INSERT channels SET name=?")
 	if err != nil {
-		return err
+		log.Println(err.Error())
 	}
-	defer f.Close()
 
-	_, err = f.WriteString(channel + "\n")
+	_, err = stmt.Exec(channel)
 	if err != nil {
-		return err
+		log.Println(err.Error())
 	}
-	return nil
 }
