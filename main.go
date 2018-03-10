@@ -31,7 +31,6 @@ func main() {
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	time.Sleep(time.Second * 15)
 	store, err := store.NewClient(os.Getenv("DSN"))
 	if err != nil {
 		log.Fatal(err)
@@ -49,6 +48,10 @@ func main() {
 	}
 
 	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
+
+		go func() {
+			store.SetUser(user)
+		}()
 
 		go func() {
 			err := fileLogger.LogMessageForUser(channel, user, message)
