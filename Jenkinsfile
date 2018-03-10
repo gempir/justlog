@@ -4,9 +4,8 @@ pipeline {
     stage('Build') {
       steps {
         sh '''docker build .
-&& 
-
-docker tag gempbotgo_gempbotgo gempir/gempbotgo && docker push gempir/gempbotgo
+docker tag gempbotgo_gempbotgo gempir/gempbotgo
+docker push gempir/gempbotgo
 	'''
       }
     }
