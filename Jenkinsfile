@@ -16,11 +16,24 @@ pipeline {
         sh 'docker push gempir/gempbotgo'
       }
     }
-    stage('Deploy') {
+    stage('Copy compose.yml') {
       steps {
-        sh '''cp ./prod.yml /home/gempir/gempbotgo && cd /home/gempir/gempbotgo &&
-docker-compose -f prod.yml pull
-&& docker-compose -f prod.yml up -d'''
+        sh 'cp ./prod.yml /home/gempir/gempbotgo'
+      }
+    }
+    stage('Change Dir') {
+      steps {
+        sh ' cd /home/gempir/gempbotgo'
+      }
+    }
+    stage('Pull Image') {
+      steps {
+        sh 'docker-compose -f prod.yml pull'
+      }
+    }
+    stage('Restart App') {
+      steps {
+        sh 'docker-compose -f prod.yml up -d'
       }
     }
   }
