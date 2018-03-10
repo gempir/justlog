@@ -31,7 +31,7 @@ func main() {
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 15)
 	store, err := store.NewClient(os.Getenv("DSN"))
 	if err != nil {
 		log.Fatal(err)

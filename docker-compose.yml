@@ -1,25 +1,27 @@
-version: "3"
+version: "2.1"
 services:
   gempbotgo:
     build: ./
     restart: always
     depends_on:
-      - "database"
+      db:
+        condition: service_healthy
     ports:
       - "8025:8025"
     env_file:
       - .env
     volumes:
-      - /var/twitch_logs:/var/twitch_logs
-  database:
-    image: mariadb
+      - /mnt/c/logs:/var/twitch_logs
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - /mnt/c/myqsl:/var/lib/mysql
     ports:
       - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-    volumes:
-      - /data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-    logging:
-      driver: "none"
-    
+    healthcheck:
+      test: mysqladmin -uroot -proot ping
+      interval: 2s
+      timeout: 5s
+      retries: 30
