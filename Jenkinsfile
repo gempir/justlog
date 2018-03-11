@@ -1,38 +1,18 @@
 pipeline {
   agent any
   stages {
-    stage('Build Image') {
+    stage('Build') {
       steps {
-        sh 'docker build .'
+        sh '''docker build .
+docker tag gempbotgo_gempbotgo gempir/gempbotgo
+docker push gempir/gempbotgo'''
       }
     }
-    stage('Tag Image') {
-      steps {
-        sh 'docker tag gempbotgo_gempbotgo gempir/gempbotgo'
-      }
-    }
-    stage('Push Image') {
-      steps {
-        sh 'docker push gempir/gempbotgo'
-      }
-    }
-    stage('Copy compose.yml') {
+    stage('Deploy') {
       steps {
         sh 'cp ./prod.yml /home/gempir/gempbotgo'
-      }
-    }
-    stage('Change Dir') {
-      steps {
-        sh ' cd /home/gempir/gempbotgo'
-      }
-    }
-    stage('Pull Image') {
-      steps {
+        sh 'cd /home/gempir/gempbotgo'
         sh 'docker-compose -f prod.yml pull'
-      }
-    }
-    stage('Restart App') {
-      steps {
         sh 'docker-compose -f prod.yml up -d'
       }
     }
