@@ -69,4 +69,5 @@ Responds with the timestamped log of a user in the current month for the given c
 * **Error Response:** `{"message":"Not Found"}`
 * **Notice**
 
-  This endpoint will redirect to the current Month and Year so the url will say `/channel/%channel%/user/%username%/2017/April`
+  * This endpoint will redirect to the current Month and Year so the url will say `/channel/%channel%/user/%username%/2017/April`
+  * With the Header Content-Type: "application/json" the response will be in json format.
