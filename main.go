@@ -37,6 +37,7 @@ func main() {
 	}
 
 	twitchClient := twitch.NewClient(os.Getenv("IRCUSER"), os.Getenv("IRCTOKEN"))
+	twitchClient.AutoReconnect = true
 
 	fileLogger = filelog.NewFileLogger()
 
@@ -66,11 +67,6 @@ func main() {
 				log.Println(err.Error())
 			}
 		}()
-
-		if strings.HasPrefix(message.Text, "!pingall") {
-			uptime := humanize.TimeSince(startTime)
-			twitchClient.Say(channel, "uptime: "+uptime)
-		}
 
 		if user.Username == admin && strings.HasPrefix(message.Text, "!join ") {
 			joinChannel := strings.Replace(message.Text, "!join ", "", 1)
