@@ -37,7 +37,6 @@ func main() {
 	}
 
 	twitchClient := twitch.NewClient(os.Getenv("IRCUSER"), os.Getenv("IRCTOKEN"))
-	twitchClient.AutoReconnect = true
 
 	fileLogger = filelog.NewFileLogger()
 
