@@ -3,27 +3,9 @@ services:
   gempbotgo:
     build: ./
     restart: always
-    depends_on:
-      db:
-        condition: service_healthy
     ports:
       - "8025:8025"
     env_file:
       - .env
     volumes:
       - /mnt/c/logs:/var/twitch_logs
-  db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - /mnt/c/myqsl:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    healthcheck:
-      test: mysqladmin -uroot -proot ping
-      interval: 2s
-      timeout: 5s
-      retries: 30
-    logging:
-      driver: "none"

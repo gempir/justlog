@@ -69,5 +69,33 @@ Responds with the timestamped log of a user in the current month for the given c
 * **Error Response:** `{"message":"Not Found"}`
 * **Notice**
 
-  * This endpoint will redirect to the current Month and Year so the url will say `/channel/%channel%/user/%username%/2017/April`
-  * With the Header Content-Type: "application/json" the response will be in json format.
+  * This endpoint will redirect to the current month and year so the url will say `/channel/%channel%/user/%username%/2017/April`
+
+#### Channellog
+
+Responds with the timestamped log of a channel of the current day for the given channel.
+
+
+* **URL** `/channel/%channel%`
+
+* **Methods** `GET` 
+
+* **Parameter**
+  -  `%channel%` Channel you want the logs for
+
+* **Success Response**
+
+  * **Code:** 200 
+    **Content:**
+
+[2017-04-1 06:40:24] gempir: PHPDETECTED
+
+[2017-04-1 06:40:36] pajlada: KKaper
+
+[2017-04-1 06:40:43] fourtf: fuck qt
+
+ 
+* **Error Response:** `{"message":"Not Found"}`
+* **Notice**
+
+  * This endpoint will redirect to the current day, month and year so the url will say `/channel/%channel%/2017/April/20`
