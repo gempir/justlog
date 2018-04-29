@@ -31,7 +31,7 @@ func main() {
 
 	fileLogger := filelog.NewFileLogger()
 
-	channels := strings.Split(os.Getenv("channels"), ",")
+	channels := strings.Split(os.Getenv("CHANNELS"), ",")
 	for _, channel := range channels {
 		fmt.Println("Joining " + channel)
 		twitchClient.Join(channel)
