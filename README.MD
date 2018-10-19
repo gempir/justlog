@@ -1,8 +1,8 @@
 # gempbotgo [![Build Status](https://travis-ci.org/gempir/gempbotgo.svg?branch=master)](https://travis-ci.org/gempir/gempbotgo)
 
 #### What is this?
-gempbot is a bot I maintain for a couple of channels. It's features differ from other bots in that it doesn't support
-commands etc. yet, it focuses on logging and providing an api for the logs.
+gempbot is a bot I maintain for a couple of channels. Its features differ from other bots in that it doesn't support
+commands, etc. yet, it focuses on logging and providing an api for the logs.
 
 ## API
 
@@ -13,7 +13,7 @@ commands etc. yet, it focuses on logging and providing an api for the logs.
 
 #### RandomQuote
 
-Responds with a random message from the give user in that channel.
+Responds with a random message from the given user in that channel.
 
 
 * **URL** `/channel/%channel%/user/%username%/random`
