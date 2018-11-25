@@ -1,6 +1,7 @@
 gempbotgo
 vendor/
 .idea/
+.vscode/
 coverage-all.out
 coverage.out
 .env

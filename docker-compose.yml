@@ -8,4 +8,4 @@ services:
     env_file:
       - .env
     volumes:
-      - /mnt/c/logs:/var/twitch_logs
+      - ./logs:/var/twitch_logs

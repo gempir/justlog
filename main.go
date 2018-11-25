@@ -60,5 +60,22 @@ func main() {
 		}
 	})
 
+	twitchClient.OnNewClearchatMessage(func(channel string, user twitch.User, message twitch.Message) {
+
+		go func() {
+			err := fileLogger.LogMessageForUser(channel, user, message)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}()
+
+		go func() {
+			err := fileLogger.LogMessageForChannel(channel, user, message)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}()
+	})
+
 	twitchClient.Connect()
 }
