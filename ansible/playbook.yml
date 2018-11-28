@@ -1,0 +1,18 @@
+---
+- name: Provision hosts for logstv
+  hosts: all
+  remote_user: root
+  
+  roles:
+    - {role: 'common', tags: ['common']}
+    - {role: 'geerlingguy.docker', tags: ['docker']}
+    - {role: 'traefik', tags: ['traefik']}
+    - {role: 'portainer', tags: ['portainer']}
+    - {role: 'bot', tags: ['bot']}
+
+  handlers:
+    - name: restart ufw
+      service: name=ufw state=restarted
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload

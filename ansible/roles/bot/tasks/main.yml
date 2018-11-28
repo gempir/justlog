@@ -1,0 +1,16 @@
+---
+- name: create directory
+  file:
+    path: /var/twitch_logs
+    state: directory
+    owner: root
+    group: docker
+    mode: 0740
+
+- name: create channels file
+  template:
+    src: templates/channels.j2
+    dest: /var/logstv_channels
+    owner: root
+    group: docker
+    mode: 0640
