@@ -14,3 +14,15 @@
 
 - name: install ufw firewall
   include: ufw.yml
+
+- name: Ensure group "justlog" exists
+  group:
+    name: justlog
+    state: present
+
+- name: Create justlog user
+  user:
+    name: justlog
+    shell: /bin/bash
+    groups: justlog
+    append: yes

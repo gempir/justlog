@@ -13,9 +13,9 @@ type Logger struct {
 }
 
 // NewFileLogger create file logger
-func NewFileLogger() Logger {
+func NewFileLogger(logPath string) Logger {
 	return Logger{
-		logPath: "/var/twitch_logs",
+		logPath: logPath,
 	}
 }
 

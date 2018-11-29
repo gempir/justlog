@@ -5,9 +5,6 @@
   
   roles:
     - {role: 'common', tags: ['common']}
-    - {role: 'geerlingguy.docker', tags: ['docker']}
-    - {role: 'traefik', tags: ['traefik']}
-    - {role: 'portainer', tags: ['portainer']}
     - {role: 'bot', tags: ['bot']}
 
   handlers:

@@ -1,0 +1,5 @@
+{
+    "admin": "gempir",
+    "logsDirectory": "./logs",
+    "channels": ["gempir", "pajlada"]
+}

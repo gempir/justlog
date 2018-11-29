@@ -1,8 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -13,26 +14,33 @@ import (
 	"github.com/gempir/gempbotgo/humanize"
 	"github.com/gempir/go-twitch-irc"
 
-	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 )
 
+type config struct {
+	LogsDirectory string   `json:"logsDirectory"`
+	Admin         string   `json:"admin"`
+	Channels      []string `json:"channels"`
+}
+
 var (
-	admin string
+	cfg config
 )
 
 func main() {
 	startTime := time.Now()
-	admin = os.Getenv("ADMIN")
+
+	configFile := flag.String("config", "config.json", "json config file")
+	flag.Parse()
+	cfg = loadConfiguration(*configFile)
 
 	apiServer := api.NewServer()
 	go apiServer.Init()
 
-	twitchClient := twitch.NewClient(os.Getenv("IRCUSER"), os.Getenv("IRCTOKEN"))
+	twitchClient := twitch.NewClient("justinfan123123", "oauth:123123123")
+	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
 
-	fileLogger := filelog.NewFileLogger()
-
-	channels := strings.Split(os.Getenv("CHANNELS"), ",")
-	for _, channel := range channels {
+	for _, channel := range cfg.Channels {
 		fmt.Println("Joining " + channel)
 		twitchClient.Join(channel)
 		apiServer.AddChannel(channel)
@@ -43,20 +51,20 @@ func main() {
 		go func() {
 			err := fileLogger.LogMessageForUser(channel, user, message)
 			if err != nil {
-				log.Println(err.Error())
+				log.Error(err.Error())
 			}
 		}()
 
 		go func() {
 			err := fileLogger.LogMessageForChannel(channel, user, message)
 			if err != nil {
-				log.Println(err.Error())
+				log.Error(err.Error())
 			}
 		}()
 
-		if user.Username == admin && strings.HasPrefix(message.Text, "!status") {
+		if user.Username == cfg.Admin && strings.HasPrefix(message.Text, "!status") {
 			uptime := humanize.TimeSince(startTime)
-			twitchClient.Say(channel, admin+", uptime: "+uptime)
+			twitchClient.Say(channel, cfg.Admin+", uptime: "+uptime)
 		}
 	})
 
@@ -65,17 +73,34 @@ func main() {
 		go func() {
 			err := fileLogger.LogMessageForUser(channel, user, message)
 			if err != nil {
-				log.Println(err.Error())
+				log.Error(err.Error())
 			}
 		}()
 
 		go func() {
 			err := fileLogger.LogMessageForChannel(channel, user, message)
 			if err != nil {
-				log.Println(err.Error())
+				log.Error(err.Error())
 			}
 		}()
 	})
 
 	twitchClient.Connect()
+}
+
+func loadConfiguration(file string) config {
+	log.Info("Loading config from " + file)
+	var cfg config
+	configFile, err := os.Open(file)
+	defer configFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	jsonParser := json.NewDecoder(configFile)
+	jsonParser.Decode(&cfg)
+
+	cfg.LogsDirectory = strings.TrimSuffix(cfg.LogsDirectory, "/")
+
+	return cfg
 }

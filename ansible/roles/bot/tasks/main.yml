@@ -1,16 +1,23 @@
 ---
-- name: create directory
+- name: create log directory
   file:
-    path: /var/twitch_logs
+    path: /var/justlog
     state: directory
-    owner: root
-    group: docker
+    owner: justlog
+    group: justlog
     mode: 0740
 
-- name: create channels file
+- name: create env file
   template:
-    src: templates/channels.j2
-    dest: /var/logstv_channels
-    owner: root
-    group: docker
+    src: templates/env.j2
+    dest: /etc/justlog.env
+    owner: justlog
+    group: justlog
     mode: 0640
+
+- name: install systemd unit file
+  template: src=myservice.j2 dest=/etc/systemd/system/myservice.service
+
+- name: reload units
+  systemd:
+    daemon_reload: yes
