@@ -16,9 +16,9 @@ type Server struct {
 }
 
 // NewServer create Server
-func NewServer() Server {
+func NewServer(logPath string) Server {
 	return Server{
-		logPath:  "/var/twitch_logs",
+		logPath:  logPath,
 		channels: []string{},
 	}
 }

@@ -5,6 +5,7 @@
   
   roles:
     - {role: 'common', tags: ['common']}
+    - {role: 'nginx', tags: ['nginx']}
     - {role: 'bot', tags: ['bot']}
 
   handlers:

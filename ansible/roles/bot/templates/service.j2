@@ -5,7 +5,10 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=/home/justlog/justlog
+WorkingDirectory=/home/justlog
 TimeoutStopSec=5
+User=justlog
+Group=justlog
 
 [Install]
 WantedBy=multi-user.target

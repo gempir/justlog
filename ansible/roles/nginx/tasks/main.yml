@@ -28,7 +28,7 @@
     service: name=nginx state=restarted
 
   - name: Create letsencrypt certificate
-    shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ api_domain }} --agree-tos -d {{ api_domain }}
+    shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ email }} --agree-tos -d {{ api_domain }}
     args:
       creates: /etc/letsencrypt/live/{{ api_domain }}
 

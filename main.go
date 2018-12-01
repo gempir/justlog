@@ -9,10 +9,10 @@ import (
 
 	"strings"
 
-	"github.com/gempir/gempbotgo/api"
-	"github.com/gempir/gempbotgo/filelog"
-	"github.com/gempir/gempbotgo/humanize"
 	"github.com/gempir/go-twitch-irc"
+	"github.com/gempir/justlog/api"
+	"github.com/gempir/justlog/filelog"
+	"github.com/gempir/justlog/humanize"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -34,7 +34,7 @@ func main() {
 	flag.Parse()
 	cfg = loadConfiguration(*configFile)
 
-	apiServer := api.NewServer()
+	apiServer := api.NewServer(cfg.LogsDirectory)
 	go apiServer.Init()
 
 	twitchClient := twitch.NewClient("justinfan123123", "oauth:123123123")

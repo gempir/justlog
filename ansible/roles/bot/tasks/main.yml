@@ -7,16 +7,16 @@
     group: justlog
     mode: 0740
 
-- name: create env file
+- name: create config file
   template:
-    src: templates/env.j2
-    dest: /etc/justlog.env
+    src: templates/config.j2
+    dest: /home/justlog/config.json
     owner: justlog
     group: justlog
     mode: 0640
 
 - name: install systemd unit file
-  template: src=myservice.j2 dest=/etc/systemd/system/myservice.service
+  template: src=service.j2 dest=/etc/systemd/system/justlog.service
 
 - name: reload units
   systemd:
