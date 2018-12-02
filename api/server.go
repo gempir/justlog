@@ -1,34 +1,33 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
+	"github.com/gempir/justlog/filelog"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
-// Server api server
 type Server struct {
-	port     string
-	logPath  string
-	channels []string
+	listenAddress string
+	logPath       string
+	fileLogger    *filelog.Logger
+	channels      []string
 }
 
-// NewServer create Server
-func NewServer(logPath string) Server {
+func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger) Server {
 	return Server{
-		logPath:  logPath,
-		channels: []string{},
+		listenAddress: listenAddress,
+		logPath:       logPath,
+		fileLogger:    fileLogger,
+		channels:      []string{},
 	}
 }
 
-// AddChannel to in-memory store to serve joined channels
 func (s *Server) AddChannel(channel string) {
 	s.channels = append(s.channels, channel)
 }
 
-// Init api server
 func (s *Server) Init() {
 
 	e := echo.New()
@@ -44,13 +43,12 @@ func (s *Server) Init() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/channel/:channel/user/:username", s.getCurrentUserLogs)
-	e.GET("/channel", s.getAllChannels)
-	e.GET("/channel/:channel", s.getCurrentChannelLogs)
-	e.GET("/channel/:channel/:year/:month/:day", s.getDatedChannelLogs)
-	e.GET("/channel/:channel/user/:username/:year/:month", s.getDatedUserLogs)
-	e.GET("/channel/:channel/user/:username/random", s.getRandomQuote)
+	e.GET("/channelid/:channelid/user/:userid", s.getCurrentUserLogs)
+	e.GET("/channelid", s.getAllChannels)
+	e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
+	e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
+	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
+	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
 
-	fmt.Println("starting API on port :8025")
-	e.Logger.Fatal(e.Start(":8025"))
+	e.Logger.Fatal(e.Start(s.listenAddress))
 }

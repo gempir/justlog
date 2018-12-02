@@ -8,24 +8,15 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gempir/go-twitch-irc"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 )
 
-var (
-	logReg = regexp.MustCompile(`\[(.*)\]\s(.*?):\s(.*)`)
-)
-
-// ErrorJSON simple json for default error response
-type ErrorJSON struct {
-	Error string `json:"Error"`
-}
-
-// RandomQuoteJSON simple json to output rq
 type RandomQuoteJSON struct {
 	Channel   string `json:"channel"`
 	Username  string `json:"username"`
@@ -33,27 +24,18 @@ type RandomQuoteJSON struct {
 	Timestamp string `json:"timestamp"`
 }
 
-// AllChannelsJSON api response
 type AllChannelsJSON struct {
 	Channels []string `json:"channels"`
 }
 
-// LogMessage for json
-type LogMessage struct {
-	Username  string `json:"username"`
-	Message   string `json:"message"`
-	Timestamp string `json:"timestamp"`
-}
-
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-	channel = strings.TrimSpace(channel)
-	year := time.Now().Year()
-	month := time.Now().Month().String()
-	username := c.Param("username")
-	username = strings.ToLower(strings.TrimSpace(username))
+	channelID := c.Param("channelid")
+	userID := c.Param("userid")
 
-	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%s", channel, username, year, month)
+	year := time.Now().Year()
+	month := int(time.Now().Month())
+
+	redirectURL := fmt.Sprintf("/channelid/%s/userid/%s/%d/%d", channelID, userID, year, month)
 	return c.Redirect(303, redirectURL)
 }
 
@@ -65,145 +47,16 @@ func (s *Server) getAllChannels(c echo.Context) error {
 }
 
 func (s *Server) getCurrentChannelLogs(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-	channel = strings.TrimSpace(channel)
+	channelID := c.Param("channelid")
 	year := time.Now().Year()
-	month := time.Now().Month().String()
+	month := int(time.Now().Month())
 	day := time.Now().Day()
 
-	redirectURL := fmt.Sprintf("/channel/%s/%d/%s/%d", channel, year, month, day)
+	redirectURL := fmt.Sprintf("/channelid/%s/%d/%d/%d", channelID, year, month, day)
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
-func (s *Server) getDatedChannelLogs(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-	channel = strings.TrimSpace(channel)
-	year := c.Param("year")
-	month := strings.Title(c.Param("month"))
-	day := c.Param("day")
-
-	if year == "" || month == "" {
-		year = strconv.Itoa(time.Now().Year())
-		month = time.Now().Month().String()
-	}
-
-	content := ""
-
-	file := fmt.Sprintf(s.logPath+"/%s/%s/%s/%s/channel.txt", channel, year, month, day)
-	if _, err := os.Stat(file + ".gz"); err == nil {
-		file = file + ".gz"
-		f, err := os.Open(file)
-		if err != nil {
-			errJSON := new(ErrorJSON)
-			errJSON.Error = "error finding logs"
-			return c.JSON(http.StatusNotFound, errJSON)
-		}
-		gz, err := gzip.NewReader(f)
-		scanner := bufio.NewScanner(gz)
-		if err != nil {
-			errJSON := new(ErrorJSON)
-			errJSON.Error = "error finding logs"
-			return c.JSON(http.StatusNotFound, errJSON)
-		}
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			content += line + "\r\n"
-		}
-		return c.String(http.StatusOK, content)
-	}
-
-	return c.File(file)
-}
-
-func (s *Server) getDatedUserLogs(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-	channel = strings.TrimSpace(channel)
-	year := c.Param("year")
-	month := strings.Title(c.Param("month"))
-	username := c.Param("username")
-	username = strings.ToLower(strings.TrimSpace(username))
-
-	if year == "" || month == "" {
-		year = strconv.Itoa(time.Now().Year())
-		month = time.Now().Month().String()
-	}
-
-	content := ""
-
-	file := fmt.Sprintf(s.logPath+"/%s/%s/%s/%s.txt", channel, year, month, username)
-	if _, err := os.Stat(file + ".gz"); err == nil {
-		file = file + ".gz"
-		f, err := os.Open(file)
-		if err != nil {
-			errJSON := new(ErrorJSON)
-			errJSON.Error = "error finding logs"
-			return c.JSON(http.StatusNotFound, errJSON)
-		}
-		gz, err := gzip.NewReader(f)
-		scanner := bufio.NewScanner(gz)
-		if err != nil {
-			errJSON := new(ErrorJSON)
-			errJSON.Error = "error finding logs"
-			return c.JSON(http.StatusNotFound, errJSON)
-		}
-
-		if c.Request().Header.Get("Content-Type") == "application/json" {
-
-			messages := []LogMessage{}
-
-			for scanner.Scan() {
-				line := scanner.Text()
-				result := logReg.FindStringSubmatch(line)
-
-				message := LogMessage{Username: result[2], Message: result[3], Timestamp: result[1]}
-
-				messages = append(messages, message)
-			}
-
-			return c.JSON(http.StatusOK, messages)
-		}
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			content += line + "\r\n"
-		}
-		return c.String(http.StatusOK, content)
-	}
-
-	if c.Request().Header.Get("Content-Type") == "application/json" {
-
-		openFile, err := os.Open(file)
-		if err != nil {
-			errJSON := new(ErrorJSON)
-			errJSON.Error = "error finding logs"
-			return c.JSON(http.StatusNotFound, errJSON)
-		}
-		defer openFile.Close()
-
-		scanner := bufio.NewScanner(openFile)
-
-		messages := []LogMessage{}
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			result := logReg.FindStringSubmatch(line)
-
-			message := LogMessage{Username: result[2], Message: result[3], Timestamp: result[1]}
-
-			messages = append(messages, message)
-		}
-
-		return c.JSON(http.StatusOK, messages)
-	}
-
-	return c.File(file)
-}
-
 func (s *Server) getRandomQuote(c echo.Context) error {
-	errJSON := new(ErrorJSON)
-	errJSON.Error = "error finding logs"
-
 	username := c.Param("username")
 	username = strings.ToLower(strings.TrimSpace(username))
 	channel := strings.ToLower(c.Param("channel"))
@@ -227,9 +80,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 		}
 	}
 	if len(userLogs) < 1 {
-		errJSON := new(ErrorJSON)
-		errJSON.Error = "error finding logs"
-		return c.JSON(http.StatusNotFound, errJSON)
+		return c.JSON(http.StatusNotFound, "error finding logs")
 	}
 
 	for _, logFile := range userLogs {
@@ -266,4 +117,103 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, lineSplit[1])
+}
+
+func (s *Server) getUserLogs(c echo.Context) error {
+	channelID := c.Param("channelid")
+	userID := c.Param("userid")
+
+	yearStr := c.Param("year")
+	monthStr := c.Param("month")
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Invalid year")
+	}
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Invalid month")
+	}
+
+	logMessages, err := s.fileLogger.ReadLogForUser(channelID, userID, year, month)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure reading log")
+	}
+
+	var logResult chatLog
+
+	for _, rawMessage := range logMessages {
+		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+
+		message := chatMessage{
+			Timestamp: timestamp{parsedMessage.Time},
+			Username:  user.Username,
+			Text:      parsedMessage.Text,
+			Type:      parsedMessage.Type,
+			Channel:   channel,
+		}
+
+		logResult.Messages = append(logResult.Messages, message)
+	}
+
+	if c.Request().Header.Get("Content-Type") == "application/json" || c.QueryParam("type") == "json" {
+		return writeJSONResponse(c, &logResult)
+	}
+
+	return writeTextResponse(c, &logResult)
+}
+
+func (s *Server) getChannelLogs(c echo.Context) error {
+	channelID := c.Param("channelid")
+
+	yearStr := c.Param("year")
+	monthStr := c.Param("month")
+	dayStr := c.Param("day")
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Invalid year")
+	}
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Invalid month")
+	}
+	day, err := strconv.Atoi(dayStr)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Invalid day")
+	}
+
+	logMessages, err := s.fileLogger.ReadLogForChannel(channelID, year, month, day)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure reading log")
+	}
+
+	var logResult chatLog
+
+	for _, rawMessage := range logMessages {
+		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+
+		message := chatMessage{
+			Timestamp: timestamp{parsedMessage.Time},
+			Username:  user.Username,
+			Text:      parsedMessage.Text,
+			Type:      parsedMessage.Type,
+			Channel:   channel,
+		}
+
+		logResult.Messages = append(logResult.Messages, message)
+	}
+
+	if c.Request().Header.Get("Content-Type") == "application/json" || c.QueryParam("type") == "json" {
+		return writeJSONResponse(c, &logResult)
+	}
+
+	return writeTextResponse(c, &logResult)
 }

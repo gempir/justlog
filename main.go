@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"os"
 	"time"
 
@@ -19,6 +18,9 @@ import (
 
 type config struct {
 	LogsDirectory string   `json:"logsDirectory"`
+	Username      string   `json:"username"`
+	OAuth         string   `json:"oauth"`
+	ListenAddress string   `json:"listenAddress"`
 	Admin         string   `json:"admin"`
 	Channels      []string `json:"channels"`
 }
@@ -34,14 +36,20 @@ func main() {
 	flag.Parse()
 	cfg = loadConfiguration(*configFile)
 
-	apiServer := api.NewServer(cfg.LogsDirectory)
-	go apiServer.Init()
-
-	twitchClient := twitch.NewClient("justinfan123123", "oauth:123123123")
+	twitchClient := twitch.NewClient(cfg.Username, "oauth:"+cfg.OAuth)
 	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
 
+	if strings.HasPrefix(cfg.Username, "justinfan") {
+		log.Info("Bot joining anonymous")
+	} else {
+		log.Info("Bot joining as user " + cfg.Username)
+	}
+
+	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger)
+	go apiServer.Init()
+
 	for _, channel := range cfg.Channels {
-		fmt.Println("Joining " + channel)
+		log.Info("Joining " + channel)
 		twitchClient.Join(channel)
 		apiServer.AddChannel(channel)
 	}
@@ -85,22 +93,36 @@ func main() {
 		}()
 	})
 
-	twitchClient.Connect()
+	log.Fatal(twitchClient.Connect())
 }
 
 func loadConfiguration(file string) config {
 	log.Info("Loading config from " + file)
-	var cfg config
+
+	// setup defaults
+	cfg := config{
+		LogsDirectory: "./logs",
+		ListenAddress: "127.0.0.1:8025",
+		Username:      "justinfan777777",
+		OAuth:         "oauth:777777777",
+		Channels:      []string{},
+		Admin:         "gempir",
+	}
+
 	configFile, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer configFile.Close()
+
+	jsonParser := json.NewDecoder(configFile)
+	err = jsonParser.Decode(&cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&cfg)
-
 	cfg.LogsDirectory = strings.TrimSuffix(cfg.LogsDirectory, "/")
+	cfg.OAuth = strings.TrimPrefix(cfg.OAuth, "oauth:")
 
 	return cfg
 }
