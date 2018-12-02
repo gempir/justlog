@@ -2,8 +2,8 @@
     "admin": "gempir",
     "logsDirectory": "./logs",
     "username": "gempbot",
-    "oauth": "cg74a9xb4le868tctmelk7eidqtrra",
-    "clientID": "862bsdm5ev5x4swg1vzqtwlokxglqv",
+    "oauth": "oauthtokenforchat",
+    "clientID": "mytwitchclientid",
     "logLevel": "debug",
     "channels": ["gempir", "pajlada"]
 }
