@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gempir/go-twitch-irc"
+	log "github.com/sirupsen/logrus"
 )
 
 type Logger struct {
@@ -50,9 +51,10 @@ func (l *Logger) ReadLogForUser(channelID string, userID string, year int, month
 		filename = filename + ".gz"
 	}
 
+	log.Debug("Opening " + filename)
 	f, err := os.Open(filename)
 	if err != nil {
-		return []string{}, errors.New("file not found")
+		return []string{}, errors.New("file not found: " + filename)
 	}
 	defer f.Close()
 
@@ -77,6 +79,7 @@ func (l *Logger) ReadLogForUser(channelID string, userID string, year int, month
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		log.Debug(line)
 		content = append(content, line)
 	}
 

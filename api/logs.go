@@ -14,7 +14,7 @@ import (
 
 	"github.com/gempir/go-twitch-irc"
 	"github.com/labstack/echo"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 )
 
 type RandomQuoteJSON struct {
@@ -117,6 +117,30 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, lineSplit[1])
+}
+
+func (s *Server) getUserLogsByName(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+	username := strings.ToLower(c.Param("username"))
+
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
+	}
+
+	names := c.ParamNames()
+	names = append(names, "channelid")
+	names = append(names, "userid")
+
+	values := c.ParamValues()
+	values = append(values, userMap[channel].ID)
+	values = append(values, userMap[username].ID)
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getUserLogs(c)
 }
 
 func (s *Server) getUserLogs(c echo.Context) error {

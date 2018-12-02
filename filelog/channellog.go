@@ -44,7 +44,7 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 
 	f, err := os.Open(filename)
 	if err != nil {
-		return []string{}, errors.New("file not found")
+		return []string{}, errors.New("file not found: " + filename)
 	}
 	defer f.Close()
 

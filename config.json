@@ -3,5 +3,7 @@
     "logsDirectory": "./logs",
     "username": "gempbot",
     "oauth": "cg74a9xb4le868tctmelk7eidqtrra",
+    "clientID": "862bsdm5ev5x4swg1vzqtwlokxglqv",
+    "logLevel": "debug",
     "channels": ["gempir", "pajlada"]
 }

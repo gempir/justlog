@@ -11,6 +11,7 @@ import (
 	"github.com/gempir/go-twitch-irc"
 	"github.com/gempir/justlog/api"
 	"github.com/gempir/justlog/filelog"
+	"github.com/gempir/justlog/helix"
 	"github.com/gempir/justlog/humanize"
 
 	log "github.com/sirupsen/logrus"
@@ -23,6 +24,8 @@ type config struct {
 	ListenAddress string   `json:"listenAddress"`
 	Admin         string   `json:"admin"`
 	Channels      []string `json:"channels"`
+	ClientID      string   `json:"clientID"`
+	LogLevel      string   `json:"logLevel"`
 }
 
 var (
@@ -36,8 +39,10 @@ func main() {
 	flag.Parse()
 	cfg = loadConfiguration(*configFile)
 
+	setupLogger(cfg)
 	twitchClient := twitch.NewClient(cfg.Username, "oauth:"+cfg.OAuth)
 	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
+	helixClient := helix.NewClient(cfg.ClientID)
 
 	if strings.HasPrefix(cfg.Username, "justinfan") {
 		log.Info("Bot joining anonymous")
@@ -45,7 +50,7 @@ func main() {
 		log.Info("Bot joining as user " + cfg.Username)
 	}
 
-	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger)
+	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient)
 	go apiServer.Init()
 
 	for _, channel := range cfg.Channels {
@@ -96,6 +101,23 @@ func main() {
 	log.Fatal(twitchClient.Connect())
 }
 
+func setupLogger(cfg config) {
+	switch cfg.LogLevel {
+	case "fatal":
+		log.SetLevel(log.FatalLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	}
+}
+
 func loadConfiguration(file string) config {
 	log.Info("Loading config from " + file)
 
@@ -107,6 +129,7 @@ func loadConfiguration(file string) config {
 		OAuth:         "oauth:777777777",
 		Channels:      []string{},
 		Admin:         "gempir",
+		LogLevel:      "info",
 	}
 
 	configFile, err := os.Open(file)
@@ -121,8 +144,15 @@ func loadConfiguration(file string) config {
 		log.Fatal(err)
 	}
 
+	// normalize
 	cfg.LogsDirectory = strings.TrimSuffix(cfg.LogsDirectory, "/")
 	cfg.OAuth = strings.TrimPrefix(cfg.OAuth, "oauth:")
+	cfg.LogLevel = strings.ToLower(cfg.LogLevel)
+
+	// ensure required
+	if cfg.ClientID == "" {
+		log.Fatal("No clientID specified")
+	}
 
 	return cfg
 }
