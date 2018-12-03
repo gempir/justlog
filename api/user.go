@@ -25,10 +25,6 @@ type RandomQuoteJSON struct {
 	Timestamp   timestamp `json:"timestamp"`
 }
 
-type AllChannelsJSON struct {
-	Channels []string `json:"channels"`
-}
-
 func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
@@ -51,52 +47,28 @@ func (s *Server) getCurrentUserLogsByName(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
-func (s *Server) getAllChannels(c echo.Context) error {
-	response := new(AllChannelsJSON)
-	response.Channels = s.channels
-
-	return c.JSON(http.StatusOK, response)
-}
-
-func (s *Server) getCurrentChannelLogs(c echo.Context) error {
-	channelID := c.Param("channelid")
-	year := time.Now().Year()
-	month := int(time.Now().Month())
-	day := time.Now().Day()
-
-	redirectURL := fmt.Sprintf("/channelid/%s/%d/%d/%d", channelID, year, month, day)
-	return c.Redirect(http.StatusSeeOther, redirectURL)
-}
-
-func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
-	channel := c.Param("channel")
-	year := time.Now().Year()
-	month := int(time.Now().Month())
-	day := time.Now().Day()
-
-	redirectURL := fmt.Sprintf("/channel/%s/%d/%d/%d", channel, year, month, day)
-	return c.Redirect(http.StatusSeeOther, redirectURL)
-}
-
-func (s *Server) getChannelLogsByName(c echo.Context) error {
+func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
+	username := strings.ToLower(c.Param("username"))
 
-	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
 	}
 
 	names := c.ParamNames()
 	names = append(names, "channelid")
+	names = append(names, "userid")
 
 	values := c.ParamValues()
 	values = append(values, userMap[channel].ID)
+	values = append(values, userMap[username].ID)
 
 	c.SetParamNames(names...)
 	c.SetParamValues(values...)
 
-	return s.getChannelLogs(c)
+	return s.getUserLogsRange(c)
 }
 
 func (s *Server) getUserLogsByName(c echo.Context) error {
@@ -256,39 +228,37 @@ func (s *Server) getUserLogs(c echo.Context) error {
 	return writeTextResponse(c, &logResult)
 }
 
-func (s *Server) getChannelLogs(c echo.Context) error {
+func (s *Server) getUserLogsRange(c echo.Context) error {
 	channelID := c.Param("channelid")
+	userID := c.Param("userid")
 
-	yearStr := c.Param("year")
-	monthStr := c.Param("month")
-	dayStr := c.Param("day")
-
-	year, err := strconv.Atoi(yearStr)
+	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), userHourLimit)
 	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid year")
-	}
-	month, err := strconv.Atoi(monthStr)
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid month")
-	}
-	day, err := strconv.Atoi(dayStr)
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid day")
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	logMessages, err := s.fileLogger.ReadLogForChannel(channelID, year, month, day)
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure reading log")
+	var logMessages []string
+
+	logMessages, _ = s.fileLogger.ReadLogForUser(channelID, userID, fromTime.Year(), int(fromTime.Month()))
+
+	if fromTime.Month() != toTime.Month() {
+		additionalMessages, _ := s.fileLogger.ReadLogForUser(channelID, userID, toTime.Year(), int(toTime.Month()))
+
+		logMessages = append(logMessages, additionalMessages...)
+	}
+
+	if len(logMessages) == 0 {
+		return c.JSON(http.StatusNotFound, "No logs found")
 	}
 
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
 		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+
+		if parsedMessage.Time.Unix() < fromTime.Unix() || parsedMessage.Time.Unix() > toTime.Unix() {
+			continue
+		}
 
 		message := chatMessage{
 			Timestamp:   timestamp{parsedMessage.Time},

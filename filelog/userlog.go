@@ -79,7 +79,6 @@ func (l *Logger) ReadLogForUser(channelID string, userID string, year int, month
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		log.Debug(line)
 		content = append(content, line)
 	}
 

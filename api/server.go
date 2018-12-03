@@ -57,6 +57,9 @@ func (s *Server) Init() {
 	})
 	e.GET("/channelid", s.getAllChannels)
 
+	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
+	e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
+
 	e.GET("/channel/:channel/user/:username", s.getCurrentUserLogsByName)
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
@@ -76,9 +79,14 @@ func (s *Server) Init() {
 type order string
 
 var (
-	orderDesc order = "DESC"
-	orderAsc  order = "ASC"
+	orderDesc     order = "DESC"
+	orderAsc      order = "ASC"
+	userHourLimit       = 744.0
 )
+
+type AllChannelsJSON struct {
+	Channels []string `json:"channels"`
+}
 
 type chatLog struct {
 	Messages []chatMessage `json:"messages"`
@@ -95,6 +103,13 @@ type chatMessage struct {
 
 type timestamp struct {
 	time.Time
+}
+
+func (s *Server) getAllChannels(c echo.Context) error {
+	response := new(AllChannelsJSON)
+	response.Channels = s.channels
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (t timestamp) MarshalJSON() ([]byte, error) {
