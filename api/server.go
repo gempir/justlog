@@ -56,11 +56,17 @@ func (s *Server) Init() {
 		return c.String(http.StatusOK, "Welcome to justlog")
 	})
 	e.GET("/channelid", s.getAllChannels)
+
+	e.GET("/channel/:channel/user/:username", s.getCurrentUserLogsByName)
+	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
 	e.GET("/channelid/:channelid/user/:userid", s.getCurrentUserLogs)
+	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
+
+	e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
+	e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
 	e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
 	e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
-	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
-	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
+
 	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
 
 	e.Logger.Fatal(e.Start(s.listenAddress))

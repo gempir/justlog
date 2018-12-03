@@ -39,6 +39,17 @@ func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
+func (s *Server) getCurrentUserLogsByName(c echo.Context) error {
+	channel := c.Param("channel")
+	username := c.Param("username")
+
+	year := time.Now().Year()
+	month := int(time.Now().Month())
+
+	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%d", channel, username, year, month)
+	return c.Redirect(303, redirectURL)
+}
+
 func (s *Server) getAllChannels(c echo.Context) error {
 	response := new(AllChannelsJSON)
 	response.Channels = s.channels
@@ -53,6 +64,16 @@ func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	day := time.Now().Day()
 
 	redirectURL := fmt.Sprintf("/channelid/%s/%d/%d/%d", channelID, year, month, day)
+	return c.Redirect(http.StatusSeeOther, redirectURL)
+}
+
+func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
+	channel := c.Param("channel")
+	year := time.Now().Year()
+	month := int(time.Now().Month())
+	day := time.Now().Day()
+
+	redirectURL := fmt.Sprintf("/channel/%s/%d/%d/%d", channel, year, month, day)
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
@@ -117,6 +138,27 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, lineSplit[1])
+}
+
+func (s *Server) getChannelLogsByName(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
+	}
+
+	names := c.ParamNames()
+	names = append(names, "channelid")
+
+	values := c.ParamValues()
+	values = append(values, userMap[channel].ID)
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getChannelLogs(c)
 }
 
 func (s *Server) getUserLogsByName(c echo.Context) error {
