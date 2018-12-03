@@ -78,6 +78,75 @@ func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
+func (s *Server) getChannelLogsByName(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
+	}
+
+	names := c.ParamNames()
+	names = append(names, "channelid")
+
+	values := c.ParamValues()
+	values = append(values, userMap[channel].ID)
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getChannelLogs(c)
+}
+
+func (s *Server) getUserLogsByName(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+	username := strings.ToLower(c.Param("username"))
+
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
+	}
+
+	names := c.ParamNames()
+	names = append(names, "channelid")
+	names = append(names, "userid")
+
+	values := c.ParamValues()
+	values = append(values, userMap[channel].ID)
+	values = append(values, userMap[username].ID)
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getUserLogs(c)
+}
+
+func (s *Server) getRandomQuoteByName(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+	username := strings.ToLower(c.Param("username"))
+
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
+	}
+
+	names := c.ParamNames()
+	names = append(names, "channelid")
+	names = append(names, "userid")
+
+	values := c.ParamValues()
+	values = append(values, userMap[channel].ID)
+	values = append(values, userMap[username].ID)
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getRandomQuote(c)
+}
+
 func (s *Server) getRandomQuote(c echo.Context) error {
 	userID := c.Param("userid")
 	channelID := c.Param("channelid")
@@ -137,51 +206,6 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, fmt.Sprintf("%s: %s", user.DisplayName, message.Text))
-}
-
-func (s *Server) getChannelLogsByName(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-
-	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
-	}
-
-	names := c.ParamNames()
-	names = append(names, "channelid")
-
-	values := c.ParamValues()
-	values = append(values, userMap[channel].ID)
-
-	c.SetParamNames(names...)
-	c.SetParamValues(values...)
-
-	return s.getChannelLogs(c)
-}
-
-func (s *Server) getUserLogsByName(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-	username := strings.ToLower(c.Param("username"))
-
-	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
-	}
-
-	names := c.ParamNames()
-	names = append(names, "channelid")
-	names = append(names, "userid")
-
-	values := c.ParamValues()
-	values = append(values, userMap[channel].ID)
-	values = append(values, userMap[username].ID)
-
-	c.SetParamNames(names...)
-	c.SetParamValues(values...)
-
-	return s.getUserLogs(c)
 }
 
 func (s *Server) getUserLogs(c echo.Context) error {
