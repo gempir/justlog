@@ -1,4 +1,4 @@
-gempbotgo
+justlog
 vendor/
 .idea/
 .vscode/
@@ -6,3 +6,4 @@ coverage-all.out
 coverage.out
 .env
 logs/
+config.json

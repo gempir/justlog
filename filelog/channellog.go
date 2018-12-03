@@ -1,33 +1,76 @@
 package filelog
 
 import (
+	"bufio"
+	"compress/gzip"
+	"errors"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/gempir/go-twitch-irc"
 )
 
-// LogMessageForChannel file log
 func (l *Logger) LogMessageForChannel(channel string, user twitch.User, message twitch.Message) error {
 	year := message.Time.Year()
-	month := message.Time.Month()
+	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%s/%d", channel, year, month, day), 0755)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.Tags["room-id"], year, month, day), 0740)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%s/%d/channel.txt", channel, year, month, day)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.Tags["room-id"], year, month, day)
 
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	contents := fmt.Sprintf("[%s] %s: %s\r\n", message.Time.Format("2006-01-2 15:04:05"), user.Username, message.Text)
-	if _, err = file.WriteString(contents); err != nil {
+	if _, err = file.WriteString(message.Raw + "\r\n"); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day int) ([]string, error) {
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", channelID, year, month, day)
+
+	if _, err := os.Stat(filename); err != nil {
+		filename = filename + ".gz"
+	}
+
+	f, err := os.Open(filename)
+	if err != nil {
+		return []string{}, errors.New("file not found: " + filename)
+	}
+	defer f.Close()
+
+	var reader io.Reader
+
+	if strings.HasSuffix(filename, ".gz") {
+		gz, err := gzip.NewReader(f)
+		if err != nil {
+			return []string{}, errors.New("file gzip not readable")
+		}
+		reader = gz
+	} else {
+		reader = f
+	}
+
+	scanner := bufio.NewScanner(reader)
+	if err != nil {
+		return []string{}, errors.New("file not readable")
+	}
+
+	content := []string{}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		content = append(content, line)
+	}
+
+	return content, nil
 }

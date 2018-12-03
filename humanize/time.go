@@ -16,60 +16,48 @@ func formatDiff(years, months, days, hours, mins, secs int) string {
 		switch years {
 		case 1:
 			since += fmt.Sprintf("%d year ", years)
-			break
 		default:
 			since += fmt.Sprintf("%d years ", years)
-			break
 		}
 	}
 	if months > 0 {
 		switch months {
 		case 1:
 			since += fmt.Sprintf("%d month ", months)
-			break
 		default:
 			since += fmt.Sprintf("%d months ", months)
-			break
 		}
 	}
 	if days > 0 {
 		switch days {
 		case 1:
 			since += fmt.Sprintf("%d day ", days)
-			break
 		default:
 			since += fmt.Sprintf("%d days ", days)
-			break
 		}
 	}
 	if hours > 0 {
 		switch hours {
 		case 1:
 			since += fmt.Sprintf("%d hour ", hours)
-			break
 		default:
 			since += fmt.Sprintf("%d hours ", hours)
-			break
 		}
 	}
 	if mins > 0 && days == 0 && months == 0 && years == 0 {
 		switch mins {
 		case 1:
 			since += fmt.Sprintf("%d min ", mins)
-			break
 		default:
 			since += fmt.Sprintf("%d mins ", mins)
-			break
 		}
 	}
 	if secs > 0 && days == 0 && months == 0 && years == 0 && hours == 0 {
 		switch secs {
 		case 1:
 			since += fmt.Sprintf("%d sec ", secs)
-			break
 		default:
 			since += fmt.Sprintf("%d secs ", secs)
-			break
 		}
 	}
 	return strings.TrimSpace(since)

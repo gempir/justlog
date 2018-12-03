@@ -1,0 +1,9 @@
+{
+    "admin": "gempir",
+    "logsDirectory": "./logs",
+    "username": "gempbot",
+    "oauth": "oauthtokenforchat",
+    "clientID": "mytwitchclientid",
+    "logLevel": "debug",
+    "channels": ["gempir", "pajlada"]
+}
