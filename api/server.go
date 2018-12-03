@@ -61,13 +61,12 @@ func (s *Server) Init() {
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
 	e.GET("/channelid/:channelid/user/:userid", s.getCurrentUserLogs)
 	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
+	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
 
 	e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
 	e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
 	e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
 	e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
-
-	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
 
 	e.Logger.Fatal(e.Start(s.listenAddress))
 }
@@ -84,11 +83,12 @@ type chatLog struct {
 }
 
 type chatMessage struct {
-	Text      string             `json:"text"`
-	Username  string             `json:"username"`
-	Channel   string             `json:"channel"`
-	Timestamp timestamp          `json:"timestamp"`
-	Type      twitch.MessageType `json:"type"`
+	Text        string             `json:"text"`
+	Username    string             `json:"username"`
+	DisplayName string             `json:"displayName"`
+	Channel     string             `json:"channel"`
+	Timestamp   timestamp          `json:"timestamp"`
+	Type        twitch.MessageType `json:"type"`
 }
 
 type timestamp struct {
@@ -201,4 +201,10 @@ func buildOrder(c echo.Context) order {
 	}
 
 	return dataOrder
+}
+
+func shouldRespondWithJson(c echo.Context) bool {
+	_, ok := c.QueryParams()["json"]
+
+	return c.Request().Header.Get("Content-Type") == "application/json" || c.QueryParam("type") == "json" || ok
 }

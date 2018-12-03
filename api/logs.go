@@ -18,10 +18,11 @@ import (
 )
 
 type RandomQuoteJSON struct {
-	Channel   string `json:"channel"`
-	Username  string `json:"username"`
-	Message   string `json:"message"`
-	Timestamp string `json:"timestamp"`
+	Channel     string    `json:"channel"`
+	Username    string    `json:"username"`
+	DisplayName string    `json:"displayName"`
+	Message     string    `json:"message"`
+	Timestamp   timestamp `json:"timestamp"`
 }
 
 type AllChannelsJSON struct {
@@ -78,21 +79,19 @@ func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
 }
 
 func (s *Server) getRandomQuote(c echo.Context) error {
-	username := c.Param("username")
-	username = strings.ToLower(strings.TrimSpace(username))
-	channel := strings.ToLower(c.Param("channel"))
-	channel = strings.TrimSpace(channel)
+	userID := c.Param("userid")
+	channelID := c.Param("channelid")
 
 	var userLogs []string
 	var lines []string
 
-	years, _ := ioutil.ReadDir(s.logPath + "/" + channel)
+	years, _ := ioutil.ReadDir(s.logPath + "/" + channelID)
 	for _, yearDir := range years {
 		year := yearDir.Name()
-		months, _ := ioutil.ReadDir(s.logPath + "/" + channel + "/" + year + "/")
+		months, _ := ioutil.ReadDir(s.logPath + "/" + channelID + "/" + year + "/")
 		for _, monthDir := range months {
 			month := monthDir.Name()
-			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", s.logPath, channel, year, month, username)
+			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", s.logPath, channelID, year, month, userID)
 			if _, err := os.Stat(path); err == nil {
 				userLogs = append(userLogs, path)
 			} else if _, err := os.Stat(path + ".gz"); err == nil {
@@ -122,22 +121,22 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	}
 
 	ranNum := rand.Intn(len(lines))
-	line := lines[ranNum]
-	lineSplit := strings.SplitN(line, "]", 2)
+	channel, user, message := twitch.ParseMessage(lines[ranNum])
 
-	if c.Request().Header.Get("Content-Type") == "application/json" {
+	if shouldRespondWithJson(c) {
 
 		randomQ := RandomQuoteJSON{
-			Channel:   channel,
-			Username:  username,
-			Message:   strings.TrimPrefix(lineSplit[1], " "+username+": "),
-			Timestamp: strings.TrimPrefix(lineSplit[0], "["),
+			Channel:     channel,
+			Username:    user.Username,
+			DisplayName: user.DisplayName,
+			Message:     message.Text,
+			Timestamp:   timestamp{message.Time},
 		}
 
 		return c.JSON(http.StatusOK, randomQ)
 	}
 
-	return c.String(http.StatusOK, lineSplit[1])
+	return c.String(http.StatusOK, fmt.Sprintf("%s: %s", user.DisplayName, message.Text))
 }
 
 func (s *Server) getChannelLogsByName(c echo.Context) error {
@@ -215,17 +214,18 @@ func (s *Server) getUserLogs(c echo.Context) error {
 		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
 
 		message := chatMessage{
-			Timestamp: timestamp{parsedMessage.Time},
-			Username:  user.Username,
-			Text:      parsedMessage.Text,
-			Type:      parsedMessage.Type,
-			Channel:   channel,
+			Timestamp:   timestamp{parsedMessage.Time},
+			Username:    user.Username,
+			DisplayName: user.DisplayName,
+			Text:        parsedMessage.Text,
+			Type:        parsedMessage.Type,
+			Channel:     channel,
 		}
 
 		logResult.Messages = append(logResult.Messages, message)
 	}
 
-	if c.Request().Header.Get("Content-Type") == "application/json" || c.QueryParam("type") == "json" {
+	if shouldRespondWithJson(c) {
 		return writeJSONResponse(c, &logResult)
 	}
 
@@ -267,17 +267,18 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
 
 		message := chatMessage{
-			Timestamp: timestamp{parsedMessage.Time},
-			Username:  user.Username,
-			Text:      parsedMessage.Text,
-			Type:      parsedMessage.Type,
-			Channel:   channel,
+			Timestamp:   timestamp{parsedMessage.Time},
+			Username:    user.Username,
+			DisplayName: user.DisplayName,
+			Text:        parsedMessage.Text,
+			Type:        parsedMessage.Type,
+			Channel:     channel,
 		}
 
 		logResult.Messages = append(logResult.Messages, message)
 	}
 
-	if c.Request().Header.Get("Content-Type") == "application/json" || c.QueryParam("type") == "json" {
+	if shouldRespondWithJson(c) {
 		return writeJSONResponse(c, &logResult)
 	}
 
