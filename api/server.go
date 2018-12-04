@@ -76,11 +76,7 @@ func (s *Server) Init() {
 	e.Logger.Fatal(e.Start(s.listenAddress))
 }
 
-type order string
-
 var (
-	orderDesc     order = "DESC"
-	orderAsc      order = "ASC"
 	userHourLimit       = 744.0
 )
 
@@ -103,6 +99,13 @@ type chatMessage struct {
 
 type timestamp struct {
 	time.Time
+}
+
+func reverse(input []string) []string {
+	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
+		input[i], input[j] = input[j], input[i]
+	}
+	return input
 }
 
 func (s *Server) getAllChannels(c echo.Context) error {
@@ -210,14 +213,11 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 	return time.Unix(i, 0), nil
 }
 
-func buildOrder(c echo.Context) order {
-	dataOrder := orderAsc
-	_, reverse := c.QueryParams()["reverse"]
-	if reverse {
-		dataOrder = orderDesc
-	}
 
-	return dataOrder
+func shouldReverse(c echo.Context) bool {
+	_, ok := c.QueryParams()["reverse"]
+
+    return c.QueryParam("order") == "reverse" || ok
 }
 
 func shouldRespondWithJson(c echo.Context) bool {

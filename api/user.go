@@ -204,6 +204,10 @@ func (s *Server) getUserLogs(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "Failure reading log")
 	}
 
+	if shouldReverse(c) {
+		reverse(logMessages)
+	}
+
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
@@ -249,6 +253,10 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 
 	if len(logMessages) == 0 {
 		return c.JSON(http.StatusNotFound, "No logs found")
+	}
+
+	if shouldReverse(c) {
+		reverse(logMessages)
 	}
 
 	var logResult chatLog

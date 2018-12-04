@@ -82,6 +82,10 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "Failure reading log")
 	}
 
+	if shouldReverse(c) {
+		reverse(logMessages)
+	}
+
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
