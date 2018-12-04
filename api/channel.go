@@ -53,6 +53,27 @@ func (s *Server) getChannelLogsByName(c echo.Context) error {
 	return s.getChannelLogs(c)
 }
 
+func (s *Server) getChannelLogsRangeByName(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
+	}
+
+	names := c.ParamNames()
+	names = append(names, "channelid")
+
+	values := c.ParamValues()
+	values = append(values, userMap[channel].ID)
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getChannelLogsRange(c)
+}
+
 func (s *Server) getChannelLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 
@@ -90,6 +111,60 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 
 	for _, rawMessage := range logMessages {
 		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+
+		message := chatMessage{
+			Timestamp:   timestamp{parsedMessage.Time},
+			Username:    user.Username,
+			DisplayName: user.DisplayName,
+			Text:        parsedMessage.Text,
+			Type:        parsedMessage.Type,
+			Channel:     channel,
+		}
+
+		logResult.Messages = append(logResult.Messages, message)
+	}
+
+	if shouldRespondWithJson(c) {
+		return writeJSONResponse(c, &logResult)
+	}
+
+	return writeTextResponse(c, &logResult)
+}
+
+func (s *Server) getChannelLogsRange(c echo.Context) error {
+	channelID := c.Param("channelid")
+
+	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), channelHourLimit)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	var logMessages []string
+
+	logMessages, _ = s.fileLogger.ReadLogForChannel(channelID, fromTime.Year(), int(fromTime.Month()), fromTime.Day())
+
+	if fromTime.Month() != toTime.Month() {
+		additionalMessages, _ := s.fileLogger.ReadLogForChannel(channelID, toTime.Year(), int(toTime.Month()), toTime.Day())
+
+		logMessages = append(logMessages, additionalMessages...)
+	}
+
+	if len(logMessages) == 0 {
+		return c.JSON(http.StatusNotFound, "No logs found")
+	}
+
+	if shouldReverse(c) {
+		reverse(logMessages)
+	}
+
+	var logResult chatLog
+
+	for _, rawMessage := range logMessages {
+		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+
+		if parsedMessage.Time.Unix() < fromTime.Unix() || parsedMessage.Time.Unix() > toTime.Unix() {
+			continue
+		}
 
 		message := chatMessage{
 			Timestamp:   timestamp{parsedMessage.Time},

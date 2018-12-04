@@ -68,6 +68,9 @@ func (s *Server) Init() {
 	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
 	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
 
+	e.GET("/channelid/:channelid/range", s.getChannelLogsRange)
+	e.GET("/channel/:channel/range", s.getChannelLogsRangeByName)
+
 	e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
 	e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
 	e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
@@ -77,7 +80,8 @@ func (s *Server) Init() {
 }
 
 var (
-	userHourLimit       = 744.0
+	userHourLimit    = 744.0
+	channelHourLimit = 24.0
 )
 
 type AllChannelsJSON struct {
@@ -213,11 +217,10 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 	return time.Unix(i, 0), nil
 }
 
-
 func shouldReverse(c echo.Context) bool {
 	_, ok := c.QueryParams()["reverse"]
 
-    return c.QueryParam("order") == "reverse" || ok
+	return c.QueryParam("order") == "reverse" || ok
 }
 
 func shouldRespondWithJson(c echo.Context) bool {
