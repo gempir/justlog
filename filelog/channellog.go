@@ -28,7 +28,7 @@ func (l *Logger) LogMessageForChannel(channel string, user twitch.User, message 
 	}
 	defer file.Close()
 
-	if _, err = file.WriteString(message.Raw + "\r\n"); err != nil {
+	if _, err = file.WriteString(message.Raw + "\n"); err != nil {
 		return err
 	}
 
