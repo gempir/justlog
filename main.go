@@ -10,6 +10,7 @@ import (
 
 	"github.com/gempir/go-twitch-irc"
 	"github.com/gempir/justlog/api"
+	"github.com/gempir/justlog/archiver"
 	"github.com/gempir/justlog/filelog"
 	"github.com/gempir/justlog/helix"
 	"github.com/gempir/justlog/humanize"
@@ -43,6 +44,8 @@ func main() {
 	twitchClient := twitch.NewClient(cfg.Username, "oauth:"+cfg.OAuth)
 	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
 	helixClient := helix.NewClient(cfg.ClientID)
+	archiver := archiver.NewArchiver(cfg.LogsDirectory)
+	archiver.Boot()
 
 	if strings.HasPrefix(cfg.Username, "justinfan") {
 		log.Info("Bot joining anonymous")
