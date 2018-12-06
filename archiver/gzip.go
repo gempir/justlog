@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 )
 
 func (a *Archiver) gzipFile(filePath string) {
@@ -16,7 +16,8 @@ func (a *Archiver) gzipFile(filePath string) {
 		return
 	}
 	defer file.Close()
-	log.Info("converting" + filePath)
+
+	log.Infof("Archiving: %s", filePath)
 
 	reader := bufio.NewReader(file)
 	content, err := ioutil.ReadAll(reader)
