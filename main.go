@@ -28,16 +28,12 @@ type config struct {
 	LogLevel      string   `json:"logLevel"`
 }
 
-var (
-	cfg config
-)
-
 func main() {
 	startTime := time.Now()
 
 	configFile := flag.String("config", "config.json", "json config file")
 	flag.Parse()
-	cfg = loadConfiguration(*configFile)
+	cfg := loadConfiguration(*configFile)
 
 	setupLogger(cfg)
 	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
@@ -50,23 +46,6 @@ func main() {
 
 	bot := bot.NewBot(cfg.Admin, cfg.Username, cfg.OAuth, &startTime, &helixClient, &fileLogger)
 	bot.Connect(cfg.Channels)
-}
-
-func setupLogger(cfg config) {
-	switch cfg.LogLevel {
-	case "fatal":
-		log.SetLevel(log.FatalLevel)
-	case "panic":
-		log.SetLevel(log.PanicLevel)
-	case "error":
-		log.SetLevel(log.ErrorLevel)
-	case "warn":
-		log.SetLevel(log.WarnLevel)
-	case "info":
-		log.SetLevel(log.InfoLevel)
-	case "debug":
-		log.SetLevel(log.DebugLevel)
-	}
 }
 
 func loadConfiguration(file string) config {
@@ -106,4 +85,21 @@ func loadConfiguration(file string) config {
 	}
 
 	return cfg
+}
+
+func setupLogger(cfg config) {
+	switch cfg.LogLevel {
+	case "fatal":
+		log.SetLevel(log.FatalLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	}
 }
