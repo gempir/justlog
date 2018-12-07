@@ -5,7 +5,7 @@
     state: directory
     owner: justlog
     group: justlog
-    mode: 0770
+    mode: 0750
 
 - name: create config file
   template:
