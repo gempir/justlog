@@ -18,7 +18,7 @@ type Archiver struct {
 
 func (a *Archiver) Boot() {
 	go a.startScanner()
-	go a.startConsumer()
+	a.startConsumer()
 }
 
 func (a *Archiver) startConsumer() {

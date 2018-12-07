@@ -1,7 +1,7 @@
 ---
 - name: create log directory
   file:
-    path: /var/justlog
+    path: /mnt/data/justlog
     state: directory
     owner: justlog
     group: justlog

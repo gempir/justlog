@@ -8,12 +8,11 @@ import (
 
 	"strings"
 
-	"github.com/gempir/go-twitch-irc"
 	"github.com/gempir/justlog/api"
 	"github.com/gempir/justlog/archiver"
+	"github.com/gempir/justlog/bot"
 	"github.com/gempir/justlog/filelog"
 	"github.com/gempir/justlog/helix"
-	"github.com/gempir/justlog/humanize"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -41,67 +40,16 @@ func main() {
 	cfg = loadConfiguration(*configFile)
 
 	setupLogger(cfg)
-	twitchClient := twitch.NewClient(cfg.Username, "oauth:"+cfg.OAuth)
 	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
 	helixClient := helix.NewClient(cfg.ClientID)
 	archiver := archiver.NewArchiver(cfg.LogsDirectory)
-	archiver.Boot()
-
-	if strings.HasPrefix(cfg.Username, "justinfan") {
-		log.Info("Bot joining anonymous")
-	} else {
-		log.Info("Bot joining as user " + cfg.Username)
-	}
+	go archiver.Boot()
 
 	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient)
 	go apiServer.Init()
 
-	for _, channel := range cfg.Channels {
-		log.Info("Joining " + channel)
-		twitchClient.Join(channel)
-		apiServer.AddChannel(channel)
-	}
-
-	twitchClient.OnNewMessage(func(channel string, user twitch.User, message twitch.Message) {
-
-		go func() {
-			err := fileLogger.LogMessageForUser(channel, user, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		go func() {
-			err := fileLogger.LogMessageForChannel(channel, user, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		if user.Username == cfg.Admin && strings.HasPrefix(message.Text, "!status") {
-			uptime := humanize.TimeSince(startTime)
-			twitchClient.Say(channel, cfg.Admin+", uptime: "+uptime)
-		}
-	})
-
-	twitchClient.OnNewClearchatMessage(func(channel string, user twitch.User, message twitch.Message) {
-
-		go func() {
-			err := fileLogger.LogMessageForUser(channel, user, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		go func() {
-			err := fileLogger.LogMessageForChannel(channel, user, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-	})
-
-	log.Fatal(twitchClient.Connect())
+	bot := bot.NewBot(cfg.Admin, cfg.Username, cfg.OAuth, &startTime, &helixClient, &fileLogger)
+	bot.Connect(cfg.Channels)
 }
 
 func setupLogger(cfg config) {
