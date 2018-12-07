@@ -16,7 +16,7 @@ func (l *Logger) LogMessageForChannel(channel string, user twitch.User, message 
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.Tags["room-id"], year, month, day), 0740)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.Tags["room-id"], year, month, day), 0750)
 	if err != nil {
 		return err
 	}
