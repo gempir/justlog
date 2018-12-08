@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
 
@@ -45,7 +47,7 @@ func (l *Logger) LogMessageForUser(channel string, user twitch.User, message twi
 	return nil
 }
 
-func (l *Logger) ReadLogForUser(channelID string, userID string, year int, month int) ([]string, error) {
+func (l *Logger) ReadLogForUser(channelID, userID string, year int, month int) ([]string, error) {
 	if channelID == "" || userID == "" {
 		return []string{}, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
 	}
@@ -88,4 +90,53 @@ func (l *Logger) ReadLogForUser(channelID string, userID string, year int, month
 	}
 
 	return content, nil
+}
+
+func (l *Logger) ReadRandomMessageForUser(channelID, userID string) (string, error) {
+	var userLogs []string
+	var lines []string
+
+	if channelID == "" || userID == "" {
+		return "", errors.New("missing channelID or userID")
+	}
+
+	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
+	for _, yearDir := range years {
+		year := yearDir.Name()
+		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
+		for _, monthDir := range months {
+			month := monthDir.Name()
+			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", l.logPath, channelID, year, month, userID)
+			if _, err := os.Stat(path); err == nil {
+				userLogs = append(userLogs, path)
+			} else if _, err := os.Stat(path + ".gz"); err == nil {
+				userLogs = append(userLogs, path+".gz")
+			}
+		}
+	}
+
+	if len(userLogs) < 1 {
+		return "", errors.New("no log found")
+	}
+
+	for _, logFile := range userLogs {
+		f, _ := os.Open(logFile)
+
+		scanner := bufio.NewScanner(f)
+
+		if strings.HasSuffix(logFile, ".gz") {
+			gz, _ := gzip.NewReader(f)
+			scanner = bufio.NewScanner(gz)
+		}
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			lines = append(lines, line)
+		}
+		f.Close()
+	}
+
+	ranNum := rand.Intn(len(lines))
+
+	return lines[ranNum], nil
 }

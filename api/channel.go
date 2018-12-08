@@ -19,6 +19,9 @@ func (s *Server) getCurrentChannelLogs(c echo.Context) error {
 	day := time.Now().Day()
 
 	redirectURL := fmt.Sprintf("/channelid/%s/%d/%d/%d", channelID, year, month, day)
+	if len(c.QueryString()) > 0 {
+		redirectURL += "?" + c.QueryString()
+	}
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
@@ -29,6 +32,9 @@ func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
 	day := time.Now().Day()
 
 	redirectURL := fmt.Sprintf("/channel/%s/%d/%d/%d", channel, year, month, day)
+	if len(c.QueryString()) > 0 {
+		redirectURL += "?" + c.QueryString()
+	}
 	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 

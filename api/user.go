@@ -1,13 +1,8 @@
 package api
 
 import (
-	"bufio"
-	"compress/gzip"
 	"fmt"
-	"io/ioutil"
-	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -33,6 +28,9 @@ func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	month := int(time.Now().Month())
 
 	redirectURL := fmt.Sprintf("/channelid/%s/userid/%s/%d/%d", channelID, userID, year, month)
+	if len(c.QueryString()) > 0 {
+		redirectURL += "?" + c.QueryString()
+	}
 	return c.Redirect(303, redirectURL)
 }
 
@@ -44,6 +42,9 @@ func (s *Server) getCurrentUserLogsByName(c echo.Context) error {
 	month := int(time.Now().Month())
 
 	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%d", channel, username, year, month)
+	if len(c.QueryString()) > 0 {
+		redirectURL += "?" + c.QueryString()
+	}
 	return c.Redirect(303, redirectURL)
 }
 
@@ -120,53 +121,14 @@ func (s *Server) getRandomQuoteByName(c echo.Context) error {
 }
 
 func (s *Server) getRandomQuote(c echo.Context) error {
-	userID := c.Param("userid")
 	channelID := c.Param("channelid")
+	userID := c.Param("userid")
 
-	var userLogs []string
-	var lines []string
-
-	if channelID == "" || userID == "" {
-		return c.JSON(http.StatusNotFound, "error finding logs")
+	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(channelID, userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
-	years, _ := ioutil.ReadDir(s.logPath + "/" + channelID)
-	for _, yearDir := range years {
-		year := yearDir.Name()
-		months, _ := ioutil.ReadDir(s.logPath + "/" + channelID + "/" + year + "/")
-		for _, monthDir := range months {
-			month := monthDir.Name()
-			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", s.logPath, channelID, year, month, userID)
-			if _, err := os.Stat(path); err == nil {
-				userLogs = append(userLogs, path)
-			} else if _, err := os.Stat(path + ".gz"); err == nil {
-				userLogs = append(userLogs, path+".gz")
-			}
-		}
-	}
-	if len(userLogs) < 1 {
-		return c.JSON(http.StatusNotFound, "error finding logs")
-	}
-
-	for _, logFile := range userLogs {
-		f, _ := os.Open(logFile)
-
-		scanner := bufio.NewScanner(f)
-
-		if strings.HasSuffix(logFile, ".gz") {
-			gz, _ := gzip.NewReader(f)
-			scanner = bufio.NewScanner(gz)
-		}
-
-		for scanner.Scan() {
-			line := scanner.Text()
-			lines = append(lines, line)
-		}
-		f.Close()
-	}
-
-	ranNum := rand.Intn(len(lines))
-	channel, user, message := twitch.ParseMessage(lines[ranNum])
+	channel, user, message := twitch.ParseMessage(rawMessage)
 
 	if shouldRespondWithJson(c) {
 
@@ -181,7 +143,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 		return c.JSON(http.StatusOK, randomQ)
 	}
 
-	return c.String(http.StatusOK, fmt.Sprintf("%s: %s", user.DisplayName, message.Text))
+	return c.String(http.StatusOK, message.Text)
 }
 
 func (s *Server) getUserLogs(c echo.Context) error {
