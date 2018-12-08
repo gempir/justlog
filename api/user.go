@@ -126,6 +126,10 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	var userLogs []string
 	var lines []string
 
+	if channelID == "" || userID == "" {
+		return c.JSON(http.StatusNotFound, "error finding logs")
+	}
+
 	years, _ := ioutil.ReadDir(s.logPath + "/" + channelID)
 	for _, yearDir := range years {
 		year := yearDir.Name()
