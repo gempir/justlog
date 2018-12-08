@@ -46,6 +46,10 @@ func (l *Logger) LogMessageForUser(channel string, user twitch.User, message twi
 }
 
 func (l *Logger) ReadLogForUser(channelID string, userID string, year int, month int) ([]string, error) {
+	if channelID == "" || userID == "" {
+		return []string{}, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
+	}
+
 	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%s.txt", channelID, year, month, userID)
 
 	if _, err := os.Stat(filename); err != nil {
