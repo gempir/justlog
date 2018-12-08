@@ -1,5 +1,5 @@
 ---
-api_domain: justlog.gempir.com
+api_domain: api.gempir.com
 email: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           65373739353434323038366266343639376262633166356330336339396664326264343334633864
