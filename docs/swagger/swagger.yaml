@@ -1,0 +1,57 @@
+basePath: /
+definitions:
+  api.RandomQuoteJSON:
+    properties:
+      channel:
+        type: string
+      displayName:
+        type: string
+      message:
+        type: string
+      timestamp:
+        $ref: '#/definitions/api.timestamp'
+        type: object
+      username:
+        type: string
+    type: object
+  api.timestamp:
+    type: object
+host: api.gempir.com
+info:
+  contact:
+    email: gempir.dev@gmail.com
+    name: gempir
+    url: https://gempir.com
+  description: API for twitch logs
+  license:
+    name: MIT
+    url: https://github.com/gempir/justlog/blob/master/LICENSE
+  title: justlog API
+  version: "1.0"
+paths:
+  /channel/{channel}/user/{username}/random:
+    get:
+      parameters:
+      - description: channelname
+        in: path
+        name: channel
+        required: true
+        type: string
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.RandomQuoteJSON'
+            type: object
+      summary: Get a random chat message from a user
+      tags:
+      - user
+swagger: "2.0"

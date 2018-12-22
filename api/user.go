@@ -55,7 +55,7 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
 	}
 
 	names := c.ParamNames()
@@ -79,7 +79,7 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
 	}
 
 	names := c.ParamNames()
@@ -96,6 +96,15 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 	return s.getUserLogs(c)
 }
 
+// getRandomQuoteByName godoc
+// @Summary Get a random chat message from a user
+// @tags user
+// @Produce  json
+// @Produce  plain
+// @Param channel path string true "channelname"
+// @Param username path string true "username"
+// @Success 200 {object} api.RandomQuoteJSON json
+// @Router /channel/{channel}/user/{username}/random [get]
 func (s *Server) getRandomQuoteByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	username := strings.ToLower(c.Param("username"))
@@ -103,7 +112,7 @@ func (s *Server) getRandomQuoteByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userIDs")
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
 	}
 
 	names := c.ParamNames()
@@ -156,18 +165,18 @@ func (s *Server) getUserLogs(c echo.Context) error {
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid year")
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Invalid year"})
 	}
 	month, err := strconv.Atoi(monthStr)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid month")
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Invalid month"})
 	}
 
 	logMessages, err := s.fileLogger.ReadLogForUser(channelID, userID, year, month)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure reading log")
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure reading log"})
 	}
 
 	if shouldReverse(c) {
@@ -204,7 +213,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 
 	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), userHourLimit)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, errorResponse{err.Error()})
 	}
 
 	var logMessages []string
@@ -218,7 +227,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 	}
 
 	if len(logMessages) == 0 {
-		return c.JSON(http.StatusNotFound, "No logs found")
+		return c.JSON(http.StatusNotFound, errorResponse{"No logs found"})
 	}
 
 	if shouldReverse(c) {

@@ -1,0 +1,84 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for twitch logs",
+        "title": "justlog API",
+        "contact": {
+            "name": "gempir",
+            "url": "https://gempir.com",
+            "email": "gempir.dev@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/gempir/justlog/blob/master/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "host": "api.gempir.com",
+    "basePath": "/",
+    "paths": {
+        "/channel/{channel}/user/{username}/random": {
+            "get": {
+                "produces": [
+                    "application/json",
+                    "text/plain"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get a random chat message from a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "channelname",
+                        "name": "channel",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/api.RandomQuoteJSON"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.RandomQuoteJSON": {
+            "type": "object",
+            "properties": {
+                "channel": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.timestamp"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.timestamp": {
+            "type": "object"
+        }
+    }
+}

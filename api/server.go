@@ -16,6 +16,9 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+
+	_ "github.com/gempir/justlog/docs"
+	"github.com/swaggo/echo-swagger"
 )
 
 type Server struct {
@@ -53,8 +56,9 @@ func (s *Server) Init() {
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Welcome to justlog")
+		return c.Redirect(http.StatusMovedPermanently, "/index.html")
 	})
+	e.GET("/*", echoSwagger.WrapHandler)
 	e.GET("/channelid", s.getAllChannels)
 
 	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
@@ -99,6 +103,10 @@ type chatMessage struct {
 	Channel     string             `json:"channel"`
 	Timestamp   timestamp          `json:"timestamp"`
 	Type        twitch.MessageType `json:"type"`
+}
+
+type errorResponse struct {
+	Message string `json:"message"`
 }
 
 type timestamp struct {
@@ -226,5 +234,5 @@ func shouldReverse(c echo.Context) bool {
 func shouldRespondWithJson(c echo.Context) bool {
 	_, ok := c.QueryParams()["json"]
 
-	return c.Request().Header.Get("Content-Type") == "application/json" || c.QueryParam("type") == "json" || ok
+	return c.Request().Header.Get("Content-Type") == "application/json" || c.Request().Header.Get("accept") == "application/json" || c.QueryParam("type") == "json" || ok
 }
