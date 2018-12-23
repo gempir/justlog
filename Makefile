@@ -1,8 +1,15 @@
-build:
+build: get
 	swag init
-	go get ./... && env GOOS=linux GOARCH=arm go build
+	go build
 
-deploy: build
+get:
+	go get ./... 
+
+build_prod: get
+	swag init
+	env GOOS=linux GOARCH=arm go build	
+
+deploy: build_prod
 	ssh root@apollo.gempir.com systemctl stop justlog.service
 	scp justlog root@apollo.gempir.com:/home/justlog/
 	ssh root@apollo.gempir.com systemctl start justlog.service

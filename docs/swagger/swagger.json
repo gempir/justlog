@@ -41,6 +41,24 @@
                         "name": "username",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "any",
+                        "description": "response as json",
+                        "name": "json",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "define response type only json supported currently, rest defaults to plain",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "any",
+                        "description": "reverse the message order, newest first",
+                        "name": "reverse",
+                        "in": "query"
                     }
                 ],
                 "responses": {

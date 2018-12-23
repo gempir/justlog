@@ -42,6 +42,19 @@ paths:
         name: username
         required: true
         type: string
+      - description: response as json
+        in: query
+        name: json
+        type: any
+      - description: define response type only json supported currently, rest defaults
+          to plain
+        in: query
+        name: type
+        type: string
+      - description: reverse the message order, newest first
+        in: query
+        name: reverse
+        type: any
       produces:
       - application/json
       - text/plain

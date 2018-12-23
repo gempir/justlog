@@ -103,6 +103,8 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 // @Produce  plain
 // @Param channel path string true "channelname"
 // @Param username path string true "username"
+// @Param json query any false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200 {object} api.RandomQuoteJSON json
 // @Router /channel/{channel}/user/{username}/random [get]
 func (s *Server) getRandomQuoteByName(c echo.Context) error {
