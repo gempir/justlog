@@ -1,4 +1,5 @@
 build:
+	swag init
 	go get ./... && env GOOS=linux GOARCH=arm go build
 
 deploy: build
