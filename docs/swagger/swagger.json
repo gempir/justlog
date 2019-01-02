@@ -17,6 +17,49 @@
     "host": "api.gempir.com",
     "basePath": "/",
     "paths": {
+        "/channel/{channel}/user/{username}": {
+            "get": {
+                "produces": [
+                    "application/json",
+                    "text/plain"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Redirect to last logs of user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "channelname",
+                        "name": "channel",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "any",
+                        "description": "response as json",
+                        "name": "json",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "define response type only json supported currently, rest defaults to plain",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "303": {}
+                }
+            }
+        },
         "/channel/{channel}/user/{username}/random": {
             "get": {
                 "produces": [
@@ -52,12 +95,6 @@
                         "type": "string",
                         "description": "define response type only json supported currently, rest defaults to plain",
                         "name": "type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "any",
-                        "description": "reverse the message order, newest first",
-                        "name": "reverse",
                         "in": "query"
                     }
                 ],
