@@ -29,6 +29,36 @@ info:
   title: justlog API
   version: "1.0"
 paths:
+  /channel/{channel}/user/{username}:
+    get:
+      parameters:
+      - description: channelname
+        in: path
+        name: channel
+        required: true
+        type: string
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: response as json
+        in: query
+        name: json
+        type: any
+      - description: define response type only json supported currently, rest defaults
+          to plain
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      responses:
+        "303": {}
+      summary: Redirect to last logs of user
+      tags:
+      - user
   /channel/{channel}/user/{username}/random:
     get:
       parameters:
@@ -51,10 +81,6 @@ paths:
         in: query
         name: type
         type: string
-      - description: reverse the message order, newest first
-        in: query
-        name: reverse
-        type: any
       produces:
       - application/json
       - text/plain

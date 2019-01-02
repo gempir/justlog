@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gempir/go-twitch-irc"
 	"github.com/labstack/echo"
@@ -20,12 +19,14 @@ type RandomQuoteJSON struct {
 	Timestamp   timestamp `json:"timestamp"`
 }
 
-func (s *Server) getCurrentUserLogs(c echo.Context) error {
+func (s *Server) getLastUserLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
 
-	year := time.Now().Year()
-	month := int(time.Now().Month())
+	year, month, err := s.fileLogger.GetLastLogYearAndMonthForUser(channelID, userID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, errorResponse{"No logs found"})
+	}
 
 	redirectURL := fmt.Sprintf("/channelid/%s/userid/%s/%d/%d", channelID, userID, year, month)
 	if len(c.QueryString()) > 0 {
@@ -34,12 +35,32 @@ func (s *Server) getCurrentUserLogs(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
-func (s *Server) getCurrentUserLogsByName(c echo.Context) error {
+// getLastUserLogsByName godoc
+// @Summary Redirect to last logs of user
+// @tags user
+// @Produce  json
+// @Produce  plain
+// @Param channel path string true "channelname"
+// @Param username path string true "username"
+// @Param json query any false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
+// @Success 303
+// @Router /channel/{channel}/user/{username} [get]
+func (s *Server) getLastUserLogsByName(c echo.Context) error {
 	channel := c.Param("channel")
 	username := c.Param("username")
 
-	year := time.Now().Year()
-	month := int(time.Now().Month())
+	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
+	}
+	var year int
+	var month int
+	year, month, err = s.fileLogger.GetLastLogYearAndMonthForUser(userMap[channel].ID, userMap[username].ID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, errorResponse{"No logs found"})
+	}
 
 	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%d", channel, username, year, month)
 	if len(c.QueryString()) > 0 {

@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/gempir/go-twitch-irc"
@@ -45,6 +47,62 @@ func (l *Logger) LogMessageForUser(channel string, user twitch.User, message twi
 		return err
 	}
 	return nil
+}
+
+type userLogFile struct {
+	path  string
+	year  string
+	month string
+}
+
+func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, int, error) {
+	if channelID == "" || userID == "" {
+		return 0, 0, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
+	}
+
+	logFiles := []userLogFile{}
+
+	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
+
+	for _, yearDir := range years {
+		year := yearDir.Name()
+		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
+		for _, monthDir := range months {
+			month := monthDir.Name()
+			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", l.logPath, channelID, year, month, userID)
+			if _, err := os.Stat(path); err == nil {
+
+				logFile := userLogFile{path, year, month}
+				logFiles = append(logFiles, logFile)
+			} else if _, err := os.Stat(path + ".gz"); err == nil {
+				logFile := userLogFile{path + ".gz", year, month}
+				logFiles = append(logFiles, logFile)
+			}
+		}
+	}
+
+	sort.Slice(logFiles, func(i, j int) bool {
+		yearA, _ := strconv.Atoi(logFiles[i].year)
+		yearB, _ := strconv.Atoi(logFiles[j].year)
+		monthA, _ := strconv.Atoi(logFiles[j].month)
+		monthB, _ := strconv.Atoi(logFiles[j].month)
+
+		if yearA == yearB {
+			return monthA > monthB
+		} else {
+			return yearA > yearB
+		}
+	})
+
+	fmt.Println(logFiles)
+	if len(logFiles) > 0 {
+		year, _ := strconv.Atoi(logFiles[0].year)
+		month, _ := strconv.Atoi(logFiles[0].month)
+
+		return year, month, nil
+	}
+
+	return 0, 0, errors.New("No logs file")
 }
 
 func (l *Logger) ReadLogForUser(channelID, userID string, year int, month int) ([]string, error) {
