@@ -47,8 +47,8 @@ func (s *Server) getLastUserLogs(c echo.Context) error {
 // @Success 303
 // @Router /channel/{channel}/user/{username} [get]
 func (s *Server) getLastUserLogsByName(c echo.Context) error {
-	channel := c.Param("channel")
-	username := c.Param("username")
+	channel := strings.ToLower(c.Param("channel"))
+	username := strings.ToLower(c.Param("username"))
 
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
