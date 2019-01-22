@@ -53,6 +53,9 @@ func (s *Server) Init() {
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}
+	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		RedirectCode: http.StatusMovedPermanently,
+	}))
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
 	e.GET("/", func(c echo.Context) error {
