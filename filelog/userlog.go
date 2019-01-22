@@ -84,7 +84,7 @@ func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, i
 	sort.Slice(logFiles, func(i, j int) bool {
 		yearA, _ := strconv.Atoi(logFiles[i].year)
 		yearB, _ := strconv.Atoi(logFiles[j].year)
-		monthA, _ := strconv.Atoi(logFiles[j].month)
+		monthA, _ := strconv.Atoi(logFiles[i].month)
 		monthB, _ := strconv.Atoi(logFiles[j].month)
 
 		if yearA == yearB {
@@ -94,7 +94,6 @@ func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, i
 		}
 	})
 
-	fmt.Println(logFiles)
 	if len(logFiles) > 0 {
 		year, _ := strconv.Atoi(logFiles[0].year)
 		month, _ := strconv.Atoi(logFiles[0].month)
