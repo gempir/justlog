@@ -187,6 +187,7 @@ func parseFromTo(from, to string, limit float64) (time.Time, time.Time, error) {
 }
 
 func writeTextResponse(c echo.Context, cLog *chatLog) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlain)
 	c.Response().WriteHeader(http.StatusOK)
 
 	for _, cMessage := range cLog.Messages {
