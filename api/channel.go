@@ -116,18 +116,36 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
-		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+		user, parsedMessage := twitch.ParseMessage(rawMessage)
 
-		message := chatMessage{
-			Timestamp:   timestamp{parsedMessage.Time},
-			Username:    user.Username,
-			DisplayName: user.DisplayName,
-			Text:        parsedMessage.Text,
-			Type:        parsedMessage.Type,
-			Channel:     channel,
+		var chatMsg chatMessage
+
+		switch parsedMessage.(type) {
+		case *twitch.PrivateMessage:
+			message := *parsedMessage.(*twitch.PrivateMessage)
+
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    user.Name,
+				DisplayName: user.DisplayName,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+			}
+		case *twitch.ClearChatMessage:
+			message := *parsedMessage.(*twitch.ClearChatMessage)
+
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.TargetUsername,
+				DisplayName: message.TargetUsername,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+			}
 		}
 
-		logResult.Messages = append(logResult.Messages, message)
+		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
 	if shouldRespondWithJson(c) {
@@ -166,22 +184,44 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
-		channel, user, parsedMessage := twitch.ParseMessage(rawMessage)
+		user, parsedMessage := twitch.ParseMessage(rawMessage)
 
-		if parsedMessage.Time.Unix() < fromTime.Unix() || parsedMessage.Time.Unix() > toTime.Unix() {
-			continue
+		var chatMsg chatMessage
+
+		switch parsedMessage.(type) {
+		case *twitch.PrivateMessage:
+			message := *parsedMessage.(*twitch.PrivateMessage)
+
+			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
+				continue
+			}
+
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    user.Name,
+				DisplayName: user.DisplayName,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+			}
+		case *twitch.ClearChatMessage:
+			message := *parsedMessage.(*twitch.ClearChatMessage)
+
+			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
+				continue
+			}
+
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.TargetUsername,
+				DisplayName: message.TargetUsername,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+			}
 		}
 
-		message := chatMessage{
-			Timestamp:   timestamp{parsedMessage.Time},
-			Username:    user.Username,
-			DisplayName: user.DisplayName,
-			Text:        parsedMessage.Text,
-			Type:        parsedMessage.Type,
-			Channel:     channel,
-		}
-
-		logResult.Messages = append(logResult.Messages, message)
+		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
 	if shouldRespondWithJson(c) {
