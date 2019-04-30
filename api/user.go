@@ -160,7 +160,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	user, parsedMessage := twitch.ParseMessage(rawMessage)
+	parsedMessage := twitch.ParseMessage(rawMessage)
 
 	switch parsedMessage.(type) {
 	case *twitch.PrivateMessage:
@@ -170,8 +170,8 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 
 			randomQ := RandomQuoteJSON{
 				Channel:     message.Channel,
-				Username:    user.Name,
-				DisplayName: user.DisplayName,
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
 				Message:     message.Message,
 				Timestamp:   timestamp{message.Time},
 			}
@@ -233,7 +233,7 @@ func (s *Server) getUserLogs(c echo.Context) error {
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
-		user, parsedMessage := twitch.ParseMessage(rawMessage)
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
 		var chatMsg chatMessage
 
@@ -243,8 +243,8 @@ func (s *Server) getUserLogs(c echo.Context) error {
 
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
-				Username:    user.Name,
-				DisplayName: user.DisplayName,
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
@@ -302,7 +302,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
-		user, parsedMessage := twitch.ParseMessage(rawMessage)
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
 		var chatMsg chatMessage
 
@@ -316,8 +316,8 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
-				Username:    user.Name,
-				DisplayName: user.DisplayName,
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,

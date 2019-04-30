@@ -116,7 +116,7 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
-		user, parsedMessage := twitch.ParseMessage(rawMessage)
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
 		var chatMsg chatMessage
 
@@ -126,8 +126,8 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
-				Username:    user.Name,
-				DisplayName: user.DisplayName,
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
@@ -184,7 +184,7 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 	var logResult chatLog
 
 	for _, rawMessage := range logMessages {
-		user, parsedMessage := twitch.ParseMessage(rawMessage)
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
 		var chatMsg chatMessage
 
@@ -198,8 +198,8 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
-				Username:    user.Name,
-				DisplayName: user.DisplayName,
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,

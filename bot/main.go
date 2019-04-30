@@ -51,29 +51,29 @@ func (b *Bot) Connect(channelIds []string) {
 		twitchClient.Join(channel.Login)
 	}
 
-	twitchClient.OnNewMessage(func(user twitch.User, message twitch.PrivateMessage) {
+	twitchClient.OnPrivateMessage(func(message twitch.PrivateMessage) {
 
 		go func() {
-			err := b.fileLogger.LogPrivateMessageForUser(message.Channel, user, message)
+			err := b.fileLogger.LogPrivateMessageForUser(message.Channel, message.User, message)
 			if err != nil {
 				log.Error(err.Error())
 			}
 		}()
 
 		go func() {
-			err := b.fileLogger.LogPrivateMessageForChannel(message.Channel, user, message)
+			err := b.fileLogger.LogPrivateMessageForChannel(message.Channel, message.User, message)
 			if err != nil {
 				log.Error(err.Error())
 			}
 		}()
 
-		if user.Name == b.admin && strings.HasPrefix(message.Message, "!status") {
+		if message.User.Name == b.admin && strings.HasPrefix(message.Message, "!status") {
 			uptime := humanize.TimeSince(*b.startTime)
-			twitchClient.Say(message.Channel, user.DisplayName+", uptime: "+uptime)
+			twitchClient.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
 		}
 	})
 
-	twitchClient.OnNewClearChatMessage(func(message twitch.ClearChatMessage) {
+	twitchClient.OnClearChatMessage(func(message twitch.ClearChatMessage) {
 
 		go func() {
 			err := b.fileLogger.LogClearchatMessageForUser(message.Channel, message.TargetUserID, message)
