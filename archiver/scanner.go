@@ -2,6 +2,7 @@ package archiver
 
 import (
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -22,11 +23,15 @@ func (a *Archiver) scanLogPath() {
 				log.Error(err)
 			}
 
+			yearFiles = a.filterFiles(yearFiles)
+
 			for _, year := range yearFiles {
 				monthFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name())
 				if err != nil {
 					log.Error(err)
 				}
+
+				monthFiles = a.filterFiles(monthFiles)
 
 				for _, month := range monthFiles {
 					dayFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name())
@@ -34,12 +39,16 @@ func (a *Archiver) scanLogPath() {
 						log.Error(err)
 					}
 
+					dayFiles = a.filterFiles(dayFiles)
+
 					for _, dayOrUserId := range dayFiles {
 						if dayOrUserId.IsDir() {
 							channelLogFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name())
 							if err != nil {
 								log.Error(err)
 							}
+
+							channelLogFiles = a.filterFiles(channelLogFiles)
 
 							for _, channelLogFile := range channelLogFiles {
 								if strings.HasSuffix(channelLogFile.Name(), ".txt") {
@@ -75,4 +84,16 @@ func (a *Archiver) scanLogPath() {
 			}
 		}
 	}
+}
+
+func (a *Archiver) filterFiles(files []os.FileInfo) []os.FileInfo {
+	var result []os.FileInfo
+
+	for _, file := range files {
+		if !strings.HasPrefix(file.Name(), ".") {
+			result = append(result, file)
+		}
+	}
+
+	return result
 }

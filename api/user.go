@@ -252,11 +252,18 @@ func (s *Server) getUserLogs(c echo.Context) error {
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
 
+			var text string
+			if message.BanDuration == 0 {
+				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
+			} else {
+				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
+			}
+
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
 				Username:    message.TargetUsername,
 				DisplayName: message.TargetUsername,
-				Text:        message.Message,
+				Text:        text,
 				Type:        message.Type,
 				Channel:     message.Channel,
 			}
