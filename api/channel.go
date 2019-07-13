@@ -44,7 +44,7 @@ func (s *Server) getChannelLogsByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
+		return c.JSON(http.StatusInternalServerError, "Failure fetching data from twitch")
 	}
 
 	names := c.ParamNames()
@@ -65,7 +65,7 @@ func (s *Server) getChannelLogsRangeByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching userID")
+		return c.JSON(http.StatusInternalServerError, "Failure fetching data from twitch")
 	}
 
 	names := c.ParamNames()
