@@ -56,6 +56,13 @@ func (s *Server) Init() {
 	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
 		RedirectCode: http.StatusMovedPermanently,
 	}))
+	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
+		XSSProtection:         "", // disabled
+		ContentTypeNosniff:    "nosniff",
+		XFrameOptions:         "", // disabled
+		HSTSMaxAge:            0, // disabled
+		ContentSecurityPolicy: "", // disabled
+	}))
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
 	e.GET("/", func(c echo.Context) error {
