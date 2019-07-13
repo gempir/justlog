@@ -19,13 +19,27 @@ type RandomQuoteJSON struct {
 	Timestamp   timestamp `json:"timestamp"`
 }
 
+// @Summary Redirect to last logs of user
+// @tags user
+// @Produce  json
+// @Produce  plain
+// @Param channelid path string true "twitch userid"
+// @Param userid path string true "twitch userid"
+// @Param from query int false "unix timestamp, limit logs by timestamps from this point"
+// @Param to query int false "unix timestamp, limit logs by timestamps to this point"
+// @Param json query any false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
+// @Success 303
+// @Success 200
+// @Failure 404
+// @Router /channelid/{channelid}/user/{userid} [get]
 func (s *Server) getLastUserLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
 
 	year, month, err := s.fileLogger.GetLastLogYearAndMonthForUser(channelID, userID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, errorResponse{"No logs found"})
+		return c.JSON(http.StatusNotFound, ErrorResponse{"No logs found"})
 	}
 
 	redirectURL := fmt.Sprintf("/channelid/%s/userid/%s/%d/%d", channelID, userID, year, month)
@@ -35,16 +49,20 @@ func (s *Server) getLastUserLogs(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
-// getLastUserLogsByName godoc
 // @Summary Redirect to last logs of user
 // @tags user
 // @Produce  json
 // @Produce  plain
 // @Param channel path string true "channelname"
 // @Param username path string true "username"
+// @Param from query int false "unix timestamp, limit logs by timestamps from this point"
+// @Param to query int false "unix timestamp, limit logs by timestamps to this point"
 // @Param json query any false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 303
+// @Success 200
+// @Failure 500
+// @Failure 404
 // @Router /channel/{channel}/user/{username} [get]
 func (s *Server) getLastUserLogsByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
@@ -53,13 +71,13 @@ func (s *Server) getLastUserLogsByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
 	}
 	var year int
 	var month int
 	year, month, err = s.fileLogger.GetLastLogYearAndMonthForUser(userMap[channel].ID, userMap[username].ID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, errorResponse{"No logs found"})
+		return c.JSON(http.StatusNotFound, ErrorResponse{"No logs found"})
 	}
 
 	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%d", channel, username, year, month)
@@ -76,7 +94,7 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
 	}
 
 	names := c.ParamNames()
@@ -93,6 +111,21 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 	return s.getUserLogsRange(c)
 }
 
+// @Summary Get logs for user by year and month
+// @tags user
+// @Produce  json
+// @Produce  plain
+// @Param channel path string true "channelname"
+// @Param username path string true "username"
+// @Param year path string true "year of logs"
+// @Param month path string true "month of logs"
+// @Param from query int false "unix timestamp, limit logs by timestamps from this point"
+// @Param to query int false "unix timestamp, limit logs by timestamps to this point"
+// @Param json query any false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
+// @Success 200
+// @Failure 500
+// @Router /channel/{channel}/user/{username}/{year}/{month} [get]
 func (s *Server) getUserLogsByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	username := strings.ToLower(c.Param("username"))
@@ -100,7 +133,7 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
 	}
 
 	names := c.ParamNames()
@@ -117,7 +150,6 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 	return s.getUserLogs(c)
 }
 
-// getRandomQuoteByName godoc
 // @Summary Get a random chat message from a user
 // @tags user
 // @Produce  json
@@ -135,7 +167,7 @@ func (s *Server) getRandomQuoteByName(c echo.Context) error {
 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure fetching userIDs"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
 	}
 
 	names := c.ParamNames()
@@ -152,6 +184,16 @@ func (s *Server) getRandomQuoteByName(c echo.Context) error {
 	return s.getRandomQuote(c)
 }
 
+// @Summary Get a random chat message from a user
+// @tags user
+// @Produce  json
+// @Produce  plain
+// @Param channelid path string true "twitch userid"
+// @Param userid path string true "twitch userid"
+// @Param json query any false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
+// @Success 200 {object} api.RandomQuoteJSON json
+// @Router /channelid/{channelid}/userid/{userid}/random [get]
 func (s *Server) getRandomQuote(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
@@ -202,6 +244,21 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	return c.String(http.StatusNotFound, "No quote found")
 }
 
+// @Summary Get logs for user by year and month
+// @tags user
+// @Produce  json
+// @Produce  plain
+// @Param channelid path string true "twitch userid"
+// @Param userid path string true "twitch userid"
+// @Param year path string true "year of logs"
+// @Param month path string true "month of logs"
+// @Param from query int false "unix timestamp, limit logs by timestamps from this point"
+// @Param to query int false "unix timestamp, limit logs by timestamps to this point"
+// @Param json query any false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
+// @Success 200
+// @Failure 500
+// @Router /channelid/{channelid}/userid/{userid}/{year}/{month} [get]
 func (s *Server) getUserLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
@@ -212,18 +269,18 @@ func (s *Server) getUserLogs(c echo.Context) error {
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Invalid year"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Invalid year"})
 	}
 	month, err := strconv.Atoi(monthStr)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Invalid month"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Invalid month"})
 	}
 
 	logMessages, err := s.fileLogger.ReadLogForUser(channelID, userID, year, month)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, errorResponse{"Failure reading log"})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure reading log"})
 	}
 
 	if shouldReverse(c) {
@@ -285,7 +342,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 
 	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), userHourLimit)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, errorResponse{err.Error()})
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{err.Error()})
 	}
 
 	var logMessages []string
@@ -299,7 +356,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 	}
 
 	if len(logMessages) == 0 {
-		return c.JSON(http.StatusNotFound, errorResponse{"No logs found"})
+		return c.JSON(http.StatusNotFound, ErrorResponse{"No logs found"})
 	}
 
 	if shouldReverse(c) {

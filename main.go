@@ -55,7 +55,7 @@ func main() {
 	archiver := archiver.NewArchiver(cfg.LogsDirectory)
 	go archiver.Boot()
 
-	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient)
+	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient, cfg.Channels)
 	go apiServer.Init()
 
 	bot := bot.NewBot(cfg.Admin, cfg.Username, cfg.OAuth, &startTime, &helixClient, &fileLogger)

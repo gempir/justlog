@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gempir/justlog/helix"
+	log "github.com/sirupsen/logrus"
 
 	twitch "github.com/gempir/go-twitch-irc"
 	"github.com/gempir/justlog/filelog"
@@ -29,13 +30,13 @@ type Server struct {
 	channels      []string
 }
 
-func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger, helixClient *helix.Client) Server {
+func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger, helixClient *helix.Client, channels []string) Server {
 	return Server{
 		listenAddress: listenAddress,
 		logPath:       logPath,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
-		channels:      []string{},
+		channels:      channels,
 	}
 }
 
@@ -69,7 +70,7 @@ func (s *Server) Init() {
 		return c.Redirect(http.StatusMovedPermanently, "/index.html")
 	})
 	e.GET("/*", echoSwagger.WrapHandler)
-	e.GET("/channelid", s.getAllChannels)
+	e.GET("/channels", s.getAllChannels)
 
 	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
 	e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
@@ -98,8 +99,13 @@ var (
 	channelHourLimit = 24.0
 )
 
+type channel struct {
+	UserID string `json:"userID"`
+	Name   string `json:"name"`
+}
+
 type AllChannelsJSON struct {
-	Channels []string `json:"channels"`
+	Channels []channel `json:"channels"`
 }
 
 type chatLog struct {
@@ -115,7 +121,7 @@ type chatMessage struct {
 	Type        twitch.MessageType `json:"type"`
 }
 
-type errorResponse struct {
+type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
@@ -130,9 +136,26 @@ func reverse(input []string) []string {
 	return input
 }
 
+// getAllChannels godoc
+// @Summary Get all joined channels
+// @tags bot
+// @Produce  json
+// @Success 200 {object} api.RandomQuoteJSON json
+// @Failure 500 {object} api.ErrorResponse json
+// @Router /channels [get]
 func (s *Server) getAllChannels(c echo.Context) error {
 	response := new(AllChannelsJSON)
-	response.Channels = s.channels
+	response.Channels = []channel{}
+	users, err := s.helixClient.GetUsersByUserIds(s.channels)
+
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
+	}
+
+	for _, user := range users {
+		response.Channels = append(response.Channels, channel{UserID: user.ID, Name: user.Login})
+	}
 
 	return c.JSON(http.StatusOK, response)
 }
