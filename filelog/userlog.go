@@ -27,7 +27,7 @@ func NewFileLogger(logPath string) Logger {
 	}
 }
 
-func (l *Logger) LogPrivateMessageForUser(channel string, user twitch.User, message twitch.PrivateMessage) error {
+func (l *Logger) LogPrivateMessageForUser(user twitch.User, message twitch.PrivateMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 
@@ -49,7 +49,29 @@ func (l *Logger) LogPrivateMessageForUser(channel string, user twitch.User, mess
 	return nil
 }
 
-func (l *Logger) LogClearchatMessageForUser(channel string, userID string, message twitch.ClearChatMessage) error {
+func (l *Logger) LogClearchatMessageForUser(userID string, message twitch.ClearChatMessage) error {
+	year := message.Time.Year()
+	month := int(message.Time.Month())
+
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/", message.RoomID, year, month), 0750)
+	if err != nil {
+		return err
+	}
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%s.txt", message.RoomID, year, month, userID)
+
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err = file.WriteString(message.Raw + "\n"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (l *Logger) LogUserNoticeMessageForUser(userID string, message twitch.UserNoticeMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 

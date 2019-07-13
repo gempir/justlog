@@ -54,14 +54,14 @@ func (b *Bot) Connect(channelIds []string) {
 	twitchClient.OnPrivateMessage(func(message twitch.PrivateMessage) {
 
 		go func() {
-			err := b.fileLogger.LogPrivateMessageForUser(message.Channel, message.User, message)
+			err := b.fileLogger.LogPrivateMessageForUser(message.User, message)
 			if err != nil {
 				log.Error(err.Error())
 			}
 		}()
 
 		go func() {
-			err := b.fileLogger.LogPrivateMessageForChannel(message.Channel, message.User, message)
+			err := b.fileLogger.LogPrivateMessageForChannel(message)
 			if err != nil {
 				log.Error(err.Error())
 			}
@@ -73,17 +73,45 @@ func (b *Bot) Connect(channelIds []string) {
 		}
 	})
 
+	twitchClient.OnUserNoticeMessage(func(message twitch.UserNoticeMessage) {
+		log.Debug(message.Raw)
+
+		go func() {
+			err := b.fileLogger.LogUserNoticeMessageForUser(message.User.ID, message)
+			if err != nil {
+				log.Error(err.Error())
+			}
+		}()
+
+		if _, ok := message.Tags["msg-param-recipient-id"]; ok {
+			go func() {
+				err := b.fileLogger.LogUserNoticeMessageForUser(message.Tags["msg-param-recipient-id"], message)
+				if err != nil {
+					log.Error(err.Error())
+				}
+			}()
+		}
+
+		go func() {
+			err := b.fileLogger.LogUserNoticeMessageForChannel(message)
+			if err != nil {
+				log.Error(err.Error())
+			}
+		}()
+
+	})
+
 	twitchClient.OnClearChatMessage(func(message twitch.ClearChatMessage) {
 
 		go func() {
-			err := b.fileLogger.LogClearchatMessageForUser(message.Channel, message.TargetUserID, message)
+			err := b.fileLogger.LogClearchatMessageForUser(message.TargetUserID, message)
 			if err != nil {
 				log.Error(err.Error())
 			}
 		}()
 
 		go func() {
-			err := b.fileLogger.LogClearchatMessageForChannel(message.Channel, message)
+			err := b.fileLogger.LogClearchatMessageForChannel(message)
 			if err != nil {
 				log.Error(err.Error())
 			}
