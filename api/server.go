@@ -61,7 +61,7 @@ func (s *Server) Init() {
 		XSSProtection:         "", // disabled
 		ContentTypeNosniff:    "nosniff",
 		XFrameOptions:         "", // disabled
-		HSTSMaxAge:            0, // disabled
+		HSTSMaxAge:            0,  // disabled
 		ContentSecurityPolicy: "", // disabled
 	}))
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
@@ -225,6 +225,8 @@ func writeTextResponse(c echo.Context, cLog *chatLog) error {
 		case twitch.PRIVMSG:
 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
 		case twitch.CLEARCHAT:
+			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+		case twitch.USERNOTICE:
 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
 		}
 	}

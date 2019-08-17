@@ -12,15 +12,15 @@ import (
 	"github.com/gempir/go-twitch-irc"
 )
 
-func (l *Logger) LogPrivateMessageForChannel(channel string, user twitch.User, message twitch.PrivateMessage) error {
+func (l *Logger) LogPrivateMessageForChannel(message twitch.PrivateMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.Tags["room-id"], year, month, day), 0750)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.RoomID, year, month, day), 0750)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.Tags["room-id"], year, month, day)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.RoomID, year, month, day)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
 	if err != nil {
@@ -35,15 +35,38 @@ func (l *Logger) LogPrivateMessageForChannel(channel string, user twitch.User, m
 	return nil
 }
 
-func (l *Logger) LogClearchatMessageForChannel(channel string, message twitch.ClearChatMessage) error {
+func (l *Logger) LogClearchatMessageForChannel(message twitch.ClearChatMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.Tags["room-id"], year, month, day), 0750)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.RoomID, year, month, day), 0750)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.Tags["room-id"], year, month, day)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.RoomID, year, month, day)
+
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err = file.WriteString(message.Raw + "\n"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l *Logger) LogUserNoticeMessageForChannel(message twitch.UserNoticeMessage) error {
+	year := message.Time.Year()
+	month := int(message.Time.Month())
+	day := message.Time.Day()
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.RoomID, year, month, day), 0750)
+	if err != nil {
+		return err
+	}
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.RoomID, year, month, day)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
 	if err != nil {
