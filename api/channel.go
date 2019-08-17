@@ -150,6 +150,17 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 				Type:        message.Type,
 				Channel:     message.Channel,
 			}
+		case *twitch.UserNoticeMessage:
+			message := *parsedMessage.(*twitch.UserNoticeMessage)
+
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.SystemMsg + " " + message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+			}
 		}
 
 		logResult.Messages = append(logResult.Messages, chatMsg)
@@ -230,6 +241,17 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 				Username:    message.TargetUsername,
 				DisplayName: message.TargetUsername,
 				Text:        text,
+				Type:        message.Type,
+				Channel:     message.Channel,
+			}
+		case *twitch.UserNoticeMessage:
+			message := *parsedMessage.(*twitch.UserNoticeMessage)
+
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.SystemMsg + " " + message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
 			}
