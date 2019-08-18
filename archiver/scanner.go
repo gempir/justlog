@@ -1,13 +1,12 @@
 package archiver
 
 import (
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (a *Archiver) scanLogPath() {
@@ -26,61 +25,66 @@ func (a *Archiver) scanLogPath() {
 			yearFiles = a.filterFiles(yearFiles)
 
 			for _, year := range yearFiles {
-				monthFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name())
-				if err != nil {
-					log.Error(err)
-				}
-
-				monthFiles = a.filterFiles(monthFiles)
-
-				for _, month := range monthFiles {
-					dayFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name())
+				if year.IsDir() {
+					monthFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name())
 					if err != nil {
 						log.Error(err)
 					}
 
-					dayFiles = a.filterFiles(dayFiles)
+					monthFiles = a.filterFiles(monthFiles)
 
-					for _, dayOrUserId := range dayFiles {
-						if dayOrUserId.IsDir() {
-							channelLogFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name())
+					for _, month := range monthFiles {
+						if month.IsDir() {
+							dayFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name())
 							if err != nil {
 								log.Error(err)
 							}
 
-							channelLogFiles = a.filterFiles(channelLogFiles)
+							dayFiles = a.filterFiles(dayFiles)
 
-							for _, channelLogFile := range channelLogFiles {
-								if strings.HasSuffix(channelLogFile.Name(), ".txt") {
-									dayInt, err := strconv.Atoi(dayOrUserId.Name())
+							for _, dayOrUserId := range dayFiles {
+								if dayOrUserId.IsDir() {
+									channelLogFiles, err := ioutil.ReadDir(a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name())
 									if err != nil {
-										log.Errorf("Failure converting day to int in scanner %s", err.Error())
+										log.Error(err)
+									}
+
+									channelLogFiles = a.filterFiles(channelLogFiles)
+
+									for _, channelLogFile := range channelLogFiles {
+										if strings.HasSuffix(channelLogFile.Name(), ".txt") {
+											dayInt, err := strconv.Atoi(dayOrUserId.Name())
+											if err != nil {
+												log.Errorf("Failure converting day to int in scanner %s", err.Error())
+												continue
+											}
+
+											if dayInt == int(time.Now().Day()) {
+												continue
+											}
+
+											a.workQueue <- a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name() + "/" + channelLogFile.Name()
+										}
+									}
+
+								} else if strings.HasSuffix(dayOrUserId.Name(), ".txt") {
+									monthInt, err := strconv.Atoi(month.Name())
+									if err != nil {
+										log.Errorf("Failure converting month to int in scanner %s", err.Error())
 										continue
 									}
 
-									if dayInt == int(time.Now().Day()) {
+									if monthInt == int(time.Now().Month()) {
 										continue
 									}
 
-									a.workQueue <- a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name() + "/" + channelLogFile.Name()
+									a.workQueue <- a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name()
 								}
 							}
-
-						} else if strings.HasSuffix(dayOrUserId.Name(), ".txt") {
-							monthInt, err := strconv.Atoi(month.Name())
-							if err != nil {
-								log.Errorf("Failure converting month to int in scanner %s", err.Error())
-								continue
-							}
-
-							if monthInt == int(time.Now().Month()) {
-								continue
-							}
-
-							a.workQueue <- a.logPath + "/" + channelId.Name() + "/" + year.Name() + "/" + month.Name() + "/" + dayOrUserId.Name()
 						}
 					}
 				}
+
 			}
 		}
 	}
