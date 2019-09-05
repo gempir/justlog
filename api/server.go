@@ -12,11 +12,11 @@ import (
 	"github.com/gempir/justlog/helix"
 	log "github.com/sirupsen/logrus"
 
-	twitch "github.com/gempir/go-twitch-irc"
+	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/filelog"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	_ "github.com/gempir/justlog/docs"
 	"github.com/swaggo/echo-swagger"
