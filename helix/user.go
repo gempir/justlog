@@ -2,10 +2,10 @@ package helix
 
 import (
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 type Client struct {
@@ -35,23 +35,27 @@ type userResponse struct {
 }
 
 type UserData struct {
-	ID              string `json:"id"`
-	Login           string `json:"login"`
-	DisplayName     string `json:"display_name"`
-	Type            string `json:"type"`
-	BroadcasterType string `json:"broadcaster_type"`
-	Description     string `json:"description"`
-	ProfileImageURL string `json:"profile_image_url"`
-	OfflineImageURL string `json:"offline_image_url"`
-	ViewCount       int    `json:"view_count"`
-	Email           string `json:"email"`
+	ID    string `json:"id"`
+	Login string `json:"login"`
 }
 
 func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error) {
 	var filteredUserIDs []string
 
+	result := make(map[string]UserData)
+
 	for _, id := range userIDs {
-		if _, ok := userCacheByID[id]; !ok {
+		if strings.HasPrefix(id, "chatrooms:") {
+			result[id] = UserData{
+				ID:    id,
+				Login: id,
+			}
+			continue
+		}
+
+		if _, ok := userCacheByID[id]; ok {
+			result[id] = userCacheByID[id]
+		} else {
 			filteredUserIDs = append(filteredUserIDs, id)
 		}
 	}
@@ -81,9 +85,7 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 		}
 	}
 
-	result := make(map[string]UserData)
-
-	for _, id := range userIDs {
+	for _, id := range filteredUserIDs {
 		result[id] = userCacheByID[id]
 	}
 
@@ -93,8 +95,20 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, error) {
 	var filteredUsernames []string
 
+	result := make(map[string]UserData)
+
 	for _, username := range usernames {
-		if _, ok := userCacheByUsername[username]; !ok {
+		if strings.HasPrefix(username, "chatrooms:") {
+			result[username] = UserData{
+				ID:    username,
+				Login: username,
+			}
+			continue
+		}
+
+		if _, ok := userCacheByID[username]; ok {
+			result[username] = userCacheByID[username]
+		} else {
 			filteredUsernames = append(filteredUsernames, username)
 		}
 	}
@@ -124,9 +138,7 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 		}
 	}
 
-	result := make(map[string]UserData)
-
-	for _, username := range usernames {
+	for _, username := range filteredUsernames {
 		result[username] = userCacheByUsername[username]
 	}
 
