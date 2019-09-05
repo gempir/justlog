@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gempir/go-twitch-irc"
+	"github.com/gempir/go-twitch-irc/v2"
 )
 
 func (l *Logger) LogPrivateMessageForChannel(message twitch.PrivateMessage) error {
