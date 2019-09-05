@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	twitch "github.com/gempir/go-twitch-irc"
-	"github.com/labstack/echo"
+	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 

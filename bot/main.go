@@ -6,7 +6,7 @@ import (
 
 	"github.com/gempir/justlog/filelog"
 
-	"github.com/gempir/go-twitch-irc"
+	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/helix"
 	"github.com/gempir/justlog/humanize"
 	log "github.com/sirupsen/logrus"
