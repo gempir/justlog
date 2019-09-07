@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func logChannelIdentifier(channel string, roomID string) string {
+func getLogChannelID(channel string, roomID string) string {
 	if strings.HasPrefix(channel, "chatrooms:") {
 		return channel
 	} else {
