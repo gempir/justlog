@@ -18,7 +18,7 @@ func getLogTime(msgChannel string, msgTime *time.Time) (int, int, int) {
 	// (at the time of this patch, which is 2019-09-07)
 	// We would receive a negative value that represents some time in the 18th century
 	// TODO: Once twitch has fixed this behaviour, remove this conditional, and just do
-	//       what the second block does
+	//       what the `else` block does
 	if strings.HasPrefix(msgChannel, "chatrooms:") {
 		year, month, day := time.Now().Date()
 		return year, int(month), day
