@@ -28,8 +28,7 @@ func NewFileLogger(logPath string) Logger {
 }
 
 func (l *Logger) LogPrivateMessageForUser(user twitch.User, message twitch.PrivateMessage) error {
-	year := message.Time.Year()
-	month := int(message.Time.Month())
+	year, month, _ := getLogTime(message.Channel, &message.Time)
 
 	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/", logChannelIdentifier(message.Channel, message.RoomID), year, month), 0750)
 	if err != nil {
@@ -50,8 +49,7 @@ func (l *Logger) LogPrivateMessageForUser(user twitch.User, message twitch.Priva
 }
 
 func (l *Logger) LogClearchatMessageForUser(userID string, message twitch.ClearChatMessage) error {
-	year := message.Time.Year()
-	month := int(message.Time.Month())
+	year, month, _ := getLogTime(message.Channel, &message.Time)
 
 	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/", logChannelIdentifier(message.Channel, message.RoomID), year, month), 0750)
 	if err != nil {
@@ -72,8 +70,7 @@ func (l *Logger) LogClearchatMessageForUser(userID string, message twitch.ClearC
 }
 
 func (l *Logger) LogUserNoticeMessageForUser(userID string, message twitch.UserNoticeMessage) error {
-	year := message.Time.Year()
-	month := int(message.Time.Month())
+	year, month, _ := getLogTime(message.Channel, &message.Time)
 
 	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/", logChannelIdentifier(message.Channel, message.RoomID), year, month), 0750)
 	if err != nil {
