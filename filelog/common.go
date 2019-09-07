@@ -9,4 +9,3 @@ func logChannelIdentifier(channel string, roomID string) string {
 		return roomID
 	}
 }
-
