@@ -16,11 +16,11 @@ func (l *Logger) LogPrivateMessageForChannel(message twitch.PrivateMessage) erro
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.RoomID, year, month, day), 0750)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", logChannelIdentifier(message.Channel, message.RoomID), year, month, day), 0750)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.RoomID, year, month, day)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", logChannelIdentifier(message.Channel, message.RoomID), year, month, day)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
 	if err != nil {
@@ -39,11 +39,11 @@ func (l *Logger) LogClearchatMessageForChannel(message twitch.ClearChatMessage) 
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.RoomID, year, month, day), 0750)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", logChannelIdentifier(message.Channel, message.RoomID), year, month, day), 0750)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.RoomID, year, month, day)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", logChannelIdentifier(message.Channel, message.RoomID), year, month, day)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
 	if err != nil {
@@ -62,11 +62,11 @@ func (l *Logger) LogUserNoticeMessageForChannel(message twitch.UserNoticeMessage
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
-	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", message.RoomID, year, month, day), 0750)
+	err := os.MkdirAll(fmt.Sprintf(l.logPath+"/%s/%d/%d/%d", logChannelIdentifier(message.Channel, message.RoomID), year, month, day), 0750)
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", message.RoomID, year, month, day)
+	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", logChannelIdentifier(message.Channel, message.RoomID), year, month, day)
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0640)
 	if err != nil {
