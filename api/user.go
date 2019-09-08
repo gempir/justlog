@@ -305,6 +305,7 @@ func (s *Server) getUserLogs(c echo.Context) error {
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -323,6 +324,7 @@ func (s *Server) getUserLogs(c echo.Context) error {
 				Text:        text,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.UserNoticeMessage:
 			message := *parsedMessage.(*twitch.UserNoticeMessage)
@@ -334,6 +336,7 @@ func (s *Server) getUserLogs(c echo.Context) error {
 				Text:        message.SystemMsg + " " + message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		}
 
@@ -342,6 +345,10 @@ func (s *Server) getUserLogs(c echo.Context) error {
 
 	if shouldRespondWithJson(c) {
 		return writeJSONResponse(c, &logResult)
+	}
+
+	if shouldRespondWithRaw(c) {
+		return writeRawResponse(c, &logResult)
 	}
 
 	return writeTextResponse(c, &logResult)
@@ -396,6 +403,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -418,6 +426,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 				Text:        text,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.UserNoticeMessage:
 			message := *parsedMessage.(*twitch.UserNoticeMessage)
@@ -429,6 +438,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 				Text:        message.SystemMsg + " " + message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		}
 
@@ -437,6 +447,10 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 
 	if shouldRespondWithJson(c) {
 		return writeJSONResponse(c, &logResult)
+	}
+
+	if shouldRespondWithRaw(c) {
+		return writeRawResponse(c, &logResult)
 	}
 
 	return writeTextResponse(c, &logResult)

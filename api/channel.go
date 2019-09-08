@@ -131,6 +131,7 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -149,6 +150,7 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 				Text:        text,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.UserNoticeMessage:
 			message := *parsedMessage.(*twitch.UserNoticeMessage)
@@ -160,6 +162,7 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 				Text:        message.SystemMsg + " " + message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		}
 
@@ -168,6 +171,10 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 
 	if shouldRespondWithJson(c) {
 		return writeJSONResponse(c, &logResult)
+	}
+
+	if shouldRespondWithRaw(c) {
+		return writeRawResponse(c, &logResult)
 	}
 
 	return writeTextResponse(c, &logResult)
@@ -221,6 +228,7 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 				Text:        message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -243,6 +251,7 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 				Text:        text,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		case *twitch.UserNoticeMessage:
 			message := *parsedMessage.(*twitch.UserNoticeMessage)
@@ -254,6 +263,7 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 				Text:        message.SystemMsg + " " + message.Message,
 				Type:        message.Type,
 				Channel:     message.Channel,
+				Raw:         message.Raw,
 			}
 		}
 
@@ -262,6 +272,10 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 
 	if shouldRespondWithJson(c) {
 		return writeJSONResponse(c, &logResult)
+	}
+
+	if shouldRespondWithRaw(c) {
+		return writeRawResponse(c, &logResult)
 	}
 
 	return writeTextResponse(c, &logResult)

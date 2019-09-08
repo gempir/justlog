@@ -119,6 +119,7 @@ type chatMessage struct {
 	Channel     string             `json:"channel"`
 	Timestamp   timestamp          `json:"timestamp"`
 	Type        twitch.MessageType `json:"type"`
+	Raw         string             `json:"raw"`
 }
 
 type ErrorResponse struct {
@@ -234,6 +235,17 @@ func writeTextResponse(c echo.Context, cLog *chatLog) error {
 	return nil
 }
 
+func writeRawResponse(c echo.Context, cLog *chatLog) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
+	c.Response().WriteHeader(http.StatusOK)
+
+	for _, cMessage := range cLog.Messages {
+		c.Response().Write([]byte(cMessage.Raw + "\n"))
+	}
+
+	return nil
+}
+
 func writeJSONResponse(c echo.Context, logResult *chatLog) error {
 	_, stream := c.QueryParams()["stream"]
 	if stream {
@@ -271,4 +283,10 @@ func shouldRespondWithJson(c echo.Context) bool {
 	_, ok := c.QueryParams()["json"]
 
 	return c.Request().Header.Get("Content-Type") == "application/json" || c.Request().Header.Get("accept") == "application/json" || c.QueryParam("type") == "json" || ok
+}
+
+func shouldRespondWithRaw(c echo.Context) bool {
+	_, ok := c.QueryParams()["raw"]
+
+	return c.QueryParam("type") == "raw" || ok
 }
