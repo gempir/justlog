@@ -106,8 +106,8 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 			continue
 		}
 
-		if _, ok := userCacheByID[username]; ok {
-			result[username] = userCacheByID[username]
+		if _, ok := userCacheByUsername[username]; ok {
+			result[username] = userCacheByUsername[username]
 		} else {
 			filteredUsernames = append(filteredUsernames, username)
 		}
