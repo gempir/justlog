@@ -39,7 +39,7 @@ type config struct {
 // @license.name MIT
 // @license.url https://github.com/gempir/justlog/blob/master/LICENSE
 
-// @host api.gempir.com
+// @host logs.ivr.fi
 // @BasePath /
 
 func main() {

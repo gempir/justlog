@@ -231,14 +231,14 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 				Channel:     message.Channel,
 				Username:    message.TargetUsername,
 				DisplayName: message.TargetUsername,
-				Message:     message.Message,
+				Message:     buildClearChatMessageText(message),
 				Timestamp:   timestamp{message.Time},
 			}
 
 			return c.JSON(http.StatusOK, randomQ)
 		}
 
-		return c.String(http.StatusOK, message.Message)
+		return c.String(http.StatusOK, buildClearChatMessageText(message))
 	}
 
 	return c.String(http.StatusNotFound, "No quote found")
@@ -310,18 +310,11 @@ func (s *Server) getUserLogs(c echo.Context) error {
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
 
-			var text string
-			if message.BanDuration == 0 {
-				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
-			} else {
-				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
-			}
-
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
 				Username:    message.TargetUsername,
 				DisplayName: message.TargetUsername,
-				Text:        text,
+				Text:        buildClearChatMessageText(message),
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
@@ -412,18 +405,11 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 				continue
 			}
 
-			var text string
-			if message.BanDuration == 0 {
-				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
-			} else {
-				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
-			}
-
 			chatMsg = chatMessage{
 				Timestamp:   timestamp{message.Time},
 				Username:    message.TargetUsername,
 				DisplayName: message.TargetUsername,
-				Text:        text,
+				Text:        buildClearChatMessageText(message),
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
@@ -454,4 +440,12 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 	}
 
 	return writeTextResponse(c, &logResult)
+}
+
+func buildClearChatMessageText(message twitch.ClearChatMessage) string {
+	if message.BanDuration == 0 {
+		return fmt.Sprintf("%s has been banned", message.TargetUsername)
+	} else {
+		return fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
+	}
 }
