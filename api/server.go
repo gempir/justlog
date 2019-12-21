@@ -19,7 +19,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	_ "github.com/gempir/justlog/docs"
-	"github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type Server struct {
@@ -79,7 +79,7 @@ func (s *Server) Init() {
 	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
 
-	e.GET("/channelid/:channelid/user/:userid", s.getLastUserLogs)
+	e.GET("/channelid/:channelid/userid/:userid", s.getLastUserLogs)
 	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
 	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
 
