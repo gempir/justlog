@@ -66,7 +66,10 @@ func (s *Server) Init() {
 	}))
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
-	e.GET("/", func(c echo.Context) error {
+	e.Static("/", "web/public/index.html")
+	e.Static("/bundle.js", "web/public/bundle.js")
+
+	e.GET("/docs", func(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/index.html")
 	})
 	e.GET("/*", echoSwagger.WrapHandler)

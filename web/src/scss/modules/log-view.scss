@@ -1,0 +1,63 @@
+.log-view {
+    flex: 0.9;
+    background: $grey-medium;
+    @include box-shadow(1);
+    height: 97vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-radius: 3px;
+    position: relative;
+    padding: 2px;
+
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+         
+    &::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: $grey-light;
+    }
+
+    .line {
+        padding: 0.25rem;
+        color: white;
+        font-size: 13px;
+        min-height: 24px;
+
+        p {
+            display: inline-block;
+        }
+
+        img {
+            height: 16px;
+            width: auto;
+            padding: 0 3px;
+        }
+
+        .timestamp {
+            position: relative;
+            color: $grey-light;
+            margin-right: 0.25rem;
+
+            &:hover {
+                color: $grey-lighter;
+            }
+        }
+
+        &:last-child {
+            border: 0;
+        }
+    }
+
+    .load-all {
+        width: 100%;
+    }
+
+    .progress {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        right: 0;
+        margin: auto;
+    }
+}
