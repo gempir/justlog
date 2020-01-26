@@ -72,7 +72,7 @@ func (s *Server) Init() {
 	e.GET("/docs", func(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
 	})
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.GET("/docs/*", echoSwagger.WrapHandler)
 	e.GET("/channels", s.getAllChannels)
 
 	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
