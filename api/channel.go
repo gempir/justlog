@@ -106,7 +106,7 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 	logMessages, err := s.fileLogger.ReadLogForChannel(channelID, year, month, day)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure reading log")
+		return c.JSON(http.StatusNotFound, "Failure reading log")
 	}
 
 	if shouldReverse(c) {

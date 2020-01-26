@@ -280,7 +280,7 @@ func (s *Server) getUserLogs(c echo.Context) error {
 	logMessages, err := s.fileLogger.ReadLogForUser(channelID, userID, year, month)
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure reading log"})
+		return c.JSON(http.StatusNotFound, ErrorResponse{"Failure reading log"})
 	}
 
 	if shouldReverse(c) {
