@@ -66,8 +66,9 @@ func (s *Server) Init() {
 	}))
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
-	e.Static("/", "web/public/index.html")
-	e.Static("/bundle.js", "web/public/bundle.js")
+	assetHandler := http.FileServer(assets)
+	e.GET("/", echo.WrapHandler(assetHandler))
+	e.GET("/bundle.js", echo.WrapHandler(assetHandler))
 
 	e.GET("/docs", func(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/index.html")
