@@ -27,7 +27,7 @@ type RandomQuoteJSON struct {
 // @Param userid path string true "twitch userid"
 // @Param from query int false "unix timestamp, limit logs by timestamps from this point"
 // @Param to query int false "unix timestamp, limit logs by timestamps to this point"
-// @Param json query any false "response as json"
+// @Param json query int false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 303
 // @Success 200
@@ -57,7 +57,7 @@ func (s *Server) getLastUserLogs(c echo.Context) error {
 // @Param username path string true "username"
 // @Param from query int false "unix timestamp, limit logs by timestamps from this point"
 // @Param to query int false "unix timestamp, limit logs by timestamps to this point"
-// @Param json query any false "response as json"
+// @Param json query int false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 303
 // @Success 200
@@ -121,7 +121,7 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 // @Param month path string true "month of logs"
 // @Param from query int false "unix timestamp, limit logs by timestamps from this point"
 // @Param to query int false "unix timestamp, limit logs by timestamps to this point"
-// @Param json query any false "response as json"
+// @Param json query int false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200
 // @Failure 500
@@ -156,7 +156,7 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 // @Produce  plain
 // @Param channel path string true "channelname"
 // @Param username path string true "username"
-// @Param json query any false "response as json"
+// @Param json query int false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200 {object} api.RandomQuoteJSON json
 // @Router /channel/{channel}/user/{username}/random [get]
@@ -190,7 +190,7 @@ func (s *Server) getRandomQuoteByName(c echo.Context) error {
 // @Produce  plain
 // @Param channelid path string true "twitch userid"
 // @Param userid path string true "twitch userid"
-// @Param json query any false "response as json"
+// @Param json query int false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200 {object} api.RandomQuoteJSON json
 // @Router /channelid/{channelid}/userid/{userid}/random [get]
@@ -254,7 +254,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 // @Param month path string true "month of logs"
 // @Param from query int false "unix timestamp, limit logs by timestamps from this point"
 // @Param to query int false "unix timestamp, limit logs by timestamps to this point"
-// @Param json query any false "response as json"
+// @Param json query int false "response as json"
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200
 // @Failure 500

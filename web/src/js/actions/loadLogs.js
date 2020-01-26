@@ -13,7 +13,7 @@ export default function (channel, username, year, month) {
                 }
             }
     
-            fetch(`/channel/${channel}/user/${username}/${year}/${month}`, options).then((response) => {
+            fetch(`${getState().apiBaseUrl}/channel/${channel}/user/${username}/${year}/${month}`, options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response
                 } else {

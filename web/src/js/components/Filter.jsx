@@ -24,7 +24,7 @@ export default class Filter extends Component {
                     placeholder="forsen"
                     onChange={this.onChannelChange}
                     onAutocomplete={this.onChannelChange}
-                    data={this.props.channels}
+                    data={this.props.channels.map(obj => obj.name)}
                 />
                 <TextField
                     id="username"

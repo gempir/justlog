@@ -3,6 +3,14 @@ build: get
 
 full: build_web build_swagger build
 
+full_run: full run
+
+run:
+	./justlog
+
+run_web:
+	cd web && npm run start
+
 get:
 	go get ./... 
 

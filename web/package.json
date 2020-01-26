@@ -1,6 +1,8 @@
 {
     "name": "justlog-web",
     "license": "MIT",
+    "description": "frontend for justlog",
+    "repository": "github.com/gempir/justlog",
     "dependencies": {
         "material-design-icons": "^3.0.1",
         "moment": "^2.22.2",
@@ -16,7 +18,7 @@
     },
     "scripts": {
         "start": "webpack-dev-server --mode development --content-base public",
-        "build": "node_modules/.bin/webpack -p --mode production && cp public/* dist/"
+        "build": "node_modules/.bin/webpack -p --mode production"
     },
     "devDependencies": {
         "@babel/core": "^7.1.5",

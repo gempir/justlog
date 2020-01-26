@@ -3,7 +3,7 @@ import setChannels from "./setChannels";
 export default function () {
     return function (dispatch, getState) {
         return new Promise((resolve, reject) => {
-            fetch("/channels").then((response) => {
+            fetch(`${getState().apiBaseUrl}/channels`).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response
                 } else {

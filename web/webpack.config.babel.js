@@ -1,6 +1,8 @@
 const path = require("path");
+const webpack = require("webpack");
 
-module.exports = {
+module.exports = (env, options) => ({
+	
 	entry: './src/index.jsx',
 	output: {
 		path: path.resolve(__dirname, 'public'),
@@ -24,5 +26,12 @@ module.exports = {
 	},
 	resolve: {
 		extensions: ['.js', '.jsx'],
-	}
-};
+	},
+	plugins: [
+		new webpack.DefinePlugin({
+			'process.env': {
+				'apiBaseUrl': options.mode === 'development' ? '"http://localhost:8025"' : '""',
+			}
+		}),
+	]
+});
