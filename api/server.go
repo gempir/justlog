@@ -45,7 +45,6 @@ func (s *Server) AddChannel(channel string) {
 }
 
 func (s *Server) Init() {
-
 	e := echo.New()
 	e.HideBanner = true
 
@@ -66,10 +65,14 @@ func (s *Server) Init() {
 	}))
 	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
-	e.GET("/", func(c echo.Context) error {
-		return c.Redirect(http.StatusMovedPermanently, "/index.html")
+	assetHandler := http.FileServer(assets)
+	e.GET("/", echo.WrapHandler(assetHandler))
+	e.GET("/bundle.js", echo.WrapHandler(assetHandler))
+
+	e.GET("/docs", func(c echo.Context) error {
+		return c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
 	})
-	e.GET("/*", echoSwagger.WrapHandler)
+	e.GET("/docs/*", echoSwagger.WrapHandler)
 	e.GET("/channels", s.getAllChannels)
 
 	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)

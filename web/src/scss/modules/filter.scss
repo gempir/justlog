@@ -1,0 +1,22 @@
+.filter {
+    position: relative;
+    flex: 0.1;
+    background: $grey-medium;
+    margin-right: 15px;
+    height: 300px;
+    padding: 1rem;
+    border-radius: 3px;
+    @include box-shadow(1);
+
+    input {
+        &::-webkit-input-placeholder {
+            opacity: 0.25;
+        }
+    }
+
+    .show-logs {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
