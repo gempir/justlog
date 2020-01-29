@@ -2,6 +2,7 @@ package helix
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -143,7 +144,10 @@ func (c *Client) makeRequest(parameters string) error {
 	if err != nil {
 		return err
 	}
-
+	if response.StatusCode >= 400 {
+		return fmt.Errorf("%d GET https://api.twitch.tv/helix/users%s", response.StatusCode, parameters)
+	}
+	
 	log.Infof("%d GET https://api.twitch.tv/helix/users%s", response.StatusCode, parameters)
 
 	defer response.Body.Close()
