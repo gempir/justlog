@@ -1,4 +1,4 @@
-build: get
+build:
 	go build
 
 full: build_web build_swagger build
@@ -10,9 +10,6 @@ run:
 
 run_web:
 	cd web && npm run start
-
-get:
-	go get ./... 
 
 build_swagger:
 	swag init
