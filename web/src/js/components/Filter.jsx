@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
-import moment from "moment";
 
 export default class Filter extends Component {
 
     constructor(props) {
         super(props);
 
+        const date = new Date();
+
         this.state = {
             channel: "",
             username: "",
-            year: moment().year(),
-            month: moment().format("M")
-         }
+            year: date.getFullYear(),
+            month: date.getMonth + 1,
+        }
     }
 
     render() {
-		return (
+        return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
                 <input
                     type="text"
@@ -52,24 +53,24 @@ export default class Filter extends Component {
                 </div>
                 <button type="submit" className="show-logs">Show logs</button>
             </form>
-		)
+        )
     }
 
     onChannelChange = (e) => {
-        this.setState({channel: e.target.value});
-    } 
+        this.setState({ channel: e.target.value });
+    }
 
     onUsernameChange = (e) => {
-        this.setState({ username: e.target.value});
+        this.setState({ username: e.target.value });
     }
 
     onYearChange = (e) => {
-        this.setState({year: e.target.value});
-    } 
+        this.setState({ year: e.target.value });
+    }
 
     onMonthChange = (e) => {
-        this.setState({month: e.target.value});
-    } 
+        this.setState({ month: e.target.value });
+    }
 
     onSubmit = (e) => {
         e.preventDefault();

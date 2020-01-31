@@ -4966,13 +4966,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.24.0":
-  version: 2.24.0
-  resolution: "moment@npm:2.24.0"
-  checksum: 56e19bd546ba5851580573c9294a87c8e38fb97a7b9e3ce67f5b3da6490354869596fc1f3af2a773c85e5a3299cb26772146eabd04c844d2092c10f7614a24fa
-  languageName: node
-  linkType: hard
-
 "move-concurrently@npm:^1.0.1":
   version: 1.0.1
   resolution: "move-concurrently@npm:1.0.1"
@@ -7826,7 +7819,6 @@ fsevents@^1.2.7:
     css-loader: ^3.4.2
     material-design-icons: ^3.0.1
     mini-css-extract-plugin: ^0.9.0
-    moment: ^2.24.0
     node-sass: ^4.13.1
     pnp-webpack-plugin: ^1.6.0
     react: ^16.12.0

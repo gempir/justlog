@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import moment from 'moment';
 import twitchEmotes from "../emotes/twitch";
 import reactStringReplace from "react-string-replace";
 
@@ -51,7 +50,7 @@ class LogView extends Component {
 	}
 
 	formatDate = (timestamp) => {
-		return moment(timestamp).format("YYYY-MM-DD HH:mm:ss UTC");
+		return new Date(timestamp).format("YYYY-MM-DD HH:mm:ss UTC");
 	}
 
 	buildTwitchEmote = (id) => {
