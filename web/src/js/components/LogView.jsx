@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { Button, CircularProgress } from 'react-md';
 import moment from 'moment';
 import twitchEmotes from "../emotes/twitch";
 import reactStringReplace from "react-string-replace";
@@ -21,8 +20,8 @@ class LogView extends Component {
 						<span id={value.timestamp} className="timestamp">{this.formatDate(value.timestamp)}</span>{this.renderMessage(value.text)}
 					</div>
 				)}
-				{this.getLogs().length > 0 && this.state.limitLoad && <Button className={"load-all"} raised primary onClick={() => this.setState({ ...this.state, limitLoad: false })}>Load all</Button>}
-				{this.props.loading && <CircularProgress className={"progress"} scale={10} id={"progress"} />}
+				{this.getLogs().length > 0 && this.state.limitLoad && <button className={"load-all"} raised primary onClick={() => this.setState({ ...this.state, limitLoad: false })}>Load all</button>}
+				{this.props.loading && <div>loading</div>}
 			</div>
 		);
 	}

@@ -9,9 +9,16 @@
     @include box-shadow(1);
 
     input {
+        width: 100%;
+        margin-bottom: 10px;
+    
         &::-webkit-input-placeholder {
             opacity: 0.25;
         }
+    }
+
+    select {
+        margin-right: 5px;
     }
 
     .show-logs {

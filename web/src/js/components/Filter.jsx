@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Autocomplete, TextField, Button, SelectField } from 'react-md';
 import moment from "moment";
 
 export default class Filter extends Component {
@@ -18,57 +17,59 @@ export default class Filter extends Component {
     render() {
 		return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
-                <Autocomplete
-                    id="channel"
-                    label="Channel"
+                <input
+                    type="text"
                     placeholder="forsen"
+                    autoComplete={"off"}
                     onChange={this.onChannelChange}
-                    onAutocomplete={this.onChannelChange}
-                    data={this.props.channels.map(obj => obj.name)}
                 />
-                <TextField
-                    id="username"
-                    label="Username"
-                    lineDirection="center"
+                <input
+                    type="text"
+                    autoComplete={"off"}
                     onChange={this.onUsernameChange}
                     placeholder="gempir"
                 />
-                <SelectField
-                    id="year"
-                    label="Year"
-                    defaultValue={this.state.year}
-                    menuItems={[moment().year(), moment().subtract(1, "year").year(),  moment().subtract(2, "year").year()]}
-                    onChange={this.onYearChange}
-                    value={this.state.year}
-                />
-                <SelectField
-                    id="month"
-                    label="Month"
-                    defaultValue={this.state.month}
-                    menuItems={["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]}
-                    onChange={this.onMonthChange}
-                    value={this.state.month}
-                />
-                <Button flat primary swapTheming type="submit" className="show-logs">Show logs</Button>
+                <div className="date">
+                    <select onChange={this.onYearChange} value={this.state.year}>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                    </select>
+                    <select onChange={this.onMonthChange} value={this.state.month}>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+                <button type="submit" className="show-logs">Show logs</button>
             </form>
 		)
     }
 
-    onChannelChange = (value) => {
-        this.setState({...this.state, channel: value});
+    onChannelChange = (e) => {
+        this.setState({channel: e.target.value});
     } 
 
-    onUsernameChange = (value) => {
-        this.setState({...this.state, username: value});
+    onUsernameChange = (e) => {
+        this.setState({ username: e.target.value});
     }
-    
-    onYearChange = (value) => {
-        this.setState({...this.state, year: value});
+
+    onYearChange = (e) => {
+        this.setState({year: e.target.value});
     } 
 
-    onMonthChange = (value) => {
-        this.setState({...this.state, month: moment().month(value).format("M")});
-    }
+    onMonthChange = (e) => {
+        this.setState({month: e.target.value});
+    } 
 
     onSubmit = (e) => {
         e.preventDefault();

@@ -26,6 +26,7 @@
 
         p {
             display: inline-block;
+            margin: 0;
         }
 
         img {
@@ -38,6 +39,7 @@
             position: relative;
             color: $grey-light;
             margin-right: 0.25rem;
+            user-select: none;
 
             &:hover {
                 color: $grey-lighter;
