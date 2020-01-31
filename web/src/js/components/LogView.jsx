@@ -50,7 +50,7 @@ class LogView extends Component {
 	}
 
 	formatDate = (timestamp) => {
-		return new Date(timestamp).format("YYYY-MM-DD HH:mm:ss UTC");
+		return new Date(timestamp).toUTCString();
 	}
 
 	buildTwitchEmote = (id) => {

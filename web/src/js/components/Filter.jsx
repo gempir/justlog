@@ -11,7 +11,7 @@ export default class Filter extends Component {
             channel: "",
             username: "",
             year: date.getFullYear(),
-            month: date.getMonth + 1,
+            month: date.getMonth() + 1,
         }
     }
 
