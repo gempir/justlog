@@ -1,6 +1,5 @@
 export default () => {
-    // const regex = /\/(\w+)\/(\w+)\??/;
-    // console.log(window.location.pathname.match(regex));
+    const urlParams = new URLSearchParams(window.location.search);
 
     return {
         apiBaseUrl: process.env.apiBaseUrl,
@@ -10,7 +9,7 @@ export default () => {
         },
         loading: false,
         twitchEmotes: {},
-        currentChannel: "",
-        currentUsername: "",
+        currentChannel: urlParams.get("channel") || "",
+        currentUsername: urlParams.get("username") || "",
     }
 }

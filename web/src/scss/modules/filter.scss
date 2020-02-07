@@ -1,29 +1,71 @@
 .filter {
     position: relative;
-    flex: 0.1;
+    display: flex;
+    width: 600px;
     background: $grey-medium;
-    margin-right: 15px;
-    height: 300px;
-    padding: 1rem;
+    padding: 0.5rem;
+    margin: 0 auto 1rem;
     border-radius: 3px;
+    font-size: 1rem;
     @include box-shadow(1);
 
     input {
         width: 100%;
-        margin-bottom: 10px;
     
         &::-webkit-input-placeholder {
             opacity: 0.25;
         }
     }
 
-    select {
-        margin-right: 5px;
+    .channel-wrapper {
+        width: 100%;
+        position: relative;
+        margin-right: 0.5rem;
+
+        input:focus {
+
+            & + .channel-autocomplete {
+                display: block;
+            }
+        }
+
+        .channel-autocomplete {
+            display: none;
+            position: absolute;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            background: $grey-medium;
+            z-index: 100;
+            top: 100%;
+            left: 0;
+            right: 0;
+            padding: 0;
+            font-size: 0.8rem;
+            @include box-shadow(2);
+            border-bottom-left-radius: 3px;
+            border-bottom-right-radius: 3px;
+            color: white;
+
+            li {
+                cursor: pointer;
+                padding: 5px;
+
+                &:hover {
+                    background: $grey-light;
+                }
+            }
+        }
     }
 
+
     .show-logs {
-        position: absolute;
-        bottom: 1rem;
-        right: 1rem;
+        width: 200px;
+        margin-left: 0.5rem;
+        background: $dark-blue;
+
+        &:hover, &:active {
+            background: $light-blue;
+        }
     }
 }

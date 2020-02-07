@@ -24,43 +24,31 @@ class Filter extends Component {
     render() {
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
+                <div className="channel-wrapper">
                 <input
                     type="text"
                     placeholder="pajlada"
                     onChange={this.onChannelChange}
                     value={this.props.currentChannel}
                 />
+                <ul className="channel-autocomplete">
+                    {this.props.channels
+                    .filter(channel => channel.name.includes(this.props.currentChannel))
+                    .map(channel => <li key={channel.userID} onClick={() => this.setChannel(channel.name)}>{channel.name}</li>)}
+                </ul>
+                </div>
                 <input
                     type="text"
                     placeholder="gempir"
                     onChange={this.onUsernameChange}
                     value={this.props.currentUsername}
                 />
-                <div className="date">
-                    <select onChange={this.onYearChange} value={this.state.year}>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
-                        <option value="2018">2018</option>
-                    </select>
-                    <select onChange={this.onMonthChange} value={this.state.month}>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                    </select>
-                </div>
                 <button type="submit" className="show-logs">Show logs</button>
             </form>
         )
     }
+
+    setChannel = channel => this.props.dispatch(setCurrent(channel, this.props.currentUsername));
 
     onChannelChange = (e) => {
         this.props.dispatch(setCurrent(e.target.value, this.props.currentUsername));
@@ -85,6 +73,7 @@ class Filter extends Component {
 }
 
 const mapStateToProps = (state) => ({
+    channels: state.channels,
     currentChannel: state.currentChannel,
     currentUsername: state.currentUsername
 });
