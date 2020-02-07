@@ -1,6 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import {connect} from "react-redux";
+import setCurrent from "./../actions/setCurrent";
 
-export default class Filter extends Component {
+class Filter extends Component {
 
     constructor(props) {
         super(props);
@@ -8,10 +10,14 @@ export default class Filter extends Component {
         const date = new Date();
 
         this.state = {
-            channel: "",
-            username: "",
             year: date.getFullYear(),
             month: date.getMonth() + 1,
+        }
+    }
+
+    componentDidMount() {
+        if (this.props.currentChannel && this.props.currentUsername) {
+            this.props.searchLogs(this.props.currentChannel, this.props.currentUsername, this.state.year, this.state.month);
         }
     }
 
@@ -20,15 +26,15 @@ export default class Filter extends Component {
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
                 <input
                     type="text"
-                    placeholder="forsen"
-                    autoComplete={"off"}
+                    placeholder="pajlada"
                     onChange={this.onChannelChange}
+                    value={this.props.currentChannel}
                 />
                 <input
                     type="text"
-                    autoComplete={"off"}
-                    onChange={this.onUsernameChange}
                     placeholder="gempir"
+                    onChange={this.onUsernameChange}
+                    value={this.props.currentUsername}
                 />
                 <div className="date">
                     <select onChange={this.onYearChange} value={this.state.year}>
@@ -57,11 +63,11 @@ export default class Filter extends Component {
     }
 
     onChannelChange = (e) => {
-        this.setState({ channel: e.target.value });
+        this.props.dispatch(setCurrent(e.target.value, this.props.currentUsername));
     }
 
     onUsernameChange = (e) => {
-        this.setState({ username: e.target.value });
+        this.props.dispatch(setCurrent(this.props.currentChannel, e.target.value));
     }
 
     onYearChange = (e) => {
@@ -74,6 +80,13 @@ export default class Filter extends Component {
 
     onSubmit = (e) => {
         e.preventDefault();
-        this.props.searchLogs(this.state.channel, this.state.username, this.state.year, this.state.month);
+        this.props.searchLogs(this.props.currentChannel, this.props.currentUsername, this.state.year, this.state.month);
     }
 }
+
+const mapStateToProps = (state) => ({
+    currentChannel: state.currentChannel,
+    currentUsername: state.currentUsername
+});
+
+export default connect(mapStateToProps)(Filter);

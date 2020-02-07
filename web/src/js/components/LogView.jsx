@@ -19,7 +19,7 @@ class LogView extends Component {
 						<span id={value.timestamp} className="timestamp">{this.formatDate(value.timestamp)}</span>{this.renderMessage(value.text)}
 					</div>
 				)}
-				{this.getLogs().length > 0 && this.state.limitLoad && <button className={"load-all"} raised primary onClick={() => this.setState({ ...this.state, limitLoad: false })}>Load all</button>}
+				{this.getLogs().length > this.constructor.LOAD_LIMIT && this.state.limitLoad && <button className={"load-all"} onClick={() => this.setState({limitLoad: false })}>Load all</button>}
 				{this.props.loading && <div>loading</div>}
 			</div>
 		);

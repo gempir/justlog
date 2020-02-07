@@ -54,5 +54,5 @@ module.exports = (env, options) => ({
 		chunkModules: false,
 		entrypoints: false,
 		modules: false,
-	},
+	}
 });
