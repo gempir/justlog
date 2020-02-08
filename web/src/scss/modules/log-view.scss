@@ -18,7 +18,7 @@
     &::-webkit-scrollbar {
         width: 10px;
     }
-         
+
     &::-webkit-scrollbar-thumb {
         border-radius: 10px;
         background: $grey-light;
@@ -30,6 +30,19 @@
 
     &.not-loaded {
         cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:hover button {
+            background: $light-blue;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background: $dark-blue;
+        }
     }
 
     .line {

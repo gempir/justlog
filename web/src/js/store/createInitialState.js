@@ -13,6 +13,10 @@ export default () => {
         logs[`${year}-${prevMonth}`] = new Log(year, prevMonth, [], false);
     }
 
+    for (let prevMonth = 12; prevMonth >= 1; prevMonth--) {
+        logs[`${"2019"}-${prevMonth}`] = new Log("2019", prevMonth, [], false);
+    }
+
     return {
         apiBaseUrl: process.env.apiBaseUrl,
         channels: [],

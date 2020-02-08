@@ -8,7 +8,10 @@ class LogView extends Component {
 
 	render() {
 		if (this.props.log.loaded === false) {
-			return <div className="log-view not-loaded" onClick={this.loadLog}>{this.props.log.getTitle()}</div>;
+			return <div className="log-view not-loaded" onClick={this.loadLog}>
+				<span>{this.props.log.getTitle()}</span>
+				<button>load</button>
+			</div>;
 		}
 
 		return (
