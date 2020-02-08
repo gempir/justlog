@@ -4695,13 +4695,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"material-design-icons@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "material-design-icons@npm:3.0.1"
-  checksum: 1248effdfb7175ce9ade19224ebe83741142b1668732fddab064083c7c9b70561d42b3e59d770d26c95ac892ceecfe65079ebca31a07ba179a7a8fdf28203af6
-  languageName: node
-  linkType: hard
-
 "md5.js@npm:^1.3.4":
   version: 1.3.5
   resolution: "md5.js@npm:1.3.5"
@@ -7817,7 +7810,6 @@ fsevents@^1.2.7:
     "@babel/preset-react": ^7.8.3
     babel-loader: ^8.0.6
     css-loader: ^3.4.2
-    material-design-icons: ^3.0.1
     mini-css-extract-plugin: ^0.9.0
     node-sass: ^4.13.1
     pnp-webpack-plugin: ^1.6.0
@@ -7833,7 +7825,6 @@ fsevents@^1.2.7:
     webpack: ^4.41.5
     webpack-cli: ^3.3.10
     webpack-dev-server: ^3.10.1
-    whatwg-fetch: ^3.0.0
   languageName: unknown
   linkType: soft
 
@@ -7988,13 +7979,6 @@ fsevents@^1.2.7:
   version: 0.1.3
   resolution: "websocket-extensions@npm:0.1.3"
   checksum: af7c83b72b46dcb0249b5174c22fca5cf84ed77d1dbf2fd27c82413b893b802e3309f65a61322017851da041d8b8d4cc7195feb4b73b2f9931a81ef3cca5c2a1
-  languageName: node
-  linkType: hard
-
-"whatwg-fetch@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "whatwg-fetch@npm:3.0.0"
-  checksum: a3033a72d7300f899073ed30fe46e12ff7142ed06221879a610a919c01b8b26d3f82ac7a5c18c397a1cb6a95b3df95a644e45ead93c10872118fc0e961ea9f2c
   languageName: node
   linkType: hard
 

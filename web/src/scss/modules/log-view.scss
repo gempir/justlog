@@ -18,6 +18,10 @@
         background: $grey-light;
     }
 
+    &:empty {
+        display: none;
+    }
+
     .line {
         padding: 0.25rem;
         color: white;

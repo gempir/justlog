@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 import setCurrent from "./../actions/setCurrent";
+import AutocompleteInput from "./AutocompleteInput";
 
 class Filter extends Component {
 
@@ -22,21 +23,17 @@ class Filter extends Component {
     }
 
     render() {
+        const completions = this.props.channels
+            .filter(channel => channel.name.includes(this.props.currentChannel));
+
+        const autocompletions = [];
+        for (const completion of completions) {
+            autocompletions.push(<li key={completion.userID} onClick={() => this.setChannel(completion.name)}>{completion.name}</li>);
+        }
+
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
-                <div className="channel-wrapper">
-                <input
-                    type="text"
-                    placeholder="pajlada"
-                    onChange={this.onChannelChange}
-                    value={this.props.currentChannel}
-                />
-                <ul className="channel-autocomplete">
-                    {this.props.channels
-                    .filter(channel => channel.name.includes(this.props.currentChannel))
-                    .map(channel => <li key={channel.userID} onClick={() => this.setChannel(channel.name)}>{channel.name}</li>)}
-                </ul>
-                </div>
+                <AutocompleteInput placeholder="pajlada" onChange={this.onChannelChange} value={this.props.currentChannel} autocompletions={this.props.channels} />
                 <input
                     type="text"
                     placeholder="gempir"
@@ -47,8 +44,6 @@ class Filter extends Component {
             </form>
         )
     }
-
-    setChannel = channel => this.props.dispatch(setCurrent(channel, this.props.currentUsername));
 
     onChannelChange = (e) => {
         this.props.dispatch(setCurrent(e.target.value, this.props.currentUsername));
@@ -68,6 +63,13 @@ class Filter extends Component {
 
     onSubmit = (e) => {
         e.preventDefault();
+
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        params.set('channel', this.props.currentChannel);
+        params.set('username', this.props.currentUsername);
+        window.location.search = params.toString();
+
         this.props.searchLogs(this.props.currentChannel, this.props.currentUsername, this.state.year, this.state.month);
     }
 }

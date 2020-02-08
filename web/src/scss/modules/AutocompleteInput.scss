@@ -1,0 +1,15 @@
+.AutocompleteInput {
+    position: relative;
+
+    input {
+        height: 100%;
+    }
+
+    ul {
+        position: absolute;
+        background: $grey-medium;
+        top: 100%;
+        left: 0;
+        right: 0;
+    }
+}
