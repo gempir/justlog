@@ -21,7 +21,8 @@ export default class AutocompleteInput extends Component {
             />
             {this.state.focused && <ul>
                 {this.props.autocompletions
-                    .filter(completion => completion.includes(this.props.value))
+                    .filter(completion => completion.includes(this.props.value) && this.props.value !== "")
+                    .sort()
                     .map(completion =>
                         <li key={completion} onClick={() => this.handleClick(completion)} onMouseDown={e => e.preventDefault()}>
                             {completion}

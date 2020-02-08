@@ -27,7 +27,7 @@ class LogSearch extends Component {
                 <Filter
                     channels={this.props.channels}
                 />
-                {Object.values(this.props.logs).map(log =>
+                {this.props.channel && this.props.username && Object.values(this.props.logs).map(log =>
                     <LogView key={log.getTitle()} log={log} />
                 )}
             </div>
