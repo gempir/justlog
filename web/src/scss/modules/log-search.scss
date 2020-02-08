@@ -1,5 +1,7 @@
 .log-search {
     display: flex;
+    flex-direction: column;
     padding: 1rem;
-    min-height: 100vh; 
+    max-width: 1600px;
+    margin: 0 auto;
 }

@@ -14,29 +14,33 @@ class LogSearch extends Component {
         props.dispatch(loadChannels());
     }
 
+    componentDidMount() {
+        if (this.props.channel && this.props.username) {
+            this.props.dispatch(loadLogs());
+        }
+    }
+
     render() {
         return (
             <div className="log-search">
                 <ToastContainer />
                 <Filter
                     channels={this.props.channels}
-                    searchLogs={this.searchLogs}
                 />
-                <LogView />
+                {Object.values(this.props.logs).map(log =>
+                    <LogView key={log.getTitle()} log={log} />
+                )}
             </div>
         );
-    }
-
-    searchLogs = (channel, username, year, month) => {
-        this.props.dispatch(loadLogs(channel, username, year, month)).catch((error) => {
-            toast.error("Failed to load logs: " + error);
-        });
     }
 }
 
 const mapStateToProps = (state) => {
     return {
         channels: state.channels,
+        channel: state.channel,
+        username: state.username,
+        logs: state.logs,
     };
 };
 

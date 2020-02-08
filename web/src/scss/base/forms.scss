@@ -5,3 +5,41 @@ input {
 label {
     color: white;
 }
+
+button {
+    background: $grey-dark;
+    outline: none;
+    color: white;
+    border: 0;
+    padding: 10px;
+    border-radius: 3px;
+
+    &:hover {
+        background: $grey-medium-dark;
+        cursor: pointer;
+    }
+}
+
+input {
+    background: $grey-dark;
+    outline: none;
+    border: 0;
+    border-radius: 3px;
+
+    &:focus {
+        background: $grey-medium-dark;
+    }
+
+    &::-webkit-input-placeholder {
+        opacity: 0.25;
+    }
+}
+
+select {
+    border: 0;
+    border-radius: 3px;
+    outline: none;
+    background: $grey-dark;
+    color: white;
+    padding: 5px;
+}

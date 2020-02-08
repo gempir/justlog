@@ -4,9 +4,9 @@ body {
     background: $grey-dark;
     font-family: Helvetica, Arial, sans-serif;
     height: 100%;
-    overflow: hidden;
-    position: absolute;
     width: 100%;
 }
 
-
+* {
+    box-sizing: border-box;
+}

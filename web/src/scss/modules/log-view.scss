@@ -8,14 +8,41 @@
     border-radius: 3px;
     position: relative;
     padding: 2px;
+    margin-top: 1rem;
+    color: white;
+
+    &:first-child {
+        margin-top: 0;
+    }
 
     &::-webkit-scrollbar {
         width: 10px;
     }
-         
+
     &::-webkit-scrollbar-thumb {
         border-radius: 10px;
         background: $grey-light;
+    }
+
+    &:empty {
+        display: none;
+    }
+
+    &.not-loaded {
+        cursor: pointer;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:hover button {
+            background: $light-blue;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background: $dark-blue;
+        }
     }
 
     .line {
@@ -26,6 +53,7 @@
 
         p {
             display: inline-block;
+            margin: 0;
         }
 
         img {
@@ -38,6 +66,7 @@
             position: relative;
             color: $grey-light;
             margin-right: 0.25rem;
+            user-select: none;
 
             &:hover {
                 color: $grey-lighter;

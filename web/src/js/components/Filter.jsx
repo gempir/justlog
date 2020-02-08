@@ -1,77 +1,53 @@
-import React, { Component } from 'react';
-import { Autocomplete, TextField, Button, SelectField } from 'react-md';
-import moment from "moment";
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import setCurrent from "./../actions/setCurrent";
+import AutocompleteInput from "./AutocompleteInput";
+import loadLogs from "../actions/loadLogs";
 
-export default class Filter extends Component {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            channel: "",
-            username: "",
-            year: moment().year(),
-            month: moment().format("M")
-         }
-    }
+class Filter extends Component {
+    username;
 
     render() {
-		return (
+        return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
-                <Autocomplete
-                    id="channel"
-                    label="Channel"
-                    placeholder="forsen"
-                    onChange={this.onChannelChange}
-                    onAutocomplete={this.onChannelChange}
-                    data={this.props.channels.map(obj => obj.name)}
-                />
-                <TextField
-                    id="username"
-                    label="Username"
-                    lineDirection="center"
-                    onChange={this.onUsernameChange}
+                <AutocompleteInput placeholder="pajlada" onChange={this.onChannelChange} value={this.props.channel} onAutocompletionClick={() => this.username.focus()} autocompletions={this.props.channels.map(channel => channel.name)} />
+                <input
+                    ref={el => this.username = el}
+                    type="text"
                     placeholder="gempir"
+                    onChange={this.onUsernameChange}
+                    value={this.props.username}
                 />
-                <SelectField
-                    id="year"
-                    label="Year"
-                    defaultValue={this.state.year}
-                    menuItems={[moment().year(), moment().subtract(1, "year").year(),  moment().subtract(2, "year").year()]}
-                    onChange={this.onYearChange}
-                    value={this.state.year}
-                />
-                <SelectField
-                    id="month"
-                    label="Month"
-                    defaultValue={this.state.month}
-                    menuItems={["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]}
-                    onChange={this.onMonthChange}
-                    value={this.state.month}
-                />
-                <Button flat primary swapTheming type="submit" className="show-logs">Show logs</Button>
+                <button type="submit" className="show-logs">Show logs</button>
             </form>
-		)
+        )
     }
 
-    onChannelChange = (value) => {
-        this.setState({...this.state, channel: value});
-    } 
-
-    onUsernameChange = (value) => {
-        this.setState({...this.state, username: value});
+    onChannelChange = (channel) => {
+        this.props.dispatch(setCurrent(channel, this.props.username));
     }
-    
-    onYearChange = (value) => {
-        this.setState({...this.state, year: value});
-    } 
 
-    onMonthChange = (value) => {
-        this.setState({...this.state, month: moment().month(value).format("M")});
+    onUsernameChange = (e) => {
+        this.props.dispatch(setCurrent(this.props.channel, e.target.value));
     }
 
     onSubmit = (e) => {
         e.preventDefault();
-        this.props.searchLogs(this.state.channel, this.state.username, this.state.year, this.state.month);
+
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        params.set('channel', this.props.channel);
+        params.set('username', this.props.username);
+        window.location.search = params.toString();
+
+        this.props.dispatch(loadLogs());
     }
 }
+
+const mapStateToProps = (state) => ({
+    channels: state.channels,
+    channel: state.channel,
+    username: state.username
+});
+
+export default connect(mapStateToProps)(Filter);
