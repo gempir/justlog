@@ -4,6 +4,11 @@ import setLoading from "./setLoading";
 export default function (channel, username, year, month) {
     return function (dispatch, getState) {
         return new Promise((resolve, reject) => {
+            channel = channel || getState().channel;
+            username = username || getState().username;
+            year = year || getState().year;
+            month = month || getState().month;
+
 
             dispatch(setLoading(true));
                         

@@ -2,38 +2,27 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import setCurrent from "./../actions/setCurrent";
 import AutocompleteInput from "./AutocompleteInput";
+import loadLogs from "../actions/loadLogs";
 
 class Filter extends Component {
-
-    constructor(props) {
-        super(props);
-
-        const date = new Date();
-
-        this.state = {
-            year: date.getFullYear(),
-            month: date.getMonth() + 1,
-        }
-    }
-
     username;
 
     componentDidMount() {
-        if (this.props.currentChannel && this.props.currentUsername) {
-            this.props.searchLogs(this.props.currentChannel, this.props.currentUsername, this.state.year, this.state.month);
+        if (this.props.channel && this.props.username) {
+            this.props.dispatch(loadLogs());
         }
     }
 
     render() {
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
-                <AutocompleteInput placeholder="pajlada" onChange={this.onChannelChange} value={this.props.currentChannel} onAutocompletionClick={() => this.username.focus()} autocompletions={this.props.channels.map(channel => channel.name)} />
+                <AutocompleteInput placeholder="pajlada" onChange={this.onChannelChange} value={this.props.channel} onAutocompletionClick={() => this.username.focus()} autocompletions={this.props.channels.map(channel => channel.name)} />
                 <input
                     ref={el => this.username = el}
                     type="text"
                     placeholder="gempir"
                     onChange={this.onUsernameChange}
-                    value={this.props.currentUsername}
+                    value={this.props.username}
                 />
                 <button type="submit" className="show-logs">Show logs</button>
             </form>
@@ -41,19 +30,11 @@ class Filter extends Component {
     }
 
     onChannelChange = (channel) => {
-        this.props.dispatch(setCurrent(channel, this.props.currentUsername));
+        this.props.dispatch(setCurrent(channel, this.props.username));
     }
 
     onUsernameChange = (e) => {
-        this.props.dispatch(setCurrent(this.props.currentChannel, e.target.value));
-    }
-
-    onYearChange = (e) => {
-        this.setState({ year: e.target.value });
-    }
-
-    onMonthChange = (e) => {
-        this.setState({ month: e.target.value });
+        this.props.dispatch(setCurrent(this.props.channel, e.target.value));
     }
 
     onSubmit = (e) => {
@@ -61,18 +42,18 @@ class Filter extends Component {
 
         const url = new URL(window.location.href);
         const params = new URLSearchParams(url.search);
-        params.set('channel', this.props.currentChannel);
-        params.set('username', this.props.currentUsername);
+        params.set('channel', this.props.channel);
+        params.set('username', this.props.username);
         window.location.search = params.toString();
 
-        this.props.searchLogs(this.props.currentChannel, this.props.currentUsername, this.state.year, this.state.month);
+        this.props.dispatch(loadLogs());
     }
 }
 
 const mapStateToProps = (state) => ({
     channels: state.channels,
-    currentChannel: state.currentChannel,
-    currentUsername: state.currentUsername
+    channel: state.channel,
+    username: state.username
 });
 
 export default connect(mapStateToProps)(Filter);

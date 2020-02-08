@@ -20,17 +20,10 @@ class LogSearch extends Component {
                 <ToastContainer />
                 <Filter
                     channels={this.props.channels}
-                    searchLogs={this.searchLogs}
                 />
                 <LogView />
             </div>
         );
-    }
-
-    searchLogs = (channel, username, year, month) => {
-        this.props.dispatch(loadLogs(channel, username, year, month)).catch((error) => {
-            toast.error("Failed to load logs: " + error);
-        });
     }
 }
 

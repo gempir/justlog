@@ -5,33 +5,26 @@ import reactStringReplace from "react-string-replace";
 
 class LogView extends Component {
 
-	static LOAD_LIMIT = 100;
-
-	state = {
-		limitLoad: true,
-	};
-
 	render() {
+		const oldLogs = [];
+		
+		for (let month = this.props.month - 1; month >= 1; month--) {
+			oldLogs.push(month)
+		}
+
+		console.log(oldLogs);
+
 		return (
 			<div className={"log-view"}>
-				{this.getLogs().map((value, key) =>
+				{this.props.messages.reverse().map((value, key) =>
 					<div key={key} className="line" onClick={() => this.setState({})}>
 						<span id={value.timestamp} className="timestamp">{this.formatDate(value.timestamp)}</span>{this.renderMessage(value.text)}
 					</div>
 				)}
-				{this.getLogs().length > this.constructor.LOAD_LIMIT && this.state.limitLoad && <button className={"load-all"} onClick={() => this.setState({limitLoad: false })}>Load all</button>}
 				{this.props.loading && <div>loading</div>}
 			</div>
 		);
 	}
-
-	getLogs = () => {
-		if (this.state.limitLoad) {
-			return this.props.messages.slice(this.props.messages.length - LogView.LOAD_LIMIT, this.props.messages.length).reverse();
-		} else {
-			return this.props.messages.reverse();
-		}
-	};
 
 	renderMessage = (message) => {
 		for (let emoteCode in twitchEmotes) {
@@ -60,6 +53,7 @@ class LogView extends Component {
 
 const mapStateToProps = (state) => {
 	return {
+		month: state.month,
 		messages: state.logs.messages,
 		loading: state.loading
 	};

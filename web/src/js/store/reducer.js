@@ -7,7 +7,7 @@ export default (state, action) => {
         case "SET_LOGS":
             return { ...state, logs: action.logs };
         case "SET_CURRENT":
-            return { ...state, currentChannel: action.currentChannel, currentUsername: action.currentUsername };
+            return { ...state, channel: action.channel, username: action.username };
         case "SET_TWITCH_EMOTES":
             return { ...state, twitchEmotes: action.twitchEmotes };
         default:
