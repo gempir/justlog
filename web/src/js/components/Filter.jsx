@@ -7,12 +7,6 @@ import loadLogs from "../actions/loadLogs";
 class Filter extends Component {
     username;
 
-    componentDidMount() {
-        if (this.props.channel && this.props.username) {
-            this.props.dispatch(loadLogs());
-        }
-    }
-
     render() {
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>

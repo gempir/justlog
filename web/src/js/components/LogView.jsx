@@ -2,26 +2,22 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import twitchEmotes from "../emotes/twitch";
 import reactStringReplace from "react-string-replace";
+import loadLogs from '../actions/loadLogs';
 
 class LogView extends Component {
 
 	render() {
-		const oldLogs = [];
-		
-		for (let month = this.props.month - 1; month >= 1; month--) {
-			oldLogs.push(month)
+		if (this.props.log.loaded === false) {
+			return <div className="log-view not-loaded" onClick={this.loadLog}>{this.props.log.getTitle()}</div>;
 		}
-
-		console.log(oldLogs);
 
 		return (
 			<div className={"log-view"}>
-				{this.props.messages.reverse().map((value, key) =>
+				{this.props.log.messages.reverse().map((value, key) =>
 					<div key={key} className="line" onClick={() => this.setState({})}>
 						<span id={value.timestamp} className="timestamp">{this.formatDate(value.timestamp)}</span>{this.renderMessage(value.text)}
 					</div>
 				)}
-				{this.props.loading && <div>loading</div>}
 			</div>
 		);
 	}
@@ -42,6 +38,10 @@ class LogView extends Component {
 		);
 	}
 
+	loadLog = () => {
+		this.props.dispatch(loadLogs(null, null, this.props.log.year, this.props.log.month));
+	}
+
 	formatDate = (timestamp) => {
 		return new Date(timestamp).toUTCString();
 	}
@@ -50,13 +50,10 @@ class LogView extends Component {
 		return `https://static-cdn.jtvnw.net/emoticons/v1/${id}/1.0`;
 	}
 }
-
 const mapStateToProps = (state) => {
-	return {
-		month: state.month,
-		messages: state.logs.messages,
-		loading: state.loading
-	};
+    return {
+
+    };
 };
 
 export default connect(mapStateToProps)(LogView);

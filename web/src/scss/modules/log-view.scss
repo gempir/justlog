@@ -8,6 +8,12 @@
     border-radius: 3px;
     position: relative;
     padding: 2px;
+    margin-top: 1rem;
+    color: white;
+
+    &:first-child {
+        margin-top: 0;
+    }
 
     &::-webkit-scrollbar {
         width: 10px;
@@ -20,6 +26,10 @@
 
     &:empty {
         display: none;
+    }
+
+    &.not-loaded {
+        cursor: pointer;
     }
 
     .line {

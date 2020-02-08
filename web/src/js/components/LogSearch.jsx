@@ -14,6 +14,12 @@ class LogSearch extends Component {
         props.dispatch(loadChannels());
     }
 
+    componentDidMount() {
+        if (this.props.channel && this.props.username) {
+            this.props.dispatch(loadLogs());
+        }
+    }
+
     render() {
         return (
             <div className="log-search">
@@ -21,7 +27,9 @@ class LogSearch extends Component {
                 <Filter
                     channels={this.props.channels}
                 />
-                <LogView />
+                {Object.values(this.props.logs).map(log =>
+                    <LogView key={log.getTitle()} log={log} />
+                )}
             </div>
         );
     }
@@ -30,6 +38,9 @@ class LogSearch extends Component {
 const mapStateToProps = (state) => {
     return {
         channels: state.channels,
+        channel: state.channel,
+        username: state.username,
+        logs: state.logs,
     };
 };
 
