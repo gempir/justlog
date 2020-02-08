@@ -16,6 +16,8 @@ class Filter extends Component {
         }
     }
 
+    username;
+
     componentDidMount() {
         if (this.props.currentChannel && this.props.currentUsername) {
             this.props.searchLogs(this.props.currentChannel, this.props.currentUsername, this.state.year, this.state.month);
@@ -23,18 +25,11 @@ class Filter extends Component {
     }
 
     render() {
-        const completions = this.props.channels
-            .filter(channel => channel.name.includes(this.props.currentChannel));
-
-        const autocompletions = [];
-        for (const completion of completions) {
-            autocompletions.push(<li key={completion.userID} onClick={() => this.setChannel(completion.name)}>{completion.name}</li>);
-        }
-
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
-                <AutocompleteInput placeholder="pajlada" onChange={this.onChannelChange} value={this.props.currentChannel} autocompletions={this.props.channels} />
+                <AutocompleteInput placeholder="pajlada" onChange={this.onChannelChange} value={this.props.currentChannel} onAutocompletionClick={() => this.username.focus()} autocompletions={this.props.channels.map(channel => channel.name)} />
                 <input
+                    ref={el => this.username = el}
                     type="text"
                     placeholder="gempir"
                     onChange={this.onUsernameChange}
@@ -45,8 +40,8 @@ class Filter extends Component {
         )
     }
 
-    onChannelChange = (e) => {
-        this.props.dispatch(setCurrent(e.target.value, this.props.currentUsername));
+    onChannelChange = (channel) => {
+        this.props.dispatch(setCurrent(channel, this.props.currentUsername));
     }
 
     onUsernameChange = (e) => {

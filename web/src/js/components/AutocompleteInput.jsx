@@ -1,19 +1,39 @@
 import React, { Component } from "react";
 
 export default class AutocompleteInput extends Component {
-    render() {            
+
+    state = {
+        focused: false,
+    };
+
+    input;
+
+    render() {
         return <div className="AutocompleteInput">
             <input
                 type="text"
+                ref={el => this.input = el}
                 placeholder={this.props.placeholder}
-                onChange={this.props.onChange}
+                onChange={e => this.props.onChange(e.target.value)}
+                onFocus={() => this.setState({ focused: true })}
+                onBlur={() => this.setState({ focused: false })}
                 value={this.props.value}
             />
-            <ul>
+            {this.state.focused && <ul>
                 {this.props.autocompletions
-                .filter(channel => channel.name.includes(this.props.value))
-                .map(channel => <li key={channel.userID} onClick={() => this.setChannel(channel.name)}>{channel.name}</li>)}
-            </ul>
+                    .filter(completion => completion.includes(this.props.value))
+                    .map(completion =>
+                        <li key={completion} onClick={() => this.handleClick(completion)} onMouseDown={e => e.preventDefault()}>
+                            {completion}
+                        </li>
+                    )}
+            </ul>}
         </div>
+    }
+
+    handleClick = (completion) => {
+        this.props.onChange(completion);
+        this.input.blur();
+        this.props.onAutocompletionClick(completion);
     }
 }

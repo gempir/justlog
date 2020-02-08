@@ -7,9 +7,27 @@
 
     ul {
         position: absolute;
+        z-index: 100;
+        margin: 0;
+        padding: 0;
+        color: white;
+        list-style-type: none;
         background: $grey-medium;
         top: 100%;
         left: 0;
         right: 0;
+        @include box-shadow(2);
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        
+        li {
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+
+            &:hover {
+                background: $grey-light;
+            }
+        }
     }
 }
