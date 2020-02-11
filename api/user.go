@@ -172,8 +172,6 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 // @tags user
 // @Produce  json
 // @Produce  plain
-// @Param channelIdType path string true "channelid or channel"
-// @Param userIdType path string true "userid or channel"
 // @Param channel path string true "channelname"
 // @Param username path string true "username"
 // @Param year path string true "year of logs"
@@ -184,7 +182,7 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200
 // @Failure 500
-// @Router /{channelIdType}/{channel}/{userIdType}/{username}/{year}/{month} [get]
+// @Router /channel/{channel}/user/{username}/{year}/{month} [get]
 func (s *Server) getUserLogsByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	username := strings.ToLower(c.Param("username"))
