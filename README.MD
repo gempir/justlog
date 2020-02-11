@@ -3,3 +3,7 @@
 #### What is this?
 justlog is a bot I maintain for a couple of channels. Its features differ from other bots in that it doesn't support
 commands, etc. yet, it focuses on logging and providing an api for the logs.
+
+### V2 
+
+DO NOT USE V2 ENDPOINTS. They are unstable and will likely be changed in the future

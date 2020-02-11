@@ -34,50 +34,19 @@ info:
   title: justlog API
   version: "1.0"
 paths:
-  /channel/{channel}/user/{username}:
+  /{channelIdType}/{channel}/{userIdType}/{username}/{year}/{month}:
     get:
       parameters:
-      - description: channelname
+      - description: channelid or channel
         in: path
-        name: channel
+        name: channelIdType
         required: true
         type: string
-      - description: username
+      - description: userid or channel
         in: path
-        name: username
+        name: userIdType
         required: true
         type: string
-      - description: unix timestamp, limit logs by timestamps from this point
-        in: query
-        name: from
-        type: integer
-      - description: unix timestamp, limit logs by timestamps to this point
-        in: query
-        name: to
-        type: integer
-      - description: response as json
-        in: query
-        name: json
-        type: integer
-      - description: define response type only json supported currently, rest defaults
-          to plain
-        in: query
-        name: type
-        type: string
-      produces:
-      - application/json
-      - text/plain
-      responses:
-        "200": {}
-        "303": {}
-        "404": {}
-        "500": {}
-      summary: Redirect to last logs of user
-      tags:
-      - user
-  /channel/{channel}/user/{username}/{year}/{month}:
-    get:
-      parameters:
       - description: channelname
         in: path
         name: channel
@@ -124,6 +93,47 @@ paths:
       summary: Get logs for user by year and month
       tags:
       - user
+  /channel/{channel}/user/{username}:
+    get:
+      parameters:
+      - description: channelname
+        in: path
+        name: channel
+        required: true
+        type: string
+      - description: username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: unix timestamp, limit logs by timestamps from this point
+        in: query
+        name: from
+        type: integer
+      - description: unix timestamp, limit logs by timestamps to this point
+        in: query
+        name: to
+        type: integer
+      - description: response as json
+        in: query
+        name: json
+        type: integer
+      - description: define response type only json supported currently, rest defaults
+          to plain
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      responses:
+        "200": {}
+        "303": {}
+        "404": {}
+        "500": {}
+      summary: Redirect to last logs of user
+      tags:
+      - user
   /channel/{channel}/user/{username}/random:
     get:
       parameters:
@@ -157,7 +167,7 @@ paths:
       summary: Get a random chat message from a user
       tags:
       - user
-  /channelid/{channelid}/user/{userid}:
+  /channelid/{channelid}/userid/{userid}:
     get:
       parameters:
       - description: twitch userid
@@ -295,4 +305,64 @@ paths:
       summary: Get all joined channels
       tags:
       - bot
+  /v2/{channelType}/{channel}/{userType}/{user}/{year}/{month}:
+    get:
+      deprecated: true
+      parameters:
+      - description: id or name
+        in: path
+        name: channelType
+        required: true
+        type: string
+      - description: id or name
+        in: path
+        name: userIdType
+        required: true
+        type: string
+      - description: channelid or channelname
+        in: path
+        name: channel
+        required: true
+        type: string
+      - description: userid or username
+        in: path
+        name: user
+        required: true
+        type: string
+      - description: year of logs
+        in: path
+        name: year
+        required: true
+        type: string
+      - description: month of logs
+        in: path
+        name: month
+        required: true
+        type: string
+      - description: unix timestamp, limit logs by timestamps from this point
+        in: query
+        name: from
+        type: integer
+      - description: unix timestamp, limit logs by timestamps to this point
+        in: query
+        name: to
+        type: integer
+      - description: response as json
+        in: query
+        name: json
+        type: integer
+      - description: define response type only json supported currently, rest defaults
+          to plain
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      - text/plain
+      responses:
+        "200": {}
+        "500": {}
+      summary: UNSTABLE DO NOT USE
+      tags:
+      - user
 swagger: "2.0"

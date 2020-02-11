@@ -5,7 +5,7 @@ full: build_web build_swagger build
 
 full_run: full run
 
-run:
+run: build
 	./justlog
 
 run_web:

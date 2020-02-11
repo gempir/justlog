@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import setCurrent from "./../actions/setCurrent";
 import AutocompleteInput from "./AutocompleteInput";
 import loadLogs from "../actions/loadLogs";
+import LoadingSpinner from "./LoadingSpinner";
 
 class Filter extends Component {
     username;
@@ -18,7 +19,7 @@ class Filter extends Component {
                     onChange={this.onUsernameChange}
                     value={this.props.username}
                 />
-                <button type="submit" className="show-logs">Show logs</button>
+                <button type="submit" className="show-logs">{this.props.loading ? <LoadingSpinner /> : <>Show logs</>}</button>
             </form>
         )
     }
@@ -47,7 +48,8 @@ class Filter extends Component {
 const mapStateToProps = (state) => ({
     channels: state.channels,
     channel: state.channel,
-    username: state.username
+    username: state.username,
+    loading: state.loading
 });
 
 export default connect(mapStateToProps)(Filter);

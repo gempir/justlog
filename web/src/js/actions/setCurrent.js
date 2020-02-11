@@ -1,7 +1,7 @@
 export default (channel, username) => (dispatch) => {
     dispatch({
         type: 'SET_CURRENT',
-        channel: channel,
-        username: username
+        channel: channel.trim(),
+        username: username.trim()
     });
 }

@@ -25,11 +25,23 @@
 
     .show-logs {
         width: 200px;
+        height: 35px;
         margin-left: 0.5rem;
         background: $dark-blue;
 
         &:hover, &:active {
             background: $light-blue;
+        }
+
+        .LoadingSpinner {
+            position: relative;
+            width: 14px;
+            height: 14px;
+
+            div {
+                margin: 2px;
+                border-width: 2px;
+            }
         }
     }
 }

@@ -123,77 +123,7 @@
                 }
             }
         },
-        "/channel/{channel}/user/{username}/{year}/{month}": {
-            "get": {
-                "produces": [
-                    "application/json",
-                    "text/plain"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get logs for user by year and month",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "channelname",
-                        "name": "channel",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "username",
-                        "name": "username",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "year of logs",
-                        "name": "year",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "month of logs",
-                        "name": "month",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "unix timestamp, limit logs by timestamps from this point",
-                        "name": "from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "unix timestamp, limit logs by timestamps to this point",
-                        "name": "to",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "response as json",
-                        "name": "json",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "define response type only json supported currently, rest defaults to plain",
-                        "name": "type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {},
-                    "500": {}
-                }
-            }
-        },
-        "/channelid/{channelid}/user/{userid}": {
+        "/channelid/{channelid}/userid/{userid}": {
             "get": {
                 "produces": [
                     "application/json",
@@ -390,6 +320,175 @@
                             "$ref": "#/definitions/api.ErrorResponse"
                         }
                     }
+                }
+            }
+        },
+        "/v2/{channelType}/{channel}/{userType}/{user}/{year}/{month}": {
+            "get": {
+                "produces": [
+                    "application/json",
+                    "text/plain"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "UNSTABLE DO NOT USE",
+                "deprecated": true,
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id or name",
+                        "name": "channelType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id or name",
+                        "name": "userIdType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "channelid or channelname",
+                        "name": "channel",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "userid or username",
+                        "name": "user",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "year of logs",
+                        "name": "year",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "month of logs",
+                        "name": "month",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "unix timestamp, limit logs by timestamps from this point",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "unix timestamp, limit logs by timestamps to this point",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "response as json",
+                        "name": "json",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "define response type only json supported currently, rest defaults to plain",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {},
+                    "500": {}
+                }
+            }
+        },
+        "/{channelIdType}/{channel}/{userIdType}/{username}/{year}/{month}": {
+            "get": {
+                "produces": [
+                    "application/json",
+                    "text/plain"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get logs for user by year and month",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "channelid or channel",
+                        "name": "channelIdType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "userid or channel",
+                        "name": "userIdType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "channelname",
+                        "name": "channel",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "year of logs",
+                        "name": "year",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "month of logs",
+                        "name": "month",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "unix timestamp, limit logs by timestamps from this point",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "unix timestamp, limit logs by timestamps to this point",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "response as json",
+                        "name": "json",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "define response type only json supported currently, rest defaults to plain",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {},
+                    "500": {}
                 }
             }
         }

@@ -40,8 +40,22 @@
         }
 
         button {
+            width: 90px;
+            height: 35px;
+            white-space: nowrap;
             padding: 0.5rem 1rem;
             background: $dark-blue;
+
+            .LoadingSpinner {
+                position: relative;
+                width: 14px;
+                height: 14px;
+    
+                div {
+                    margin: 2px;
+                    border-width: 2px;
+                }
+            }
         }
     }
 

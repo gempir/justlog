@@ -8,6 +8,7 @@ import (
 
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/labstack/echo/v4"
+	helix "github.com/gempir/justlog/helix"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,7 +33,7 @@ type RandomQuoteJSON struct {
 // @Success 303
 // @Success 200
 // @Failure 404
-// @Router /channelid/{channelid}/user/{userid} [get]
+// @Router /channelid/{channelid}/userid/{userid} [get]
 func (s *Server) getLastUserLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
@@ -87,6 +88,62 @@ func (s *Server) getLastUserLogsByName(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
+
+// @Summary UNSTABLE DO NOT USE
+// @tags user
+// @Deprecated
+// @Produce  json
+// @Produce  plain
+// @Param channelType path string true "id or name"
+// @Param userIdType path string true "id or name"
+// @Param channel path string true "channelid or channelname"
+// @Param user path string true "userid or username"
+// @Param year path string true "year of logs"
+// @Param month path string true "month of logs"
+// @Param from query int false "unix timestamp, limit logs by timestamps from this point"
+// @Param to query int false "unix timestamp, limit logs by timestamps to this point"
+// @Param json query int false "response as json"
+// @Param type query string false "define response type only json supported currently, rest defaults to plain"
+// @Success 200
+// @Failure 500
+// @Router /v2/{channelType}/{channel}/{userType}/{user}/{year}/{month} [get]
+func (s *Server) getUserLogsExact(c echo.Context) error {
+	channel := strings.ToLower(c.Param("channel"))
+	user := strings.ToLower(c.Param("user"))
+
+	userMap := map[string]helix.UserData{}
+	if (c.Param("channelType") == "name" || c.Param("userType") == "name") {
+		var err error
+		userMap, err = s.helixClient.GetUsersByUsernames([]string{channel, user})
+		if err != nil {
+			log.Error(err)
+			return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
+		}
+	}
+
+	names := c.ParamNames()
+	values := c.ParamValues()
+	names = append(names, "channelid")
+
+	if (c.Param("channelType") == "name") {
+		values = append(values, userMap[channel].ID)
+	} else {
+		values = append(values, c.Param("channel"))
+	}
+
+	names = append(names, "userid")
+	if (c.Param("userType") == "name") {
+		values = append(values, userMap[user].ID)
+	} else {
+		values = append(values, c.Param("user"))
+	}
+
+	c.SetParamNames(names...)
+	c.SetParamValues(values...)
+
+	return s.getUserLogs(c)
+}
+
 func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	username := strings.ToLower(c.Param("username"))
@@ -115,6 +172,8 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 // @tags user
 // @Produce  json
 // @Produce  plain
+// @Param channelIdType path string true "channelid or channel"
+// @Param userIdType path string true "userid or channel"
 // @Param channel path string true "channelname"
 // @Param username path string true "username"
 // @Param year path string true "year of logs"
@@ -125,7 +184,7 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200
 // @Failure 500
-// @Router /channel/{channel}/user/{username}/{year}/{month} [get]
+// @Router /{channelIdType}/{channel}/{userIdType}/{username}/{year}/{month} [get]
 func (s *Server) getUserLogsByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	username := strings.ToLower(c.Param("username"))
