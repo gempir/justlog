@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/labstack/echo/v4"
 	helix "github.com/gempir/justlog/helix"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -88,7 +88,6 @@ func (s *Server) getLastUserLogsByName(c echo.Context) error {
 	return c.Redirect(303, redirectURL)
 }
 
-
 // @Summary UNSTABLE DO NOT USE
 // @tags user
 // @Deprecated
@@ -106,13 +105,13 @@ func (s *Server) getLastUserLogsByName(c echo.Context) error {
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200
 // @Failure 500
-// @Router /v2/{channelType}/{channel}/{userType}/{user}/{year}/{month} [get]
-func (s *Server) getUserLogsExact(c echo.Context) error {
+// @Router /{channelType}/{channel}/{userType}/{user}/{year}/{month} [get]
+func (s *Server) getUserLogsExact(c userRequestContext) error {
 	channel := strings.ToLower(c.Param("channel"))
 	user := strings.ToLower(c.Param("user"))
 
 	userMap := map[string]helix.UserData{}
-	if (c.Param("channelType") == "name" || c.Param("userType") == "name") {
+	if c.channelType == "channel" || c.userType == "user" {
 		var err error
 		userMap, err = s.helixClient.GetUsersByUsernames([]string{channel, user})
 		if err != nil {
@@ -125,14 +124,14 @@ func (s *Server) getUserLogsExact(c echo.Context) error {
 	values := c.ParamValues()
 	names = append(names, "channelid")
 
-	if (c.Param("channelType") == "name") {
+	if c.channelType == "channel" {
 		values = append(values, userMap[channel].ID)
 	} else {
 		values = append(values, c.Param("channel"))
 	}
 
 	names = append(names, "userid")
-	if (c.Param("userType") == "name") {
+	if c.userType == "user" {
 		values = append(values, userMap[user].ID)
 	} else {
 		values = append(values, c.Param("user"))
@@ -265,7 +264,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	case *twitch.PrivateMessage:
 		message := *parsedMessage.(*twitch.PrivateMessage)
 
-		if shouldRespondWithJson(c) {
+		if shouldRespondWithJSON(c) {
 
 			randomQ := RandomQuoteJSON{
 				Channel:     message.Channel,
@@ -282,7 +281,7 @@ func (s *Server) getRandomQuote(c echo.Context) error {
 	case *twitch.ClearChatMessage:
 		message := *parsedMessage.(*twitch.ClearChatMessage)
 
-		if shouldRespondWithJson(c) {
+		if shouldRespondWithJSON(c) {
 
 			randomQ := RandomQuoteJSON{
 				Channel:     message.Channel,
@@ -393,7 +392,7 @@ func (s *Server) getUserLogs(c echo.Context) error {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	if shouldRespondWithJson(c) {
+	if shouldRespondWithJSON(c) {
 		return writeJSONResponse(c, &logResult)
 	}
 
@@ -488,7 +487,7 @@ func (s *Server) getUserLogsRange(c echo.Context) error {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	if shouldRespondWithJson(c) {
+	if shouldRespondWithJSON(c) {
 		return writeJSONResponse(c, &logResult)
 	}
 

@@ -18,10 +18,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	// docs are weird and just need a blank import
 	_ "github.com/gempir/justlog/docs"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// Server api server
 type Server struct {
 	listenAddress string
 	logPath       string
@@ -30,6 +32,7 @@ type Server struct {
 	channels      []string
 }
 
+// NewServer create api Server
 func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger, helixClient *helix.Client, channels []string) Server {
 	return Server{
 		listenAddress: listenAddress,
@@ -40,10 +43,18 @@ func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger,
 	}
 }
 
+// AddChannel adds a channel to the collection to output on the channels endpoint
 func (s *Server) AddChannel(channel string) {
 	s.channels = append(s.channels, channel)
 }
 
+type userRequestContext struct {
+	echo.Context
+	channelType string
+	userType    string
+}
+
+// Init start the server
 func (s *Server) Init() {
 	e := echo.New()
 	e.HideBanner = true
@@ -75,18 +86,27 @@ func (s *Server) Init() {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.GET("/channels", s.getAllChannels)
 
+	e.GET("/channel/:channel/user/:user/:year/:month", func(c echo.Context) error {
+		return s.getUserLogsExact(userRequestContext{c, "channel", "user"})
+	})
+	e.GET("/channelid/:channel/user/:user/:year/:month", func(c echo.Context) error {
+		return s.getUserLogsExact(userRequestContext{c, "channelid", "user"})
+	})
+	e.GET("/channel/:channel/userid/:user/:year/:month", func(c echo.Context) error {
+		return s.getUserLogsExact(userRequestContext{c, "channel", "userid"})
+	})
+	e.GET("/channelid/:channel/userid/:user/:year/:month", func(c echo.Context) error {
+		return s.getUserLogsExact(userRequestContext{c, "channelid", "userid"})
+	})
+
 	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
 	e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
 
 	e.GET("/channel/:channel/user/:username", s.getLastUserLogsByName)
-	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
 	e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
 
 	e.GET("/channelid/:channelid/userid/:userid", s.getLastUserLogs)
-	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
 	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
-
-	e.GET("/v2/:channelType/:channel/:userType/:user/:year/:month", s.getUserLogsExact)
 
 	e.GET("/channelid/:channelid/range", s.getChannelLogsRange)
 	e.GET("/channel/:channel/range", s.getChannelLogsRangeByName)
@@ -109,6 +129,7 @@ type channel struct {
 	Name   string `json:"name"`
 }
 
+// AllChannelsJSON inlcudes all channels
 type AllChannelsJSON struct {
 	Channels []channel `json:"channels"`
 }
@@ -127,6 +148,7 @@ type chatMessage struct {
 	Raw         string             `json:"raw"`
 }
 
+// ErrorResponse a simple error response
 type ErrorResponse struct {
 	Message string `json:"message"`
 }
@@ -284,7 +306,7 @@ func shouldReverse(c echo.Context) bool {
 	return c.QueryParam("order") == "reverse" || ok
 }
 
-func shouldRespondWithJson(c echo.Context) bool {
+func shouldRespondWithJSON(c echo.Context) bool {
 	_, ok := c.QueryParams()["json"]
 
 	return c.Request().Header.Get("Content-Type") == "application/json" || c.Request().Header.Get("accept") == "application/json" || c.QueryParam("type") == "json" || ok

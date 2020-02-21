@@ -169,7 +169,7 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	if shouldRespondWithJson(c) {
+	if shouldRespondWithJSON(c) {
 		return writeJSONResponse(c, &logResult)
 	}
 
@@ -270,7 +270,7 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	if shouldRespondWithJson(c) {
+	if shouldRespondWithJSON(c) {
 		return writeJSONResponse(c, &logResult)
 	}
 

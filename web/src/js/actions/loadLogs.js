@@ -13,11 +13,11 @@ export default function (channel, username, year, month) {
 
             dispatch(setLoading(true));
 
-            let channelPath = "name";
+            let channelPath = "channel";
             if (channel.toLowerCase().startsWith("id:")) {
                 channelPath = "id";
             }
-            let usernamePath = "name";
+            let usernamePath = "user";
             if (username.toLowerCase().startsWith("id:")) {
                 usernamePath = "id";
             }
