@@ -28,20 +28,6 @@ type config struct {
 	LogLevel      string   `json:"logLevel"`
 }
 
-// @title justlog API
-// @version 1.0
-// @description API for twitch logs
-
-// @contact.name gempir
-// @contact.url https://gempir.com
-// @contact.email gempir.dev@gmail.com
-
-// @license.name MIT
-// @license.url https://github.com/gempir/justlog/blob/master/LICENSE
-
-// @host logs.ivr.fi
-// @BasePath /
-
 func main() {
 	startTime := time.Now()
 

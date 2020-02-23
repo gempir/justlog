@@ -106,12 +106,12 @@ func (s *Server) getLastUserLogsByName(c echo.Context) error {
 // @Success 200
 // @Failure 500
 // @Router /{channelType}/{channel}/{userType}/{user}/{year}/{month} [get]
-func (s *Server) getUserLogsExact(c userRequestContext) error {
+func (s *Server) getUserLogsExact(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	user := strings.ToLower(c.Param("user"))
 
 	userMap := map[string]helix.UserData{}
-	if c.channelType == "channel" || c.userType == "user" {
+	if c.Param("channelType") == "channel" || c.Param("userType") == "user" {
 		var err error
 		userMap, err = s.helixClient.GetUsersByUsernames([]string{channel, user})
 		if err != nil {
@@ -124,14 +124,14 @@ func (s *Server) getUserLogsExact(c userRequestContext) error {
 	values := c.ParamValues()
 	names = append(names, "channelid")
 
-	if c.channelType == "channel" {
+	if c.Param("channelType") == "channel" {
 		values = append(values, userMap[channel].ID)
 	} else {
 		values = append(values, c.Param("channel"))
 	}
 
 	names = append(names, "userid")
-	if c.userType == "user" {
+	if c.Param("userType") == "user" {
 		values = append(values, userMap[user].ID)
 	} else {
 		values = append(values, c.Param("user"))
@@ -181,7 +181,7 @@ func (s *Server) getUserLogsRangeByName(c echo.Context) error {
 // @Param type query string false "define response type only json supported currently, rest defaults to plain"
 // @Success 200
 // @Failure 500
-// @Router /channel/{channel}/user/{username}/{year}/{month} [get]
+// @Router /channel/{channel}/user/{username}/{time} [get]
 func (s *Server) getUserLogsByName(c echo.Context) error {
 	channel := strings.ToLower(c.Param("channel"))
 	username := strings.ToLower(c.Param("username"))
@@ -202,6 +202,10 @@ func (s *Server) getUserLogsByName(c echo.Context) error {
 
 	c.SetParamNames(names...)
 	c.SetParamValues(values...)
+
+	if c.Param("time") == "range" {
+		return s.getUserLogsRange(c)
+	}
 
 	return s.getUserLogs(c)
 }
@@ -319,8 +323,10 @@ func (s *Server) getUserLogs(c echo.Context) error {
 	channelID := c.Param("channelid")
 	userID := c.Param("userid")
 
-	yearStr := c.Param("year")
-	monthStr := c.Param("month")
+	time := c.Param("time")
+	timeSplit := strings.Split(time, "/")
+	yearStr := timeSplit[0]
+	monthStr := timeSplit[1]
 
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {

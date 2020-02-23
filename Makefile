@@ -1,9 +1,7 @@
+full: web swag build
+
 build:
 	go build
-
-full: build_web build_swagger build
-
-full_run: full run
 
 run: build
 	./justlog
@@ -11,15 +9,21 @@ run: build
 run_web:
 	cd web && yarn start
 
-build_swagger:
-	swag init
+swag: init_swag init_assets
 
-build_web: get_web
+web: init_web
 	cd web && yarn build
-	go run api/assets.go
 
-get_web:
+init_web:
 	cd web && yarn install
+
+init_swag:
+	swag init -g api/server.go --output web/public
+	rm web/public/docs.go
+	rm web/public/swagger.yaml
+
+init_assets:
+	go run api/assets.go
 
 # Docker stuff
 container:

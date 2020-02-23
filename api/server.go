@@ -16,11 +16,6 @@ import (
 	"github.com/gempir/justlog/filelog"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
-	// docs are weird and just need a blank import
-	_ "github.com/gempir/justlog/docs"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 // Server api server
@@ -30,6 +25,8 @@ type Server struct {
 	fileLogger    *filelog.Logger
 	helixClient   *helix.Client
 	channels      []string
+	assets        []string
+	assetHandler  http.Handler
 }
 
 // NewServer create api Server
@@ -40,6 +37,8 @@ func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
+		assets:        []string{"/", "/bundle.js", "/swagger.json", "/swagger.html"},
+		assetHandler:  http.FileServer(assets),
 	}
 }
 
@@ -54,69 +53,73 @@ type userRequestContext struct {
 	userType    string
 }
 
+// @title justlog API
+// @version 1.0
+// @description API for twitch logs
+
+// @contact.name gempir
+// @contact.url https://gempir.com
+// @contact.email gempir.dev@gmail.com
+
+// @license.name MIT
+// @license.url https://github.com/gempir/justlog/blob/master/LICENSE
+
+// @host logs.ivr.fi
+// @BasePath /
+
 // Init start the server
 func (s *Server) Init() {
-	e := echo.New()
-	e.HideBanner = true
+	http.Handle("/", corsHandler(http.HandlerFunc(s.route)))
 
-	DefaultCORSConfig := middleware.CORSConfig{
-		Skipper:      middleware.DefaultSkipper,
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+	// e.GET("/:channelType/:channel/:userType/:user/:time", s.getUserLogsExact)
+
+	// e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
+	// e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
+
+	// e.GET("/channel/:channel/user/:username", s.getLastUserLogsByName)
+	// e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
+
+	// e.GET("/channelid/:channelid/userid/:userid", s.getLastUserLogs)
+	// e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
+
+	// e.GET("/channelid/:channelid/range", s.getChannelLogsRange)
+	// e.GET("/channel/:channel/range", s.getChannelLogsRangeByName)
+
+	// e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
+	// e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
+	// e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
+	// e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
+
+	log.Fatal(http.ListenAndServe(s.listenAddress, nil))
+}
+
+func (s *Server) route(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.EscapedPath()
+
+	if contains(s.assets, url) {
+		s.assetHandler.ServeHTTP(w, r)
+		return
 	}
-	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
-		RedirectCode: http.StatusMovedPermanently,
-	}))
-	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
-		XSSProtection:         "", // disabled
-		ContentTypeNosniff:    "nosniff",
-		XFrameOptions:         "", // disabled
-		HSTSMaxAge:            0,  // disabled
-		ContentSecurityPolicy: "", // disabled
-	}))
-	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
 
-	assetHandler := http.FileServer(assets)
-	e.GET("/", echo.WrapHandler(assetHandler))
-	e.GET("/bundle.js", echo.WrapHandler(assetHandler))
+	if url == "/channels" {
+		s.getAllChannels(w, r)
+		return
+	}
 
-	e.GET("/docs", func(c echo.Context) error {
-		return c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	fmt.Fprint(w, r.URL.EscapedPath())
+}
+
+func corsHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			h.ServeHTTP(w, r)
+		}
 	})
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	e.GET("/channels", s.getAllChannels)
-
-	e.GET("/channel/:channel/user/:user/:year/:month", func(c echo.Context) error {
-		return s.getUserLogsExact(userRequestContext{c, "channel", "user"})
-	})
-	e.GET("/channelid/:channel/user/:user/:year/:month", func(c echo.Context) error {
-		return s.getUserLogsExact(userRequestContext{c, "channelid", "user"})
-	})
-	e.GET("/channel/:channel/userid/:user/:year/:month", func(c echo.Context) error {
-		return s.getUserLogsExact(userRequestContext{c, "channel", "userid"})
-	})
-	e.GET("/channelid/:channel/userid/:user/:year/:month", func(c echo.Context) error {
-		return s.getUserLogsExact(userRequestContext{c, "channelid", "userid"})
-	})
-
-	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
-	e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
-
-	e.GET("/channel/:channel/user/:username", s.getLastUserLogsByName)
-	e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
-
-	e.GET("/channelid/:channelid/userid/:userid", s.getLastUserLogs)
-	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
-
-	e.GET("/channelid/:channelid/range", s.getChannelLogsRange)
-	e.GET("/channel/:channel/range", s.getChannelLogsRangeByName)
-
-	e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
-	e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
-	e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
-	e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
-
-	e.Logger.Fatal(e.Start(s.listenAddress))
 }
 
 var (
@@ -157,6 +160,15 @@ type timestamp struct {
 	time.Time
 }
 
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 func reverse(input []string) []string {
 	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
 		input[i], input[j] = input[j], input[i]
@@ -171,21 +183,34 @@ func reverse(input []string) []string {
 // @Success 200 {object} api.RandomQuoteJSON json
 // @Failure 500 {object} api.ErrorResponse json
 // @Router /channels [get]
-func (s *Server) getAllChannels(c echo.Context) error {
+func (s *Server) getAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}
 	users, err := s.helixClient.GetUsersByUserIds(s.channels)
 
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
+		http.Error(w, "Failure fetching data from twitch", http.StatusInternalServerError)
+		return
 	}
 
 	for _, user := range users {
 		response.Channels = append(response.Channels, channel{UserID: user.ID, Name: user.Login})
 	}
 
-	return c.JSON(http.StatusOK, response)
+	writeJSON(response, http.StatusOK, w, r)
+}
+
+func writeJSON(data interface{}, code int, w http.ResponseWriter, r *http.Request) {
+	js, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(code)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 func (t timestamp) MarshalJSON() ([]byte, error) {
