@@ -67,44 +67,12 @@ type timeRequest struct {
 	to    string
 	year  string
 	month string
+	day   string
 }
-
-// @title justlog API
-// @version 1.0
-// @description API for twitch logs
-
-// @contact.name gempir
-// @contact.url https://gempir.com
-// @contact.email gempir.dev@gmail.com
-
-// @license.name MIT
-// @license.url https://github.com/gempir/justlog/blob/master/LICENSE
-
-// @host logs.ivr.fi
-// @BasePath /
 
 // Init start the server
 func (s *Server) Init() {
 	http.Handle("/", corsHandler(http.HandlerFunc(s.route)))
-
-	// e.GET("/:channelType/:channel/:userType/:user/:time", s.getUserLogsExact)
-
-	// e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
-	// e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
-
-	// e.GET("/channel/:channel/user/:username", s.getLastUserLogsByName)
-	// e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
-
-	// e.GET("/channelid/:channelid/userid/:userid", s.getLastUserLogs)
-	// e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
-
-	// e.GET("/channelid/:channelid/range", s.getChannelLogsRange)
-	// e.GET("/channel/:channel/range", s.getChannelLogsRangeByName)
-
-	// e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
-	// e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
-	// e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
-	// e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
 
 	log.Fatal(http.ListenAndServe(s.listenAddress, nil))
 }
@@ -126,7 +94,7 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.EscapedPath()
+	url := strings.TrimRight(r.URL.EscapedPath(), "/")
 
 	matches := pathRegex.FindAllStringSubmatch(url, -1)
 	if len(matches) == 0 || len(matches[0]) < 5 {
@@ -138,24 +106,52 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 		time: timeRequest{},
 	}
 
-	if matches[0][1] == "channel" {
-		request.channel = matches[0][2]
+	params := []string{}
+	for _, match := range matches[0] {
+		if match != "" {
+			params = append(params, match)
+		}
 	}
-	if matches[0][1] == "channelid" {
-		request.channelid = matches[0][2]
+
+	isUserRequest := len(params) > 3 && (params[3] == "user" || params[3] == "userid")
+	isChannelRequest := len(params) < 3 || (len(params) > 3 && params[3] != "user" && params[3] != "userid")
+
+	if params[1] == "channel" {
+		request.channel = params[2]
 	}
-	if matches[0][3] == "user" {
-		request.user = matches[0][4]
+	if params[1] == "channelid" {
+		request.channelid = params[2]
 	}
-	if matches[0][3] == "userid" {
-		request.userid = matches[0][4]
+	if isUserRequest && params[3] == "user" {
+		request.user = params[4]
 	}
-	if len(matches[0]) == 7 {
-		request.time.year = matches[0][5]
-		request.time.month = matches[0][6]
-	} else {
+	if isUserRequest && params[3] == "userid" {
+		request.userid = params[4]
+	}
+
+	if isUserRequest && len(params) == 7 {
+		request.time.year = params[5]
+		request.time.month = params[6]
+	} else if isChannelRequest && len(params) == 6 {
+		request.time.year = params[3]
+		request.time.month = params[4]
+		request.time.day = params[5]
+	} else if (isUserRequest && len(params) == 6 && params[5] == "range") || (isChannelRequest && len(params) == 4 && params[3] == "range") {
 		request.time.from = r.URL.Query().Get("from")
 		request.time.to = r.URL.Query().Get("to")
+	} else {
+		request.time.year = string(time.Now().Year())
+		request.time.month = string(time.Now().Month())
+		query := r.URL.Query()
+		query.Del("from")
+		query.Del("to")
+
+		encodedQuery := ""
+		if query.Encode() != "" {
+			encodedQuery = "?" + query.Encode()
+		}
+		http.Redirect(w, r, fmt.Sprintf("%s/%d/%d%s", params[0], time.Now().Year(), time.Now().Month(), encodedQuery), http.StatusPermanentRedirect)
+		return
 	}
 
 	if _, ok := r.URL.Query()["reverse"]; ok {
@@ -179,7 +175,23 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not fetch userids", http.StatusInternalServerError)
 		return
 	}
-	logs, err := s.getUserLogs(request)
+
+	var logs *chatLog
+	if request.time.from != "" && request.time.to != "" {
+		if isUserRequest {
+			logs, err = s.getUserLogsRange(request)
+		} else {
+			logs, err = s.getChannelLogsRange(request)
+		}
+
+	} else {
+		if isUserRequest {
+			logs, err = s.getUserLogs(request)
+		} else {
+			logs, err = s.getChannelLogs(request)
+		}
+	}
+
 	if err != nil {
 		log.Error(err)
 		http.Error(w, "could not load logs", http.StatusInternalServerError)
@@ -187,17 +199,17 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if request.responseType == responseTypeJSON {
-		writeJSON(&logs, http.StatusOK, w, r)
+		writeJSON(logs, http.StatusOK, w, r)
 		return
 	}
 
 	if request.responseType == responseTypeRaw {
-		writeRaw(&logs, http.StatusOK, w, r)
+		writeRaw(logs, http.StatusOK, w, r)
 		return
 	}
 
 	if request.responseType == responseTypeText {
-		writeText(&logs, http.StatusOK, w, r)
+		writeText(logs, http.StatusOK, w, r)
 		return
 	}
 
@@ -212,10 +224,10 @@ func clearHeaders(w http.ResponseWriter) {
 
 func (s *Server) fillIds(request userRequest) (userRequest, error) {
 	usernames := []string{}
-	if request.channelid == "" {
+	if request.channelid == "" && request.channel != "" {
 		usernames = append(usernames, request.channel)
 	}
-	if request.userid == "" {
+	if request.userid == "" && request.user != "" {
 		usernames = append(usernames, request.user)
 	}
 
@@ -250,7 +262,7 @@ func corsHandler(h http.Handler) http.Handler {
 var (
 	userHourLimit    = 744.0
 	channelHourLimit = 24.0
-	pathRegex        = regexp.MustCompile(`\/(channel|channelid)\/([a-zA-Z0-9]*)\/(user|userid)\/([a-zA-Z0-9]*)(?:\/(\d{4})\/(\d{1,2}))?`)
+	pathRegex        = regexp.MustCompile(`\/(channel|channelid)\/([a-zA-Z0-9]+)(?:\/(user|userid)\/([a-zA-Z0-9]+))?(?:(?:\/(\d{4})\/(\d{1,2})(?:\/(\d{1,2}))?)|(?:\/(range)))?`)
 )
 
 type channel struct {
@@ -412,35 +424,6 @@ func parseFromTo(from, to string, limit float64) (time.Time, time.Time, error) {
 
 	return fromTime, toTime, nil
 }
-
-// func writeTextResponse(c echo.Context, cLog *chatLog) error {
-// 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-// 	c.Response().WriteHeader(http.StatusOK)
-
-// 	for _, cMessage := range cLog.Messages {
-// 		switch cMessage.Type {
-// 		case twitch.PRIVMSG:
-// 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
-// 		case twitch.CLEARCHAT:
-// 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
-// 		case twitch.USERNOTICE:
-// 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func writeRawResponse(c echo.Context, cLog *chatLog) error {
-// 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-// 	c.Response().WriteHeader(http.StatusOK)
-
-// 	for _, cMessage := range cLog.Messages {
-// 		c.Response().Write([]byte(cMessage.Raw + "\n"))
-// 	}
-
-// 	return nil
-// }
 
 func parseTimestamp(timestamp string) (time.Time, error) {
 

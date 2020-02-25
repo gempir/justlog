@@ -91,6 +91,7 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 	return result, nil
 }
 
+// GetUsersByUsernames fetches userdata from helix
 func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, error) {
 	var filteredUsernames []string
 
@@ -147,7 +148,7 @@ func (c *Client) makeRequest(parameters string) error {
 	if response.StatusCode >= 400 {
 		return fmt.Errorf("%d GET https://api.twitch.tv/helix/users%s", response.StatusCode, parameters)
 	}
-	
+
 	log.Infof("%d GET https://api.twitch.tv/helix/users%s", response.StatusCode, parameters)
 
 	defer response.Body.Close()

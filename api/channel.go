@@ -1,270 +1,182 @@
 package api
 
-// func (s *Server) getCurrentChannelLogs(c echo.Context) error {
-// 	channelID := c.Param("channelid")
-// 	year := time.Now().Year()
-// 	month := int(time.Now().Month())
-// 	day := time.Now().Day()
+import (
+	"errors"
+	"fmt"
+	"strconv"
 
-// 	redirectURL := fmt.Sprintf("/channelid/%s/%d/%d/%d", channelID, year, month, day)
-// 	if len(c.QueryString()) > 0 {
-// 		redirectURL += "?" + c.QueryString()
-// 	}
-// 	return c.Redirect(http.StatusSeeOther, redirectURL)
-// }
+	"github.com/gempir/go-twitch-irc/v2"
+)
 
-// func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
-// 	channel := c.Param("channel")
-// 	year := time.Now().Year()
-// 	month := int(time.Now().Month())
-// 	day := time.Now().Day()
+func (s *Server) getChannelLogs(request userRequest) (*chatLog, error) {
+	yearStr := request.time.year
+	monthStr := request.time.month
+	dayStr := request.time.day
 
-// 	redirectURL := fmt.Sprintf("/channel/%s/%d/%d/%d", channel, year, month, day)
-// 	if len(c.QueryString()) > 0 {
-// 		redirectURL += "?" + c.QueryString()
-// 	}
-// 	return c.Redirect(http.StatusSeeOther, redirectURL)
-// }
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		return &chatLog{}, errors.New("invalid year")
+	}
+	month, err := strconv.Atoi(monthStr)
+	if err != nil {
+		return &chatLog{}, errors.New("invalid month")
+	}
+	day, err := strconv.Atoi(dayStr)
+	if err != nil {
+		return &chatLog{}, errors.New("invalid day")
+	}
 
-// func (s *Server) getChannelLogsByName(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
+	logMessages, err := s.fileLogger.ReadLogForChannel(request.channelid, year, month, day)
+	if err != nil {
+		return &chatLog{}, err
+	}
 
-// 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, "Failure fetching data from twitch")
-// 	}
+	if request.reverse {
+		reverseSlice(logMessages)
+	}
 
-// 	names := c.ParamNames()
-// 	names = append(names, "channelid")
+	var logResult chatLog
 
-// 	values := c.ParamValues()
-// 	values = append(values, userMap[channel].ID)
+	for _, rawMessage := range logMessages {
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
-// 	c.SetParamNames(names...)
-// 	c.SetParamValues(values...)
+		var chatMsg chatMessage
 
-// 	return s.getChannelLogs(c)
-// }
+		switch parsedMessage.(type) {
+		case *twitch.PrivateMessage:
+			message := *parsedMessage.(*twitch.PrivateMessage)
 
-// func (s *Server) getChannelLogsRangeByName(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		case *twitch.ClearChatMessage:
+			message := *parsedMessage.(*twitch.ClearChatMessage)
 
-// 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, "Failure fetching data from twitch")
-// 	}
+			var text string
+			if message.BanDuration == 0 {
+				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
+			} else {
+				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
+			}
 
-// 	names := c.ParamNames()
-// 	names = append(names, "channelid")
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.TargetUsername,
+				DisplayName: message.TargetUsername,
+				Text:        text,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		case *twitch.UserNoticeMessage:
+			message := *parsedMessage.(*twitch.UserNoticeMessage)
 
-// 	values := c.ParamValues()
-// 	values = append(values, userMap[channel].ID)
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.SystemMsg + " " + message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		}
 
-// 	c.SetParamNames(names...)
-// 	c.SetParamValues(values...)
+		logResult.Messages = append(logResult.Messages, chatMsg)
+	}
 
-// 	return s.getChannelLogsRange(c)
-// }
+	return &logResult, nil
+}
 
-// func (s *Server) getChannelLogs(c echo.Context) error {
-// 	channelID := c.Param("channelid")
+func (s *Server) getChannelLogsRange(request userRequest) (*chatLog, error) {
+	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, userHourLimit)
+	if err != nil {
+		return &chatLog{}, err
+	}
 
-// 	yearStr := c.Param("year")
-// 	monthStr := c.Param("month")
-// 	dayStr := c.Param("day")
+	var logMessages []string
 
-// 	year, err := strconv.Atoi(yearStr)
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, "Invalid year")
-// 	}
-// 	month, err := strconv.Atoi(monthStr)
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, "Invalid month")
-// 	}
-// 	day, err := strconv.Atoi(dayStr)
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, "Invalid day")
-// 	}
+	logMessages, _ = s.fileLogger.ReadLogForChannel(request.channelid, fromTime.Year(), int(fromTime.Month()), fromTime.Day())
 
-// 	logMessages, err := s.fileLogger.ReadLogForChannel(channelID, year, month, day)
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusNotFound, "Failure reading log")
-// 	}
+	if fromTime.Month() != toTime.Month() {
+		additionalMessages, _ := s.fileLogger.ReadLogForChannel(request.channelid, toTime.Year(), int(toTime.Month()), toTime.Day())
 
-// 	if shouldReverse(c) {
-// 		reverse(logMessages)
-// 	}
+		logMessages = append(logMessages, additionalMessages...)
+	}
 
-// 	var logResult chatLog
+	if request.reverse {
+		reverseSlice(logMessages)
+	}
 
-// 	for _, rawMessage := range logMessages {
-// 		parsedMessage := twitch.ParseMessage(rawMessage)
+	var logResult chatLog
 
-// 		var chatMsg chatMessage
+	for _, rawMessage := range logMessages {
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
-// 		switch parsedMessage.(type) {
-// 		case *twitch.PrivateMessage:
-// 			message := *parsedMessage.(*twitch.PrivateMessage)
+		var chatMsg chatMessage
 
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Text:        message.Message,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		case *twitch.ClearChatMessage:
-// 			message := *parsedMessage.(*twitch.ClearChatMessage)
+		switch parsedMessage.(type) {
+		case *twitch.PrivateMessage:
+			message := *parsedMessage.(*twitch.PrivateMessage)
 
-// 			var text string
-// 			if message.BanDuration == 0 {
-// 				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
-// 			} else {
-// 				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
-// 			}
+			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
+				continue
+			}
 
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.TargetUsername,
-// 				DisplayName: message.TargetUsername,
-// 				Text:        text,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		case *twitch.UserNoticeMessage:
-// 			message := *parsedMessage.(*twitch.UserNoticeMessage)
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		case *twitch.ClearChatMessage:
+			message := *parsedMessage.(*twitch.ClearChatMessage)
 
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Text:        message.SystemMsg + " " + message.Message,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		}
+			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
+				continue
+			}
 
-// 		logResult.Messages = append(logResult.Messages, chatMsg)
-// 	}
+			var text string
+			if message.BanDuration == 0 {
+				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
+			} else {
+				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
+			}
 
-// 	if shouldRespondWithJSON(c) {
-// 		return writeJSONResponse(c, &logResult)
-// 	}
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.TargetUsername,
+				DisplayName: message.TargetUsername,
+				Text:        text,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		case *twitch.UserNoticeMessage:
+			message := *parsedMessage.(*twitch.UserNoticeMessage)
 
-// 	if shouldRespondWithRaw(c) {
-// 		return writeRawResponse(c, &logResult)
-// 	}
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.SystemMsg + " " + message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		}
 
-// 	return writeTextResponse(c, &logResult)
-// }
+		logResult.Messages = append(logResult.Messages, chatMsg)
+	}
 
-// func (s *Server) getChannelLogsRange(c echo.Context) error {
-// 	channelID := c.Param("channelid")
-
-// 	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), channelHourLimit)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, err.Error())
-// 	}
-
-// 	var logMessages []string
-
-// 	logMessages, _ = s.fileLogger.ReadLogForChannel(channelID, fromTime.Year(), int(fromTime.Month()), fromTime.Day())
-
-// 	if fromTime.Month() != toTime.Month() {
-// 		additionalMessages, _ := s.fileLogger.ReadLogForChannel(channelID, toTime.Year(), int(toTime.Month()), toTime.Day())
-
-// 		logMessages = append(logMessages, additionalMessages...)
-// 	}
-
-// 	if len(logMessages) == 0 {
-// 		return c.JSON(http.StatusNotFound, "No logs found")
-// 	}
-
-// 	if shouldReverse(c) {
-// 		reverse(logMessages)
-// 	}
-
-// 	var logResult chatLog
-
-// 	for _, rawMessage := range logMessages {
-// 		parsedMessage := twitch.ParseMessage(rawMessage)
-
-// 		var chatMsg chatMessage
-
-// 		switch parsedMessage.(type) {
-// 		case *twitch.PrivateMessage:
-// 			message := *parsedMessage.(*twitch.PrivateMessage)
-
-// 			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
-// 				continue
-// 			}
-
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Text:        message.Message,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		case *twitch.ClearChatMessage:
-// 			message := *parsedMessage.(*twitch.ClearChatMessage)
-
-// 			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
-// 				continue
-// 			}
-
-// 			var text string
-// 			if message.BanDuration == 0 {
-// 				text = fmt.Sprintf("%s has been banned", message.TargetUsername)
-// 			} else {
-// 				text = fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
-// 			}
-
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.TargetUsername,
-// 				DisplayName: message.TargetUsername,
-// 				Text:        text,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		case *twitch.UserNoticeMessage:
-// 			message := *parsedMessage.(*twitch.UserNoticeMessage)
-
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Text:        message.SystemMsg + " " + message.Message,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		}
-
-// 		logResult.Messages = append(logResult.Messages, chatMsg)
-// 	}
-
-// 	if shouldRespondWithJSON(c) {
-// 		return writeJSONResponse(c, &logResult)
-// 	}
-
-// 	if shouldRespondWithRaw(c) {
-// 		return writeRawResponse(c, &logResult)
-// 	}
-
-// 	return writeTextResponse(c, &logResult)
-// }
+	return &logResult, nil
+}

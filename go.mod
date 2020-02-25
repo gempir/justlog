@@ -7,6 +7,7 @@ require (
 	github.com/gempir/go-twitch-irc/v2 v2.2.0
 	github.com/json-iterator/go v1.1.7
 	github.com/labstack/echo/v4 v4.0.0
+	github.com/labstack/gommon v0.2.8
 	github.com/mattn/go-colorable v0.1.0 // indirect
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect

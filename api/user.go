@@ -217,10 +217,10 @@ type RandomQuoteJSON struct {
 // 	return c.String(http.StatusNotFound, "No quote found")
 // }
 
-func (s *Server) getUserLogs(request userRequest) (chatLog, error) {
+func (s *Server) getUserLogs(request userRequest) (*chatLog, error) {
 	logMessages, err := s.fileLogger.ReadLogForUser(request.channelid, request.userid, request.time.year, request.time.month)
 	if err != nil {
-		return chatLog{}, err
+		return &chatLog{}, err
 	}
 
 	if request.reverse {
@@ -276,103 +276,89 @@ func (s *Server) getUserLogs(request userRequest) (chatLog, error) {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	return logResult, nil
+	return &logResult, nil
 }
 
-// func (s *Server) getUserLogsRange(c echo.Context) error {
-// 	channelID := c.Param("channelid")
-// 	userID := c.Param("userid")
+func (s *Server) getUserLogsRange(request userRequest) (*chatLog, error) {
 
-// 	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), userHourLimit)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, ErrorResponse{err.Error()})
-// 	}
+	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, userHourLimit)
+	if err != nil {
+		return &chatLog{}, err
+	}
 
-// 	var logMessages []string
+	var logMessages []string
 
-// 	logMessages, _ = s.fileLogger.ReadLogForUser(channelID, userID, fromTime.Year(), int(fromTime.Month()))
+	logMessages, _ = s.fileLogger.ReadLogForUser(request.channelid, request.userid, fmt.Sprintf("%d", fromTime.Year()), fmt.Sprintf("%d", int(fromTime.Month())))
 
-// 	if fromTime.Month() != toTime.Month() {
-// 		additionalMessages, _ := s.fileLogger.ReadLogForUser(channelID, userID, toTime.Year(), int(toTime.Month()))
+	if fromTime.Month() != toTime.Month() {
+		additionalMessages, _ := s.fileLogger.ReadLogForUser(request.channelid, request.userid, string(toTime.Year()), string(toTime.Month()))
 
-// 		logMessages = append(logMessages, additionalMessages...)
-// 	}
+		logMessages = append(logMessages, additionalMessages...)
+	}
 
-// 	if len(logMessages) == 0 {
-// 		return c.JSON(http.StatusNotFound, ErrorResponse{"No logs found"})
-// 	}
+	if request.reverse {
+		reverseSlice(logMessages)
+	}
 
-// 	if shouldReverse(c) {
-// 		reverseSlice(logMessages)
-// 	}
+	var logResult chatLog
 
-// 	var logResult chatLog
+	for _, rawMessage := range logMessages {
+		parsedMessage := twitch.ParseMessage(rawMessage)
 
-// 	for _, rawMessage := range logMessages {
-// 		parsedMessage := twitch.ParseMessage(rawMessage)
+		var chatMsg chatMessage
 
-// 		var chatMsg chatMessage
+		switch parsedMessage.(type) {
+		case *twitch.PrivateMessage:
+			message := *parsedMessage.(*twitch.PrivateMessage)
 
-// 		switch parsedMessage.(type) {
-// 		case *twitch.PrivateMessage:
-// 			message := *parsedMessage.(*twitch.PrivateMessage)
+			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
+				continue
+			}
 
-// 			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
-// 				continue
-// 			}
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		case *twitch.ClearChatMessage:
+			message := *parsedMessage.(*twitch.ClearChatMessage)
 
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Text:        message.Message,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		case *twitch.ClearChatMessage:
-// 			message := *parsedMessage.(*twitch.ClearChatMessage)
+			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
+				continue
+			}
 
-// 			if message.Time.Unix() < fromTime.Unix() || message.Time.Unix() > toTime.Unix() {
-// 				continue
-// 			}
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.TargetUsername,
+				DisplayName: message.TargetUsername,
+				Text:        buildClearChatMessageText(message),
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		case *twitch.UserNoticeMessage:
+			message := *parsedMessage.(*twitch.UserNoticeMessage)
 
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.TargetUsername,
-// 				DisplayName: message.TargetUsername,
-// 				Text:        buildClearChatMessageText(message),
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		case *twitch.UserNoticeMessage:
-// 			message := *parsedMessage.(*twitch.UserNoticeMessage)
+			chatMsg = chatMessage{
+				Timestamp:   timestamp{message.Time},
+				Username:    message.User.Name,
+				DisplayName: message.User.DisplayName,
+				Text:        message.SystemMsg + " " + message.Message,
+				Type:        message.Type,
+				Channel:     message.Channel,
+				Raw:         message.Raw,
+			}
+		}
 
-// 			chatMsg = chatMessage{
-// 				Timestamp:   timestamp{message.Time},
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Text:        message.SystemMsg + " " + message.Message,
-// 				Type:        message.Type,
-// 				Channel:     message.Channel,
-// 				Raw:         message.Raw,
-// 			}
-// 		}
+		logResult.Messages = append(logResult.Messages, chatMsg)
+	}
 
-// 		logResult.Messages = append(logResult.Messages, chatMsg)
-// 	}
-
-// 	if shouldRespondWithJSON(c) {
-// 		return writeJSONResponse(c, &logResult)
-// 	}
-
-// 	if shouldRespondWithRaw(c) {
-// 		return writeRawResponse(c, &logResult)
-// 	}
-
-// 	return writeTextResponse(c, &logResult)
-// }
+	return &logResult, nil
+}
 
 func buildClearChatMessageText(message twitch.ClearChatMessage) string {
 	if message.BanDuration == 0 {
