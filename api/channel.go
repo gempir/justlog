@@ -8,7 +8,7 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-func (s *Server) getChannelLogs(request userRequest) (*chatLog, error) {
+func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 	yearStr := request.time.year
 	monthStr := request.time.month
 	dayStr := request.time.day
@@ -94,7 +94,7 @@ func (s *Server) getChannelLogs(request userRequest) (*chatLog, error) {
 	return &logResult, nil
 }
 
-func (s *Server) getChannelLogsRange(request userRequest) (*chatLog, error) {
+func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
 	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, userHourLimit)
 	if err != nil {
 		return &chatLog{}, err

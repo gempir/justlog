@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -52,22 +51,42 @@ const (
 	responseTypeRaw  = "raw"
 )
 
-type userRequest struct {
-	channel      string
-	user         string
-	channelid    string
-	userid       string
-	time         timeRequest
-	reverse      bool
-	responseType string
+var (
+	userHourLimit    = 744.0
+	channelHourLimit = 24.0
+)
+
+type channel struct {
+	UserID string `json:"userID"`
+	Name   string `json:"name"`
 }
 
-type timeRequest struct {
-	from  string
-	to    string
-	year  string
-	month string
-	day   string
+// AllChannelsJSON inlcudes all channels
+type AllChannelsJSON struct {
+	Channels []channel `json:"channels"`
+}
+
+type chatLog struct {
+	Messages []chatMessage `json:"messages"`
+}
+
+type chatMessage struct {
+	Text        string             `json:"text"`
+	Username    string             `json:"username"`
+	DisplayName string             `json:"displayName"`
+	Channel     string             `json:"channel"`
+	Timestamp   timestamp          `json:"timestamp"`
+	Type        twitch.MessageType `json:"type"`
+	Raw         string             `json:"raw"`
+}
+
+// ErrorResponse a simple error response
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+type timestamp struct {
+	time.Time
 }
 
 // Init start the server
@@ -102,8 +121,8 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	request := userRequest{
-		time: timeRequest{},
+	request := logRequest{
+		time: logTime{},
 	}
 
 	params := []string{}
@@ -216,13 +235,7 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "unkown response type", http.StatusBadRequest)
 }
 
-func clearHeaders(w http.ResponseWriter) {
-	for key := range w.Header() {
-		w.Header().Del(key)
-	}
-}
-
-func (s *Server) fillIds(request userRequest) (userRequest, error) {
+func (s *Server) fillIds(request logRequest) (logRequest, error) {
 	usernames := []string{}
 	if request.channelid == "" && request.channel != "" {
 		usernames = append(usernames, request.channel)
@@ -257,45 +270,6 @@ func corsHandler(h http.Handler) http.Handler {
 			h.ServeHTTP(w, r)
 		}
 	})
-}
-
-var (
-	userHourLimit    = 744.0
-	channelHourLimit = 24.0
-	pathRegex        = regexp.MustCompile(`\/(channel|channelid)\/([a-zA-Z0-9]+)(?:\/(user|userid)\/([a-zA-Z0-9]+))?(?:(?:\/(\d{4})\/(\d{1,2})(?:\/(\d{1,2}))?)|(?:\/(range)))?`)
-)
-
-type channel struct {
-	UserID string `json:"userID"`
-	Name   string `json:"name"`
-}
-
-// AllChannelsJSON inlcudes all channels
-type AllChannelsJSON struct {
-	Channels []channel `json:"channels"`
-}
-
-type chatLog struct {
-	Messages []chatMessage `json:"messages"`
-}
-
-type chatMessage struct {
-	Text        string             `json:"text"`
-	Username    string             `json:"username"`
-	DisplayName string             `json:"displayName"`
-	Channel     string             `json:"channel"`
-	Timestamp   timestamp          `json:"timestamp"`
-	Type        twitch.MessageType `json:"type"`
-	Raw         string             `json:"raw"`
-}
-
-// ErrorResponse a simple error response
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
-
-type timestamp struct {
-	time.Time
 }
 
 func contains(s []string, e string) bool {
@@ -432,4 +406,12 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 		return time.Now(), err
 	}
 	return time.Unix(i, 0), nil
+}
+
+func buildClearChatMessageText(message twitch.ClearChatMessage) string {
+	if message.BanDuration == 0 {
+		return fmt.Sprintf("%s has been banned", message.TargetUsername)
+	}
+
+	return fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
 }

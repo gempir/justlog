@@ -15,165 +15,10 @@ type RandomQuoteJSON struct {
 	Timestamp   timestamp `json:"timestamp"`
 }
 
-// func (s *Server) getLastUserLogs(c echo.Context) error {
-// 	channelID := c.Param("channelid")
-// 	userID := c.Param("userid")
-
-// 	year, month, err := s.fileLogger.GetLastLogYearAndMonthForUser(channelID, userID)
+// func (s *Server) getRandomQuote(request logRequest) error {
+// 	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(request.channelid, request.userid)
 // 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, ErrorResponse{"No logs found"})
-// 	}
-
-// 	redirectURL := fmt.Sprintf("/channelid/%s/userid/%s/%d/%d", channelID, userID, year, month)
-// 	if len(c.QueryString()) > 0 {
-// 		redirectURL += "?" + c.QueryString()
-// 	}
-// 	return c.Redirect(303, redirectURL)
-// }
-
-// func (s *Server) getLastUserLogsByName(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
-// 	username := strings.ToLower(c.Param("username"))
-
-// 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
-// 	}
-// 	var year int
-// 	var month int
-// 	year, month, err = s.fileLogger.GetLastLogYearAndMonthForUser(userMap[channel].ID, userMap[username].ID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, ErrorResponse{"No logs found"})
-// 	}
-
-// 	redirectURL := fmt.Sprintf("/channel/%s/user/%s/%d/%d", channel, username, year, month)
-// 	if len(c.QueryString()) > 0 {
-// 		redirectURL += "?" + c.QueryString()
-// 	}
-// 	return c.Redirect(303, redirectURL)
-// }
-
-// func (s *Server) getUserLogsExact(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
-// 	user := strings.ToLower(c.Param("user"))
-
-// 	userMap := map[string]helix.UserData{}
-// 	if c.Param("channelType") == "channel" || c.Param("userType") == "user" {
-// 		var err error
-// 		userMap, err = s.helixClient.GetUsersByUsernames([]string{channel, user})
-// 		if err != nil {
-// 			log.Error(err)
-// 			return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
-// 		}
-// 	}
-
-// 	names := c.ParamNames()
-// 	values := c.ParamValues()
-// 	names = append(names, "channelid")
-
-// 	if c.Param("channelType") == "channel" {
-// 		values = append(values, userMap[channel].ID)
-// 	} else {
-// 		values = append(values, c.Param("channel"))
-// 	}
-
-// 	names = append(names, "userid")
-// 	if c.Param("userType") == "user" {
-// 		values = append(values, userMap[user].ID)
-// 	} else {
-// 		values = append(values, c.Param("user"))
-// 	}
-
-// 	c.SetParamNames(names...)
-// 	c.SetParamValues(values...)
-
-// 	return s.getUserLogs(c)
-// }
-
-// func (s *Server) getUserLogsRangeByName(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
-// 	username := strings.ToLower(c.Param("username"))
-
-// 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
-// 	}
-
-// 	names := c.ParamNames()
-// 	names = append(names, "channelid")
-// 	names = append(names, "userid")
-
-// 	values := c.ParamValues()
-// 	values = append(values, userMap[channel].ID)
-// 	values = append(values, userMap[username].ID)
-
-// 	c.SetParamNames(names...)
-// 	c.SetParamValues(values...)
-
-// 	return s.getUserLogsRange(c)
-// }
-
-// func (s *Server) getUserLogsByName(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
-// 	username := strings.ToLower(c.Param("username"))
-
-// 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
-// 	}
-
-// 	names := c.ParamNames()
-// 	names = append(names, "channelid")
-// 	names = append(names, "userid")
-
-// 	values := c.ParamValues()
-// 	values = append(values, userMap[channel].ID)
-// 	values = append(values, userMap[username].ID)
-
-// 	c.SetParamNames(names...)
-// 	c.SetParamValues(values...)
-
-// 	if c.Param("time") == "range" {
-// 		return s.getUserLogsRange(c)
-// 	}
-
-// 	return s.getUserLogs(c)
-// }
-
-// func (s *Server) getRandomQuoteByName(c echo.Context) error {
-// 	channel := strings.ToLower(c.Param("channel"))
-// 	username := strings.ToLower(c.Param("username"))
-
-// 	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel, username})
-// 	if err != nil {
-// 		log.Error(err)
-// 		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
-// 	}
-
-// 	names := c.ParamNames()
-// 	names = append(names, "channelid")
-// 	names = append(names, "userid")
-
-// 	values := c.ParamValues()
-// 	values = append(values, userMap[channel].ID)
-// 	values = append(values, userMap[username].ID)
-
-// 	c.SetParamNames(names...)
-// 	c.SetParamValues(values...)
-
-// 	return s.getRandomQuote(c)
-// }
-
-// func (s *Server) getRandomQuote(c echo.Context) error {
-// 	channelID := c.Param("channelid")
-// 	userID := c.Param("userid")
-
-// 	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(channelID, userID)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, err.Error())
+// 		return err
 // 	}
 // 	parsedMessage := twitch.ParseMessage(rawMessage)
 
@@ -217,7 +62,7 @@ type RandomQuoteJSON struct {
 // 	return c.String(http.StatusNotFound, "No quote found")
 // }
 
-func (s *Server) getUserLogs(request userRequest) (*chatLog, error) {
+func (s *Server) getUserLogs(request logRequest) (*chatLog, error) {
 	logMessages, err := s.fileLogger.ReadLogForUser(request.channelid, request.userid, request.time.year, request.time.month)
 	if err != nil {
 		return &chatLog{}, err
@@ -279,7 +124,7 @@ func (s *Server) getUserLogs(request userRequest) (*chatLog, error) {
 	return &logResult, nil
 }
 
-func (s *Server) getUserLogsRange(request userRequest) (*chatLog, error) {
+func (s *Server) getUserLogsRange(request logRequest) (*chatLog, error) {
 
 	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, userHourLimit)
 	if err != nil {
@@ -358,12 +203,4 @@ func (s *Server) getUserLogsRange(request userRequest) (*chatLog, error) {
 	}
 
 	return &logResult, nil
-}
-
-func buildClearChatMessageText(message twitch.ClearChatMessage) string {
-	if message.BanDuration == 0 {
-		return fmt.Sprintf("%s has been banned", message.TargetUsername)
-	}
-
-	return fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
 }
