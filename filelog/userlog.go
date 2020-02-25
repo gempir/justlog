@@ -148,12 +148,13 @@ func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, i
 	return 0, 0, errors.New("No logs file")
 }
 
-func (l *Logger) ReadLogForUser(channelID, userID string, year int, month int) ([]string, error) {
+// ReadLogForUser fetch logs
+func (l *Logger) ReadLogForUser(channelID, userID string, year string, month string) ([]string, error) {
 	if channelID == "" || userID == "" {
 		return []string{}, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
 	}
 
-	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%s.txt", channelID, year, month, userID)
+	filename := fmt.Sprintf(l.logPath+"/%s/%s/%s/%s.txt", channelID, year, month, userID)
 
 	if _, err := os.Stat(filename); err != nil {
 		filename = filename + ".gz"

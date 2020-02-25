@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -14,8 +15,6 @@ import (
 
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/filelog"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/labstack/echo/v4"
 )
 
 // Server api server
@@ -47,10 +46,27 @@ func (s *Server) AddChannel(channel string) {
 	s.channels = append(s.channels, channel)
 }
 
-type userRequestContext struct {
-	echo.Context
-	channelType string
-	userType    string
+const (
+	responseTypeJSON = "json"
+	responseTypeText = "text"
+	responseTypeRaw  = "raw"
+)
+
+type userRequest struct {
+	channel      string
+	user         string
+	channelid    string
+	userid       string
+	time         timeRequest
+	reverse      bool
+	responseType string
+}
+
+type timeRequest struct {
+	from  string
+	to    string
+	year  string
+	month string
 }
 
 // @title justlog API
@@ -106,7 +122,116 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprint(w, r.URL.EscapedPath())
+	s.routeLogs(w, r)
+}
+
+func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.EscapedPath()
+
+	matches := pathRegex.FindAllStringSubmatch(url, -1)
+	if len(matches) == 0 || len(matches[0]) < 5 {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	request := userRequest{
+		time: timeRequest{},
+	}
+
+	if matches[0][1] == "channel" {
+		request.channel = matches[0][2]
+	}
+	if matches[0][1] == "channelid" {
+		request.channelid = matches[0][2]
+	}
+	if matches[0][3] == "user" {
+		request.user = matches[0][4]
+	}
+	if matches[0][3] == "userid" {
+		request.userid = matches[0][4]
+	}
+	if len(matches[0]) == 7 {
+		request.time.year = matches[0][5]
+		request.time.month = matches[0][6]
+	} else {
+		request.time.from = r.URL.Query().Get("from")
+		request.time.to = r.URL.Query().Get("to")
+	}
+
+	if _, ok := r.URL.Query()["reverse"]; ok {
+		request.reverse = true
+	} else {
+		request.reverse = false
+	}
+
+	if _, ok := r.URL.Query()["json"]; ok || r.URL.Query().Get("type") == "json" {
+		request.responseType = responseTypeJSON
+	} else if _, ok := r.URL.Query()["raw"]; ok || r.URL.Query().Get("type") == "raw" {
+		request.responseType = responseTypeRaw
+	} else {
+		request.responseType = responseTypeText
+	}
+
+	var err error
+	request, err = s.fillIds(request)
+	if err != nil {
+		log.Error(err)
+		http.Error(w, "could not fetch userids", http.StatusInternalServerError)
+		return
+	}
+	logs, err := s.getUserLogs(request)
+	if err != nil {
+		log.Error(err)
+		http.Error(w, "could not load logs", http.StatusInternalServerError)
+		return
+	}
+
+	if request.responseType == responseTypeJSON {
+		writeJSON(&logs, http.StatusOK, w, r)
+		return
+	}
+
+	if request.responseType == responseTypeRaw {
+		writeRaw(&logs, http.StatusOK, w, r)
+		return
+	}
+
+	if request.responseType == responseTypeText {
+		writeText(&logs, http.StatusOK, w, r)
+		return
+	}
+
+	http.Error(w, "unkown response type", http.StatusBadRequest)
+}
+
+func clearHeaders(w http.ResponseWriter) {
+	for key := range w.Header() {
+		w.Header().Del(key)
+	}
+}
+
+func (s *Server) fillIds(request userRequest) (userRequest, error) {
+	usernames := []string{}
+	if request.channelid == "" {
+		usernames = append(usernames, request.channel)
+	}
+	if request.userid == "" {
+		usernames = append(usernames, request.user)
+	}
+
+	ids, err := s.helixClient.GetUsersByUsernames(usernames)
+	if err != nil {
+		return request, err
+	}
+
+	if request.channelid == "" {
+		request.channelid = ids[request.channel].ID
+	}
+	if request.userid == "" {
+		request.userid = ids[request.user].ID
+	}
+
+	return request, nil
 }
 
 func corsHandler(h http.Handler) http.Handler {
@@ -125,6 +250,7 @@ func corsHandler(h http.Handler) http.Handler {
 var (
 	userHourLimit    = 744.0
 	channelHourLimit = 24.0
+	pathRegex        = regexp.MustCompile(`\/(channel|channelid)\/([a-zA-Z0-9]*)\/(user|userid)\/([a-zA-Z0-9]*)(?:\/(\d{4})\/(\d{1,2}))?`)
 )
 
 type channel struct {
@@ -169,20 +295,13 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func reverse(input []string) []string {
+func reverseSlice(input []string) []string {
 	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
 		input[i], input[j] = input[j], input[i]
 	}
 	return input
 }
 
-// getAllChannels godoc
-// @Summary Get all joined channels
-// @tags bot
-// @Produce  json
-// @Success 200 {object} api.RandomQuoteJSON json
-// @Failure 500 {object} api.ErrorResponse json
-// @Router /channels [get]
 func (s *Server) getAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}
@@ -208,9 +327,34 @@ func writeJSON(data interface{}, code int, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
 	w.Write(js)
+}
+
+func writeRaw(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(code)
+
+	for _, cMessage := range cLog.Messages {
+		w.Write([]byte(cMessage.Raw + "\n"))
+	}
+}
+
+func writeText(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(code)
+
+	for _, cMessage := range cLog.Messages {
+		switch cMessage.Type {
+		case twitch.PRIVMSG:
+			w.Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
+		case twitch.CLEARCHAT:
+			w.Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+		case twitch.USERNOTICE:
+			w.Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+		}
+	}
 }
 
 func (t timestamp) MarshalJSON() ([]byte, error) {
@@ -269,52 +413,34 @@ func parseFromTo(from, to string, limit float64) (time.Time, time.Time, error) {
 	return fromTime, toTime, nil
 }
 
-func writeTextResponse(c echo.Context, cLog *chatLog) error {
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-	c.Response().WriteHeader(http.StatusOK)
+// func writeTextResponse(c echo.Context, cLog *chatLog) error {
+// 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
+// 	c.Response().WriteHeader(http.StatusOK)
 
-	for _, cMessage := range cLog.Messages {
-		switch cMessage.Type {
-		case twitch.PRIVMSG:
-			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
-		case twitch.CLEARCHAT:
-			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
-		case twitch.USERNOTICE:
-			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
-		}
-	}
+// 	for _, cMessage := range cLog.Messages {
+// 		switch cMessage.Type {
+// 		case twitch.PRIVMSG:
+// 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
+// 		case twitch.CLEARCHAT:
+// 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+// 		case twitch.USERNOTICE:
+// 			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func writeRawResponse(c echo.Context, cLog *chatLog) error {
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-	c.Response().WriteHeader(http.StatusOK)
+// func writeRawResponse(c echo.Context, cLog *chatLog) error {
+// 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
+// 	c.Response().WriteHeader(http.StatusOK)
 
-	for _, cMessage := range cLog.Messages {
-		c.Response().Write([]byte(cMessage.Raw + "\n"))
-	}
+// 	for _, cMessage := range cLog.Messages {
+// 		c.Response().Write([]byte(cMessage.Raw + "\n"))
+// 	}
 
-	return nil
-}
-
-func writeJSONResponse(c echo.Context, logResult *chatLog) error {
-	_, stream := c.QueryParams()["stream"]
-	if stream {
-		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
-		c.Response().WriteHeader(http.StatusOK)
-
-		return json.NewEncoder(c.Response()).Encode(logResult)
-	}
-
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
-	data, err := json.Marshal(logResult)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.Blob(http.StatusOK, echo.MIMEApplicationJSONCharsetUTF8, data)
-}
+// 	return nil
+// }
 
 func parseTimestamp(timestamp string) (time.Time, error) {
 
@@ -323,22 +449,4 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 		return time.Now(), err
 	}
 	return time.Unix(i, 0), nil
-}
-
-func shouldReverse(c echo.Context) bool {
-	_, ok := c.QueryParams()["reverse"]
-
-	return c.QueryParam("order") == "reverse" || ok
-}
-
-func shouldRespondWithJSON(c echo.Context) bool {
-	_, ok := c.QueryParams()["json"]
-
-	return c.Request().Header.Get("Content-Type") == "application/json" || c.Request().Header.Get("accept") == "application/json" || c.QueryParam("type") == "json" || ok
-}
-
-func shouldRespondWithRaw(c echo.Context) bool {
-	_, ok := c.QueryParams()["raw"]
-
-	return c.QueryParam("type") == "raw" || ok
 }
