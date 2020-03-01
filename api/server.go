@@ -35,7 +35,7 @@ func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
-		assets:        []string{"/", "/bundle.js", "/swagger.json", "/swagger.html"},
+		assets:        []string{"/", "/bundle.js", "/favicon.ico"},
 		assetHandler:  http.FileServer(assets),
 	}
 }
@@ -113,98 +113,29 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
-	url := strings.TrimRight(r.URL.EscapedPath(), "/")
 
-	matches := pathRegex.FindAllStringSubmatch(url, -1)
-	if len(matches) == 0 || len(matches[0]) < 5 {
-		http.Error(w, "not found", http.StatusNotFound)
-		return
-	}
-
-	request := logRequest{
-		time: logTime{},
-	}
-
-	params := []string{}
-	for _, match := range matches[0] {
-		if match != "" {
-			params = append(params, match)
-		}
-	}
-
-	isUserRequest := len(params) > 3 && (params[3] == "user" || params[3] == "userid")
-	isChannelRequest := len(params) < 3 || (len(params) > 3 && params[3] != "user" && params[3] != "userid")
-
-	if params[1] == "channel" {
-		request.channel = params[2]
-	}
-	if params[1] == "channelid" {
-		request.channelid = params[2]
-	}
-	if isUserRequest && params[3] == "user" {
-		request.user = params[4]
-	}
-	if isUserRequest && params[3] == "userid" {
-		request.userid = params[4]
-	}
-
-	if isUserRequest && len(params) == 7 {
-		request.time.year = params[5]
-		request.time.month = params[6]
-	} else if isChannelRequest && len(params) == 6 {
-		request.time.year = params[3]
-		request.time.month = params[4]
-		request.time.day = params[5]
-	} else if (isUserRequest && len(params) == 6 && params[5] == "range") || (isChannelRequest && len(params) == 4 && params[3] == "range") {
-		request.time.from = r.URL.Query().Get("from")
-		request.time.to = r.URL.Query().Get("to")
-	} else {
-		request.time.year = string(time.Now().Year())
-		request.time.month = string(time.Now().Month())
-		query := r.URL.Query()
-		query.Del("from")
-		query.Del("to")
-
-		encodedQuery := ""
-		if query.Encode() != "" {
-			encodedQuery = "?" + query.Encode()
-		}
-		http.Redirect(w, r, fmt.Sprintf("%s/%d/%d%s", params[0], time.Now().Year(), time.Now().Month(), encodedQuery), http.StatusPermanentRedirect)
-		return
-	}
-
-	if _, ok := r.URL.Query()["reverse"]; ok {
-		request.reverse = true
-	} else {
-		request.reverse = false
-	}
-
-	if _, ok := r.URL.Query()["json"]; ok || r.URL.Query().Get("type") == "json" {
-		request.responseType = responseTypeJSON
-	} else if _, ok := r.URL.Query()["raw"]; ok || r.URL.Query().Get("type") == "raw" {
-		request.responseType = responseTypeRaw
-	} else {
-		request.responseType = responseTypeText
-	}
-
-	var err error
-	request, err = s.fillIds(request)
+	request, err := s.newLogRequestFromURL(r)
 	if err != nil {
-		log.Error(err)
-		http.Error(w, "could not fetch userids", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if request.redirectPath != "" {
+		http.Redirect(w, r, request.redirectPath, http.StatusFound)
 		return
 	}
 
 	var logs *chatLog
-	if request.time.from != "" && request.time.to != "" {
-		if isUserRequest {
+	if request.time.random {
+		logs, err = s.getRandomQuote(request)
+	} else if request.time.from != "" && request.time.to != "" {
+		if request.isUserRequest {
 			logs, err = s.getUserLogsRange(request)
 		} else {
 			logs, err = s.getChannelLogsRange(request)
 		}
 
 	} else {
-		if isUserRequest {
+		if request.isUserRequest {
 			logs, err = s.getUserLogs(request)
 		} else {
 			logs, err = s.getChannelLogs(request)
@@ -233,30 +164,6 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "unkown response type", http.StatusBadRequest)
-}
-
-func (s *Server) fillIds(request logRequest) (logRequest, error) {
-	usernames := []string{}
-	if request.channelid == "" && request.channel != "" {
-		usernames = append(usernames, request.channel)
-	}
-	if request.userid == "" && request.user != "" {
-		usernames = append(usernames, request.user)
-	}
-
-	ids, err := s.helixClient.GetUsersByUsernames(usernames)
-	if err != nil {
-		return request, err
-	}
-
-	if request.channelid == "" {
-		request.channelid = ids[request.channel].ID
-	}
-	if request.userid == "" {
-		request.userid = ids[request.user].ID
-	}
-
-	return request, nil
 }
 
 func corsHandler(h http.Handler) http.Handler {

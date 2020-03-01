@@ -15,52 +15,55 @@ type RandomQuoteJSON struct {
 	Timestamp   timestamp `json:"timestamp"`
 }
 
-// func (s *Server) getRandomQuote(request logRequest) error {
-// 	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(request.channelid, request.userid)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	parsedMessage := twitch.ParseMessage(rawMessage)
+func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
+	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(request.channelid, request.userid)
+	if err != nil {
+		return &chatLog{}, err
+	}
+	parsedMessage := twitch.ParseMessage(rawMessage)
 
-// 	switch parsedMessage.(type) {
-// 	case *twitch.PrivateMessage:
-// 		message := *parsedMessage.(*twitch.PrivateMessage)
+	var chatMsg chatMessage
+	switch parsedMessage.(type) {
+	case *twitch.PrivateMessage:
+		message := *parsedMessage.(*twitch.PrivateMessage)
 
-// 		if shouldRespondWithJSON(c) {
+		chatMsg = chatMessage{
+			Timestamp:   timestamp{message.Time},
+			Username:    message.User.Name,
+			DisplayName: message.User.DisplayName,
+			Text:        message.Message,
+			Type:        message.Type,
+			Channel:     message.Channel,
+			Raw:         message.Raw,
+		}
+	case *twitch.ClearChatMessage:
+		message := *parsedMessage.(*twitch.ClearChatMessage)
 
-// 			randomQ := RandomQuoteJSON{
-// 				Channel:     message.Channel,
-// 				Username:    message.User.Name,
-// 				DisplayName: message.User.DisplayName,
-// 				Message:     message.Message,
-// 				Timestamp:   timestamp{message.Time},
-// 			}
+		chatMsg = chatMessage{
+			Timestamp:   timestamp{message.Time},
+			Username:    message.TargetUsername,
+			DisplayName: message.TargetUsername,
+			Text:        buildClearChatMessageText(message),
+			Type:        message.Type,
+			Channel:     message.Channel,
+			Raw:         message.Raw,
+		}
+	case *twitch.UserNoticeMessage:
+		message := *parsedMessage.(*twitch.UserNoticeMessage)
 
-// 			return c.JSON(http.StatusOK, randomQ)
-// 		}
+		chatMsg = chatMessage{
+			Timestamp:   timestamp{message.Time},
+			Username:    message.User.Name,
+			DisplayName: message.User.DisplayName,
+			Text:        message.SystemMsg + " " + message.Message,
+			Type:        message.Type,
+			Channel:     message.Channel,
+			Raw:         message.Raw,
+		}
+	}
 
-// 		return c.String(http.StatusOK, message.Message)
-// 	case *twitch.ClearChatMessage:
-// 		message := *parsedMessage.(*twitch.ClearChatMessage)
-
-// 		if shouldRespondWithJSON(c) {
-
-// 			randomQ := RandomQuoteJSON{
-// 				Channel:     message.Channel,
-// 				Username:    message.TargetUsername,
-// 				DisplayName: message.TargetUsername,
-// 				Message:     buildClearChatMessageText(message),
-// 				Timestamp:   timestamp{message.Time},
-// 			}
-
-// 			return c.JSON(http.StatusOK, randomQ)
-// 		}
-
-// 		return c.String(http.StatusOK, buildClearChatMessageText(message))
-// 	}
-
-// 	return c.String(http.StatusNotFound, "No quote found")
-// }
+	return &chatLog{Messages: []chatMessage{chatMsg}}, nil
+}
 
 func (s *Server) getUserLogs(request logRequest) (*chatLog, error) {
 	logMessages, err := s.fileLogger.ReadLogForUser(request.channelid, request.userid, request.time.year, request.time.month)
