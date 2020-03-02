@@ -8,6 +8,7 @@ import (
 
 	"strings"
 
+	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/api"
 	"github.com/gempir/justlog/archiver"
 	"github.com/gempir/justlog/bot"
@@ -18,14 +19,17 @@ import (
 )
 
 type config struct {
-	LogsDirectory string   `json:"logsDirectory"`
-	Username      string   `json:"username"`
-	OAuth         string   `json:"oauth"`
-	ListenAddress string   `json:"listenAddress"`
-	Admin         string   `json:"admin"`
-	Channels      []string `json:"channels"`
-	ClientID      string   `json:"clientID"`
-	LogLevel      string   `json:"logLevel"`
+	LogsDirectory  string   `json:"logsDirectory"`
+	Username       string   `json:"username"`
+	OAuth          string   `json:"oauth"`
+	ListenAddress  string   `json:"listenAddress"`
+	Admin          string   `json:"admin"`
+	Channels       []string `json:"channels"`
+	ClientID       string   `json:"clientID"`
+	LogLevel       string   `json:"logLevel"`
+	ChannelConfigs map[string]struct {
+		MessageTypes []twitch.MessageType `json:"messageTypes"`
+	} `json:"channelConfigs"`
 }
 
 func main() {
@@ -44,7 +48,12 @@ func main() {
 	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient, cfg.Channels)
 	go apiServer.Init()
 
-	bot := bot.NewBot(cfg.Admin, cfg.Username, cfg.OAuth, &startTime, &helixClient, &fileLogger)
+	messageTypesToLog := make(map[string][]twitch.MessageType)
+	for userID, config := range cfg.ChannelConfigs {
+		messageTypesToLog[userID] = config.MessageTypes
+	}
+
+	bot := bot.NewBot(cfg.Admin, cfg.Username, cfg.OAuth, &startTime, &helixClient, &fileLogger, messageTypesToLog)
 	bot.Connect(cfg.Channels)
 }
 

@@ -4,6 +4,11 @@
     "username": "gempbot",
     "oauth": "oauthtokenforchat",
     "clientID": "mytwitchclientid",
-    "logLevel": "debug",
-    "channels": ["77829817", "11148817"]
+    "logLevel": "info",
+    "channels": ["77829817", "11148817"],
+    "channelConfigs": {
+        "77829817": {
+            "messageTypes": [1]
+        }
+    }
 }
