@@ -14,22 +14,20 @@ import (
 
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/filelog"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-
-	_ "github.com/gempir/justlog/docs"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// Server api server
 type Server struct {
 	listenAddress string
 	logPath       string
 	fileLogger    *filelog.Logger
 	helixClient   *helix.Client
 	channels      []string
+	assets        []string
+	assetHandler  http.Handler
 }
 
+// NewServer create api Server
 func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger, helixClient *helix.Client, channels []string) Server {
 	return Server{
 		listenAddress: listenAddress,
@@ -37,67 +35,21 @@ func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
+		assets:        []string{"/", "/bundle.js", "/favicon.ico"},
+		assetHandler:  http.FileServer(assets),
 	}
 }
 
+// AddChannel adds a channel to the collection to output on the channels endpoint
 func (s *Server) AddChannel(channel string) {
 	s.channels = append(s.channels, channel)
 }
 
-func (s *Server) Init() {
-	e := echo.New()
-	e.HideBanner = true
-
-	DefaultCORSConfig := middleware.CORSConfig{
-		Skipper:      middleware.DefaultSkipper,
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
-	}
-	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
-		RedirectCode: http.StatusMovedPermanently,
-	}))
-	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
-		XSSProtection:         "", // disabled
-		ContentTypeNosniff:    "nosniff",
-		XFrameOptions:         "", // disabled
-		HSTSMaxAge:            0,  // disabled
-		ContentSecurityPolicy: "", // disabled
-	}))
-	e.Use(middleware.CORSWithConfig(DefaultCORSConfig))
-
-	assetHandler := http.FileServer(assets)
-	e.GET("/", echo.WrapHandler(assetHandler))
-	e.GET("/bundle.js", echo.WrapHandler(assetHandler))
-
-	e.GET("/docs", func(c echo.Context) error {
-		return c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-	})
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	e.GET("/channels", s.getAllChannels)
-
-	e.GET("/channel/:channel/user/:username/range", s.getUserLogsRangeByName)
-	e.GET("/channelid/:channelid/userid/:userid/range", s.getUserLogsRange)
-
-	e.GET("/channel/:channel/user/:username", s.getLastUserLogsByName)
-	e.GET("/channel/:channel/user/:username/:year/:month", s.getUserLogsByName)
-	e.GET("/channel/:channel/user/:username/random", s.getRandomQuoteByName)
-
-	e.GET("/channelid/:channelid/userid/:userid", s.getLastUserLogs)
-	e.GET("/channelid/:channelid/userid/:userid/:year/:month", s.getUserLogs)
-	e.GET("/channelid/:channelid/userid/:userid/random", s.getRandomQuote)
-
-	e.GET("/v2/:channelType/:channel/:userType/:user/:year/:month", s.getUserLogsExact)
-
-	e.GET("/channelid/:channelid/range", s.getChannelLogsRange)
-	e.GET("/channel/:channel/range", s.getChannelLogsRangeByName)
-
-	e.GET("/channel/:channel", s.getCurrentChannelLogsByName)
-	e.GET("/channel/:channel/:year/:month/:day", s.getChannelLogsByName)
-	e.GET("/channelid/:channelid", s.getCurrentChannelLogs)
-	e.GET("/channelid/:channelid/:year/:month/:day", s.getChannelLogs)
-
-	e.Logger.Fatal(e.Start(s.listenAddress))
-}
+const (
+	responseTypeJSON = "json"
+	responseTypeText = "text"
+	responseTypeRaw  = "raw"
+)
 
 var (
 	userHourLimit    = 744.0
@@ -109,6 +61,7 @@ type channel struct {
 	Name   string `json:"name"`
 }
 
+// AllChannelsJSON inlcudes all channels
 type AllChannelsJSON struct {
 	Channels []channel `json:"channels"`
 }
@@ -127,6 +80,7 @@ type chatMessage struct {
 	Raw         string             `json:"raw"`
 }
 
+// ErrorResponse a simple error response
 type ErrorResponse struct {
 	Message string `json:"message"`
 }
@@ -135,35 +89,165 @@ type timestamp struct {
 	time.Time
 }
 
-func reverse(input []string) []string {
+// Init start the server
+func (s *Server) Init() {
+	http.Handle("/", corsHandler(http.HandlerFunc(s.route)))
+
+	log.Fatal(http.ListenAndServe(s.listenAddress, nil))
+}
+
+func (s *Server) route(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.EscapedPath()
+
+	if contains(s.assets, url) {
+		s.assetHandler.ServeHTTP(w, r)
+		return
+	}
+
+	if url == "/channels" {
+		s.getAllChannels(w, r)
+		return
+	}
+
+	s.routeLogs(w, r)
+}
+
+func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
+
+	request, err := s.newLogRequestFromURL(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if request.redirectPath != "" {
+		http.Redirect(w, r, request.redirectPath, http.StatusFound)
+		return
+	}
+
+	var logs *chatLog
+	if request.time.random {
+		logs, err = s.getRandomQuote(request)
+	} else if request.time.from != "" && request.time.to != "" {
+		if request.isUserRequest {
+			logs, err = s.getUserLogsRange(request)
+		} else {
+			logs, err = s.getChannelLogsRange(request)
+		}
+
+	} else {
+		if request.isUserRequest {
+			logs, err = s.getUserLogs(request)
+		} else {
+			logs, err = s.getChannelLogs(request)
+		}
+	}
+
+	if err != nil {
+		log.Error(err)
+		http.Error(w, "could not load logs", http.StatusInternalServerError)
+		return
+	}
+
+	if request.responseType == responseTypeJSON {
+		writeJSON(logs, http.StatusOK, w, r)
+		return
+	}
+
+	if request.responseType == responseTypeRaw {
+		writeRaw(logs, http.StatusOK, w, r)
+		return
+	}
+
+	if request.responseType == responseTypeText {
+		writeText(logs, http.StatusOK, w, r)
+		return
+	}
+
+	http.Error(w, "unkown response type", http.StatusBadRequest)
+}
+
+func corsHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			h.ServeHTTP(w, r)
+		}
+	})
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func reverseSlice(input []string) []string {
 	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
 		input[i], input[j] = input[j], input[i]
 	}
 	return input
 }
 
-// getAllChannels godoc
-// @Summary Get all joined channels
-// @tags bot
-// @Produce  json
-// @Success 200 {object} api.RandomQuoteJSON json
-// @Failure 500 {object} api.ErrorResponse json
-// @Router /channels [get]
-func (s *Server) getAllChannels(c echo.Context) error {
+func (s *Server) getAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}
 	users, err := s.helixClient.GetUsersByUserIds(s.channels)
 
 	if err != nil {
 		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, ErrorResponse{"Failure fetching data from twitch"})
+		http.Error(w, "Failure fetching data from twitch", http.StatusInternalServerError)
+		return
 	}
 
 	for _, user := range users {
 		response.Channels = append(response.Channels, channel{UserID: user.ID, Name: user.Login})
 	}
 
-	return c.JSON(http.StatusOK, response)
+	writeJSON(response, http.StatusOK, w, r)
+}
+
+func writeJSON(data interface{}, code int, w http.ResponseWriter, r *http.Request) {
+	js, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(js)
+}
+
+func writeRaw(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(code)
+
+	for _, cMessage := range cLog.Messages {
+		w.Write([]byte(cMessage.Raw + "\n"))
+	}
+}
+
+func writeText(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(code)
+
+	for _, cMessage := range cLog.Messages {
+		switch cMessage.Type {
+		case twitch.PRIVMSG:
+			w.Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
+		case twitch.CLEARCHAT:
+			w.Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+		case twitch.USERNOTICE:
+			w.Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
+		}
+	}
 }
 
 func (t timestamp) MarshalJSON() ([]byte, error) {
@@ -222,53 +306,6 @@ func parseFromTo(from, to string, limit float64) (time.Time, time.Time, error) {
 	return fromTime, toTime, nil
 }
 
-func writeTextResponse(c echo.Context, cLog *chatLog) error {
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-	c.Response().WriteHeader(http.StatusOK)
-
-	for _, cMessage := range cLog.Messages {
-		switch cMessage.Type {
-		case twitch.PRIVMSG:
-			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s: %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Username, cMessage.Text)))
-		case twitch.CLEARCHAT:
-			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
-		case twitch.USERNOTICE:
-			c.Response().Write([]byte(fmt.Sprintf("[%s] #%s %s\n", cMessage.Timestamp.Format("2006-01-2 15:04:05"), cMessage.Channel, cMessage.Text)))
-		}
-	}
-
-	return nil
-}
-
-func writeRawResponse(c echo.Context, cLog *chatLog) error {
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlainCharsetUTF8)
-	c.Response().WriteHeader(http.StatusOK)
-
-	for _, cMessage := range cLog.Messages {
-		c.Response().Write([]byte(cMessage.Raw + "\n"))
-	}
-
-	return nil
-}
-
-func writeJSONResponse(c echo.Context, logResult *chatLog) error {
-	_, stream := c.QueryParams()["stream"]
-	if stream {
-		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
-		c.Response().WriteHeader(http.StatusOK)
-
-		return json.NewEncoder(c.Response()).Encode(logResult)
-	}
-
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
-	data, err := json.Marshal(logResult)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.Blob(http.StatusOK, echo.MIMEApplicationJSONCharsetUTF8, data)
-}
-
 func parseTimestamp(timestamp string) (time.Time, error) {
 
 	i, err := strconv.ParseInt(timestamp, 10, 64)
@@ -278,20 +315,10 @@ func parseTimestamp(timestamp string) (time.Time, error) {
 	return time.Unix(i, 0), nil
 }
 
-func shouldReverse(c echo.Context) bool {
-	_, ok := c.QueryParams()["reverse"]
+func buildClearChatMessageText(message twitch.ClearChatMessage) string {
+	if message.BanDuration == 0 {
+		return fmt.Sprintf("%s has been banned", message.TargetUsername)
+	}
 
-	return c.QueryParam("order") == "reverse" || ok
-}
-
-func shouldRespondWithJson(c echo.Context) bool {
-	_, ok := c.QueryParams()["json"]
-
-	return c.Request().Header.Get("Content-Type") == "application/json" || c.Request().Header.Get("accept") == "application/json" || c.QueryParam("type") == "json" || ok
-}
-
-func shouldRespondWithRaw(c echo.Context) bool {
-	_, ok := c.QueryParams()["raw"]
-
-	return c.QueryParam("type") == "raw" || ok
+	return fmt.Sprintf("%s has been timed out for %d seconds", message.TargetUsername, message.BanDuration)
 }

@@ -1,116 +1,38 @@
 package api
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
 )
 
-func (s *Server) getCurrentChannelLogs(c echo.Context) error {
-	channelID := c.Param("channelid")
-	year := time.Now().Year()
-	month := int(time.Now().Month())
-	day := time.Now().Day()
-
-	redirectURL := fmt.Sprintf("/channelid/%s/%d/%d/%d", channelID, year, month, day)
-	if len(c.QueryString()) > 0 {
-		redirectURL += "?" + c.QueryString()
-	}
-	return c.Redirect(http.StatusSeeOther, redirectURL)
-}
-
-func (s *Server) getCurrentChannelLogsByName(c echo.Context) error {
-	channel := c.Param("channel")
-	year := time.Now().Year()
-	month := int(time.Now().Month())
-	day := time.Now().Day()
-
-	redirectURL := fmt.Sprintf("/channel/%s/%d/%d/%d", channel, year, month, day)
-	if len(c.QueryString()) > 0 {
-		redirectURL += "?" + c.QueryString()
-	}
-	return c.Redirect(http.StatusSeeOther, redirectURL)
-}
-
-func (s *Server) getChannelLogsByName(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-
-	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching data from twitch")
-	}
-
-	names := c.ParamNames()
-	names = append(names, "channelid")
-
-	values := c.ParamValues()
-	values = append(values, userMap[channel].ID)
-
-	c.SetParamNames(names...)
-	c.SetParamValues(values...)
-
-	return s.getChannelLogs(c)
-}
-
-func (s *Server) getChannelLogsRangeByName(c echo.Context) error {
-	channel := strings.ToLower(c.Param("channel"))
-
-	userMap, err := s.helixClient.GetUsersByUsernames([]string{channel})
-	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Failure fetching data from twitch")
-	}
-
-	names := c.ParamNames()
-	names = append(names, "channelid")
-
-	values := c.ParamValues()
-	values = append(values, userMap[channel].ID)
-
-	c.SetParamNames(names...)
-	c.SetParamValues(values...)
-
-	return s.getChannelLogsRange(c)
-}
-
-func (s *Server) getChannelLogs(c echo.Context) error {
-	channelID := c.Param("channelid")
-
-	yearStr := c.Param("year")
-	monthStr := c.Param("month")
-	dayStr := c.Param("day")
+func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
+	yearStr := request.time.year
+	monthStr := request.time.month
+	dayStr := request.time.day
 
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid year")
+		return &chatLog{}, errors.New("invalid year")
 	}
 	month, err := strconv.Atoi(monthStr)
 	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid month")
+		return &chatLog{}, errors.New("invalid month")
 	}
 	day, err := strconv.Atoi(dayStr)
 	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusInternalServerError, "Invalid day")
+		return &chatLog{}, errors.New("invalid day")
 	}
 
-	logMessages, err := s.fileLogger.ReadLogForChannel(channelID, year, month, day)
+	logMessages, err := s.fileLogger.ReadLogForChannel(request.channelid, year, month, day)
 	if err != nil {
-		log.Error(err)
-		return c.JSON(http.StatusNotFound, "Failure reading log")
+		return &chatLog{}, err
 	}
 
-	if shouldReverse(c) {
-		reverse(logMessages)
+	if request.reverse {
+		reverseSlice(logMessages)
 	}
 
 	var logResult chatLog
@@ -169,41 +91,27 @@ func (s *Server) getChannelLogs(c echo.Context) error {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	if shouldRespondWithJson(c) {
-		return writeJSONResponse(c, &logResult)
-	}
-
-	if shouldRespondWithRaw(c) {
-		return writeRawResponse(c, &logResult)
-	}
-
-	return writeTextResponse(c, &logResult)
+	return &logResult, nil
 }
 
-func (s *Server) getChannelLogsRange(c echo.Context) error {
-	channelID := c.Param("channelid")
-
-	fromTime, toTime, err := parseFromTo(c.QueryParam("from"), c.QueryParam("to"), channelHourLimit)
+func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
+	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, userHourLimit)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return &chatLog{}, err
 	}
 
 	var logMessages []string
 
-	logMessages, _ = s.fileLogger.ReadLogForChannel(channelID, fromTime.Year(), int(fromTime.Month()), fromTime.Day())
+	logMessages, _ = s.fileLogger.ReadLogForChannel(request.channelid, fromTime.Year(), int(fromTime.Month()), fromTime.Day())
 
 	if fromTime.Month() != toTime.Month() {
-		additionalMessages, _ := s.fileLogger.ReadLogForChannel(channelID, toTime.Year(), int(toTime.Month()), toTime.Day())
+		additionalMessages, _ := s.fileLogger.ReadLogForChannel(request.channelid, toTime.Year(), int(toTime.Month()), toTime.Day())
 
 		logMessages = append(logMessages, additionalMessages...)
 	}
 
-	if len(logMessages) == 0 {
-		return c.JSON(http.StatusNotFound, "No logs found")
-	}
-
-	if shouldReverse(c) {
-		reverse(logMessages)
+	if request.reverse {
+		reverseSlice(logMessages)
 	}
 
 	var logResult chatLog
@@ -270,13 +178,5 @@ func (s *Server) getChannelLogsRange(c echo.Context) error {
 		logResult.Messages = append(logResult.Messages, chatMsg)
 	}
 
-	if shouldRespondWithJson(c) {
-		return writeJSONResponse(c, &logResult)
-	}
-
-	if shouldRespondWithRaw(c) {
-		return writeRawResponse(c, &logResult)
-	}
-
-	return writeTextResponse(c, &logResult)
+	return &logResult, nil
 }

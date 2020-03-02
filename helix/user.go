@@ -1,32 +1,41 @@
 package helix
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
+	helixClient "github.com/nicklaw5/helix"
 	log "github.com/sirupsen/logrus"
 )
 
+// Client wrapper for helix
 type Client struct {
 	clientID   string
+	client     *helixClient.Client
 	httpClient *http.Client
 }
 
 var (
-	userCacheByID       map[string]UserData
-	userCacheByUsername map[string]UserData
+	userCacheByID       map[string]*UserData
+	userCacheByUsername map[string]*UserData
 )
 
 func init() {
-	userCacheByID = map[string]UserData{}
-	userCacheByUsername = map[string]UserData{}
+	userCacheByID = map[string]*UserData{}
+	userCacheByUsername = map[string]*UserData{}
 }
 
+// NewClient Create helix client
 func NewClient(clientID string) Client {
+	client, err := helixClient.NewClient(&helixClient.Options{
+		ClientID: clientID,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	return Client{
 		clientID:   clientID,
+		client:     client,
 		httpClient: &http.Client{},
 	}
 }
@@ -35,6 +44,7 @@ type userResponse struct {
 	Data []UserData `json:"data"`
 }
 
+// UserData exported data from twitch
 type UserData struct {
 	ID              string `json:"id"`
 	Login           string `json:"login"`
@@ -48,6 +58,7 @@ type UserData struct {
 	Email           string `json:"email"`
 }
 
+// GetUsersByUserIds receive userData for given ids
 func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error) {
 	var filteredUserIDs []string
 
@@ -57,40 +68,44 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 		}
 	}
 
-	if len(filteredUserIDs) == 1 {
-		params := "?id=" + filteredUserIDs[0]
-
-		err := c.makeRequest(params)
+	if len(filteredUserIDs) > 0 {
+		resp, err := c.client.GetUsers(&helixClient.UsersParams{
+			IDs: filteredUserIDs,
+		})
 		if err != nil {
-			return nil, err
+			return map[string]UserData{}, err
 		}
 
-	} else if len(filteredUserIDs) > 1 {
-		var params string
+		log.Infof("%d GetUsersByUserIds %v", resp.StatusCode, filteredUserIDs)
 
-		for index, id := range filteredUserIDs {
-			if index == 0 {
-				params += "?id=" + id
-			} else {
-				params += "&id=" + id
+		for _, user := range resp.Data.Users {
+			data := &UserData{
+				ID:              user.ID,
+				Login:           user.Login,
+				DisplayName:     user.Login,
+				Type:            user.Type,
+				BroadcasterType: user.BroadcasterType,
+				Description:     user.Description,
+				ProfileImageURL: user.ProfileImageURL,
+				OfflineImageURL: user.OfflineImageURL,
+				ViewCount:       user.ViewCount,
+				Email:           user.Email,
 			}
-		}
-
-		err := c.makeRequest(params)
-		if err != nil {
-			return nil, err
+			userCacheByID[user.ID] = data
+			userCacheByUsername[user.Login] = data
 		}
 	}
 
 	result := make(map[string]UserData)
 
 	for _, id := range userIDs {
-		result[id] = userCacheByID[id]
+		result[id] = *userCacheByID[id]
 	}
 
 	return result, nil
 }
 
+// GetUsersByUsernames fetches userdata from helix
 func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, error) {
 	var filteredUsernames []string
 
@@ -100,72 +115,39 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 		}
 	}
 
-	if len(filteredUsernames) == 1 {
-		params := "?login=" + filteredUsernames[0]
-
-		err := c.makeRequest(params)
+	if len(filteredUsernames) > 0 {
+		resp, err := c.client.GetUsers(&helixClient.UsersParams{
+			Logins: filteredUsernames,
+		})
 		if err != nil {
-			return nil, err
+			return map[string]UserData{}, err
 		}
 
-	} else if len(filteredUsernames) > 1 {
-		var params string
+		log.Infof("%d GetUsersByUsernames %v", resp.StatusCode, filteredUsernames)
 
-		for index, id := range filteredUsernames {
-			if index == 0 {
-				params += "?login=" + id
-			} else {
-				params += "&login=" + id
+		for _, user := range resp.Data.Users {
+			data := &UserData{
+				ID:              user.ID,
+				Login:           user.Login,
+				DisplayName:     user.Login,
+				Type:            user.Type,
+				BroadcasterType: user.BroadcasterType,
+				Description:     user.Description,
+				ProfileImageURL: user.ProfileImageURL,
+				OfflineImageURL: user.OfflineImageURL,
+				ViewCount:       user.ViewCount,
+				Email:           user.Email,
 			}
-		}
-
-		err := c.makeRequest(params)
-		if err != nil {
-			return nil, err
+			userCacheByID[user.ID] = data
+			userCacheByUsername[user.Login] = data
 		}
 	}
 
 	result := make(map[string]UserData)
 
 	for _, username := range usernames {
-		result[username] = userCacheByUsername[username]
+		result[username] = *userCacheByUsername[username]
 	}
 
 	return result, nil
-}
-
-func (c *Client) makeRequest(parameters string) error {
-	request, err := http.NewRequest("GET", "https://api.twitch.tv/helix/users"+parameters, nil)
-	if err != nil {
-		return err
-	}
-	request.Header.Set("Client-ID", c.clientID)
-	response, err := c.httpClient.Do(request)
-	if err != nil {
-		return err
-	}
-	if response.StatusCode >= 400 {
-		return fmt.Errorf("%d GET https://api.twitch.tv/helix/users%s", response.StatusCode, parameters)
-	}
-	
-	log.Infof("%d GET https://api.twitch.tv/helix/users%s", response.StatusCode, parameters)
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	var userResp userResponse
-	err = json.Unmarshal(contents, &userResp)
-	if err != nil {
-		return err
-	}
-
-	for _, user := range userResp.Data {
-		userCacheByID[user.ID] = user
-		userCacheByUsername[user.Login] = user
-	}
-
-	return nil
 }

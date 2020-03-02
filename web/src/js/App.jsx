@@ -6,7 +6,6 @@ import reducer from "./store/reducer";
 import createInitialState from "./store/createInitialState";
 import LogSearch from './components/LogSearch';
 
-
 export default class App extends Component {
 
 	constructor(props) {

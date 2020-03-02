@@ -13,18 +13,18 @@ export default function (channel, username, year, month) {
 
             dispatch(setLoading(true));
 
-            let channelPath = "name";
+            let channelPath = "channel";
             if (channel.toLowerCase().startsWith("id:")) {
                 channelPath = "id";
             }
-            let usernamePath = "name";
+            let usernamePath = "user";
             if (username.toLowerCase().startsWith("id:")) {
                 usernamePath = "id";
             }
 
             channel = channel.replace("id:", "")
             username = username.replace("id:", "")
-            const url = `${getState().apiBaseUrl}/v2/${channelPath}/${channel}/${usernamePath}/${username}/${year}/${month}`;
+            const url = `${getState().apiBaseUrl}/${channelPath}/${channel}/${usernamePath}/${username}/${year}/${month}`;
 
             fetch(url, { headers: { "Content-Type": "application/json" } }).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
