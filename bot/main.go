@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 
 	twitch "github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/helix"
-	"github.com/gempir/justlog/humanize"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,23 +19,31 @@ type Bot struct {
 	helixClient       *helix.Client
 	twitchClient      *twitch.Client
 	fileLogger        *filelog.Logger
+	channels          map[string]helix.UserData
 	messageTypesToLog map[string][]twitch.MessageType
 }
 
 // NewBot create new bot instance
-func NewBot(cfg *config.Config, helixClient *helix.Client, fileLogger *filelog.Logger, messageTypesToLog map[string][]twitch.MessageType) *Bot {
+func NewBot(cfg *config.Config, helixClient *helix.Client, fileLogger *filelog.Logger) *Bot {
+	channels, err := helixClient.GetUsersByUserIds(cfg.Channels)
+	if err != nil {
+		log.Fatalf("[bot] failed to load configured channels %s", err.Error())
+	}
+
 	return &Bot{
-		cfg:               cfg,
-		helixClient:       helixClient,
-		fileLogger:        fileLogger,
-		messageTypesToLog: messageTypesToLog,
+		cfg:         cfg,
+		helixClient: helixClient,
+		fileLogger:  fileLogger,
+		channels:    channels,
 	}
 }
 
 // Connect startup the logger and bot
-func (b *Bot) Connect(channelIds []string) {
+func (b *Bot) Connect() {
 	b.startTime = time.Now()
 	b.twitchClient = twitch.NewClient(b.cfg.Username, "oauth:"+b.cfg.OAuth)
+	b.updateMessageTypesToLog()
+	b.initialJoins()
 
 	if strings.HasPrefix(b.cfg.Username, "justinfan") {
 		log.Info("[bot] joining anonymous")
@@ -45,28 +51,10 @@ func (b *Bot) Connect(channelIds []string) {
 		log.Info("[bot] joining as user " + b.cfg.Username)
 	}
 
-	channels, err := b.helixClient.GetUsersByUserIds(channelIds)
-	if err != nil {
-		log.Fatalf("[bot] failed to load configured channels %s", err.Error())
-	}
-
-	messageTypesToLog := make(map[string][]twitch.MessageType)
-
-	for _, channel := range channels {
-		log.Info("[bot] joining " + channel.Login)
-		b.twitchClient.Join(channel.Login)
-
-		if _, ok := b.messageTypesToLog[channel.ID]; ok {
-			messageTypesToLog[channel.Login] = b.messageTypesToLog[channel.ID]
-		} else {
-			messageTypesToLog[channel.Login] = []twitch.MessageType{twitch.PRIVMSG, twitch.CLEARCHAT, twitch.USERNOTICE}
-		}
-	}
-
 	b.twitchClient.OnPrivateMessage(func(message twitch.PrivateMessage) {
 
 		go func() {
-			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+			if !b.shouldLog(message.Channel, message.GetType()) {
 				return
 			}
 
@@ -77,7 +65,7 @@ func (b *Bot) Connect(channelIds []string) {
 		}()
 
 		go func() {
-			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+			if !b.shouldLog(message.Channel, message.GetType()) {
 				return
 			}
 
@@ -94,7 +82,7 @@ func (b *Bot) Connect(channelIds []string) {
 		log.Debug(message.Raw)
 
 		go func() {
-			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+			if !b.shouldLog(message.Channel, message.GetType()) {
 				return
 			}
 
@@ -106,7 +94,7 @@ func (b *Bot) Connect(channelIds []string) {
 
 		if _, ok := message.Tags["msg-param-recipient-id"]; ok {
 			go func() {
-				if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+				if !b.shouldLog(message.Channel, message.GetType()) {
 					return
 				}
 
@@ -118,7 +106,7 @@ func (b *Bot) Connect(channelIds []string) {
 		}
 
 		go func() {
-			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+			if !b.shouldLog(message.Channel, message.GetType()) {
 				return
 			}
 
@@ -133,7 +121,7 @@ func (b *Bot) Connect(channelIds []string) {
 	b.twitchClient.OnClearChatMessage(func(message twitch.ClearChatMessage) {
 
 		go func() {
-			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+			if !b.shouldLog(message.Channel, message.GetType()) {
 				return
 			}
 
@@ -144,7 +132,7 @@ func (b *Bot) Connect(channelIds []string) {
 		}()
 
 		go func() {
-			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
+			if !b.shouldLog(message.Channel, message.GetType()) {
 				return
 			}
 
@@ -158,8 +146,8 @@ func (b *Bot) Connect(channelIds []string) {
 	log.Fatal(b.twitchClient.Connect())
 }
 
-func shouldLog(messageTypesToLog map[string][]twitch.MessageType, channelName string, receivedMsgType twitch.MessageType) bool {
-	for _, msgType := range messageTypesToLog[channelName] {
+func (b *Bot) shouldLog(channelName string, receivedMsgType twitch.MessageType) bool {
+	for _, msgType := range b.messageTypesToLog[channelName] {
 		if msgType == receivedMsgType {
 			return true
 		}
@@ -168,29 +156,23 @@ func shouldLog(messageTypesToLog map[string][]twitch.MessageType, channelName st
 	return false
 }
 
-func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
-	if message.User.Name == b.cfg.Admin {
-		if strings.HasPrefix(message.Message, "!status") {
-			uptime := humanize.TimeSince(b.startTime)
-			b.twitchClient.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
-		}
-		if strings.HasPrefix(message.Message, "!justlog join ") {
-			input := strings.TrimPrefix(message.Message, "!justlog join ")
+func (b *Bot) updateMessageTypesToLog() {
+	messageTypesToLog := make(map[string][]twitch.MessageType)
 
-			users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
-			if err != nil {
-				log.Error(err)
-				b.twitchClient.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
-			}
-
-			ids := []string{}
-			for _, user := range users {
-				ids = append(ids, user.ID)
-				log.Infof("[bot] joining %s", user.Login)
-				b.twitchClient.Join(user.Login)
-			}
-			b.cfg.AddChannels(ids...)
-			b.twitchClient.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
+	for _, channel := range b.channels {
+		if _, ok := b.cfg.ChannelConfigs[channel.ID]; ok && b.cfg.ChannelConfigs[channel.ID].MessageTypes != nil {
+			messageTypesToLog[channel.Login] = b.cfg.ChannelConfigs[channel.ID].MessageTypes
+		} else {
+			messageTypesToLog[channel.Login] = []twitch.MessageType{twitch.PRIVMSG, twitch.CLEARCHAT, twitch.USERNOTICE}
 		}
+	}
+
+	b.messageTypesToLog = messageTypesToLog
+}
+
+func (b *Bot) initialJoins() {
+	for _, channel := range b.channels {
+		log.Info("[bot] joining " + channel.Login)
+		b.twitchClient.Join(channel.Login)
 	}
 }

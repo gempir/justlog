@@ -49,6 +49,22 @@ func (cfg *Config) AddChannels(channelIDs ...string) {
 	cfg.persistConfig()
 }
 
+// SetMessageTypes sets recorded message types for a channel
+func (cfg *Config) SetMessageTypes(channelID string, messageTypes []twitch.MessageType) {
+	if _, ok := cfg.ChannelConfigs[channelID]; ok {
+		channelCfg := cfg.ChannelConfigs[channelID]
+		channelCfg.MessageTypes = messageTypes
+
+		cfg.ChannelConfigs[channelID] = channelCfg
+	} else {
+		cfg.ChannelConfigs[channelID] = ChannelConfig{
+			MessageTypes: messageTypes,
+		}
+	}
+
+	cfg.persistConfig()
+}
+
 func appendIfMissing(slice []string, i string) []string {
 	for _, ele := range slice {
 		if ele == i {
@@ -74,14 +90,15 @@ func (cfg *Config) persistConfig() {
 func loadConfiguration(filePath string) *Config {
 	// setup defaults
 	cfg := Config{
-		configFile:    filePath,
-		LogsDirectory: "./logs",
-		ListenAddress: "127.0.0.1:8025",
-		Username:      "justinfan777777",
-		OAuth:         "oauth:777777777",
-		Channels:      []string{},
-		Admin:         "gempir",
-		LogLevel:      "info",
+		configFile:     filePath,
+		LogsDirectory:  "./logs",
+		ListenAddress:  "127.0.0.1:8025",
+		Username:       "justinfan777777",
+		OAuth:          "oauth:777777777",
+		Channels:       []string{},
+		ChannelConfigs: make(map[string]ChannelConfig),
+		Admin:          "gempir",
+		LogLevel:       "info",
 	}
 
 	info, err := os.Stat(filePath)

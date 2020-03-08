@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 
-	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/api"
 	"github.com/gempir/justlog/archiver"
 	"github.com/gempir/justlog/bot"
@@ -27,11 +26,6 @@ func main() {
 	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient, cfg.Channels)
 	go apiServer.Init()
 
-	messageTypesToLog := make(map[string][]twitch.MessageType)
-	for userID, config := range cfg.ChannelConfigs {
-		messageTypesToLog[userID] = config.MessageTypes
-	}
-
-	bot := bot.NewBot(cfg, &helixClient, &fileLogger, messageTypesToLog)
-	bot.Connect(cfg.Channels)
+	bot := bot.NewBot(cfg, &helixClient, &fileLogger)
+	bot.Connect()
 }
