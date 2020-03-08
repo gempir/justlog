@@ -40,20 +40,20 @@ func (b *Bot) Connect(channelIds []string) {
 	b.twitchClient = twitch.NewClient(b.cfg.Username, "oauth:"+b.cfg.OAuth)
 
 	if strings.HasPrefix(b.cfg.Username, "justinfan") {
-		log.Info("Bot joining anonymous")
+		log.Info("[bot] joining anonymous")
 	} else {
-		log.Info("Bot joining as user " + b.cfg.Username)
+		log.Info("[bot] joining as user " + b.cfg.Username)
 	}
 
 	channels, err := b.helixClient.GetUsersByUserIds(channelIds)
 	if err != nil {
-		log.Fatalf("Failed to load configured channels %s", err.Error())
+		log.Fatalf("[bot] failed to load configured channels %s", err.Error())
 	}
 
 	messageTypesToLog := make(map[string][]twitch.MessageType)
 
 	for _, channel := range channels {
-		log.Info("Joining " + channel.Login)
+		log.Info("[bot] joining " + channel.Login)
 		b.twitchClient.Join(channel.Login)
 
 		if _, ok := b.messageTypesToLog[channel.ID]; ok {
@@ -186,6 +186,8 @@ func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
 			ids := []string{}
 			for _, user := range users {
 				ids = append(ids, user.ID)
+				log.Infof("[bot] joining %s", user.Login)
+				b.twitchClient.Join(user.Login)
 			}
 			b.cfg.AddChannels(ids...)
 			b.twitchClient.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
