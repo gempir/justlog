@@ -1,8 +1,13 @@
 # justlog [![Build Status](https://travis-ci.org/gempir/justlog.svg?branch=master)](https://travis-ci.org/gempir/justlog)
 
-#### What is this?
+### What is this?
 justlog is a bot I maintain for a couple of channels. Its features differ from other bots in that it doesn't support
 commands, etc. yet, it focuses on logging and providing an api for the logs.
+
+### Commands
+- `!justlog status` will respond with uptime
+- `!justlog join gempir,pajlada` will join the channels and append them to the config
+- `!justlog messageType gempir 1,2` will set the recorded message types to 1 and 2 in channel gempir (will fetch the userid on its own) 
 
 ### Config
 
