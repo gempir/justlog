@@ -1,12 +1,14 @@
 package bot
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/gempir/justlog/config"
 	"github.com/gempir/justlog/filelog"
 
-	"github.com/gempir/go-twitch-irc/v2"
+	twitch "github.com/gempir/go-twitch-irc/v2"
 	"github.com/gempir/justlog/helix"
 	"github.com/gempir/justlog/humanize"
 	log "github.com/sirupsen/logrus"
@@ -14,22 +16,18 @@ import (
 
 // Bot basic logging bot
 type Bot struct {
-	admin             string
-	username          string
-	oauth             string
-	startTime         *time.Time
+	startTime         time.Time
+	cfg               *config.Config
 	helixClient       *helix.Client
+	twitchClient      *twitch.Client
 	fileLogger        *filelog.Logger
 	messageTypesToLog map[string][]twitch.MessageType
 }
 
 // NewBot create new bot instance
-func NewBot(admin, username, oauth string, startTime *time.Time, helixClient *helix.Client, fileLogger *filelog.Logger, messageTypesToLog map[string][]twitch.MessageType) *Bot {
+func NewBot(cfg *config.Config, helixClient *helix.Client, fileLogger *filelog.Logger, messageTypesToLog map[string][]twitch.MessageType) *Bot {
 	return &Bot{
-		admin:             admin,
-		username:          username,
-		oauth:             oauth,
-		startTime:         startTime,
+		cfg:               cfg,
 		helixClient:       helixClient,
 		fileLogger:        fileLogger,
 		messageTypesToLog: messageTypesToLog,
@@ -38,12 +36,13 @@ func NewBot(admin, username, oauth string, startTime *time.Time, helixClient *he
 
 // Connect startup the logger and bot
 func (b *Bot) Connect(channelIds []string) {
-	twitchClient := twitch.NewClient(b.username, "oauth:"+b.oauth)
+	b.startTime = time.Now()
+	b.twitchClient = twitch.NewClient(b.cfg.Username, "oauth:"+b.cfg.OAuth)
 
-	if strings.HasPrefix(b.username, "justinfan") {
+	if strings.HasPrefix(b.cfg.Username, "justinfan") {
 		log.Info("Bot joining anonymous")
 	} else {
-		log.Info("Bot joining as user " + b.username)
+		log.Info("Bot joining as user " + b.cfg.Username)
 	}
 
 	channels, err := b.helixClient.GetUsersByUserIds(channelIds)
@@ -55,7 +54,7 @@ func (b *Bot) Connect(channelIds []string) {
 
 	for _, channel := range channels {
 		log.Info("Joining " + channel.Login)
-		twitchClient.Join(channel.Login)
+		b.twitchClient.Join(channel.Login)
 
 		if _, ok := b.messageTypesToLog[channel.ID]; ok {
 			messageTypesToLog[channel.Login] = b.messageTypesToLog[channel.ID]
@@ -64,7 +63,7 @@ func (b *Bot) Connect(channelIds []string) {
 		}
 	}
 
-	twitchClient.OnPrivateMessage(func(message twitch.PrivateMessage) {
+	b.twitchClient.OnPrivateMessage(func(message twitch.PrivateMessage) {
 
 		go func() {
 			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
@@ -88,13 +87,10 @@ func (b *Bot) Connect(channelIds []string) {
 			}
 		}()
 
-		if message.User.Name == b.admin && strings.HasPrefix(message.Message, "!status") {
-			uptime := humanize.TimeSince(*b.startTime)
-			twitchClient.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
-		}
+		b.handlePrivateMessage(message)
 	})
 
-	twitchClient.OnUserNoticeMessage(func(message twitch.UserNoticeMessage) {
+	b.twitchClient.OnUserNoticeMessage(func(message twitch.UserNoticeMessage) {
 		log.Debug(message.Raw)
 
 		go func() {
@@ -134,7 +130,7 @@ func (b *Bot) Connect(channelIds []string) {
 
 	})
 
-	twitchClient.OnClearChatMessage(func(message twitch.ClearChatMessage) {
+	b.twitchClient.OnClearChatMessage(func(message twitch.ClearChatMessage) {
 
 		go func() {
 			if !shouldLog(messageTypesToLog, message.Channel, message.GetType()) {
@@ -159,7 +155,7 @@ func (b *Bot) Connect(channelIds []string) {
 		}()
 	})
 
-	log.Fatal(twitchClient.Connect())
+	log.Fatal(b.twitchClient.Connect())
 }
 
 func shouldLog(messageTypesToLog map[string][]twitch.MessageType, channelName string, receivedMsgType twitch.MessageType) bool {
@@ -170,4 +166,29 @@ func shouldLog(messageTypesToLog map[string][]twitch.MessageType, channelName st
 	}
 
 	return false
+}
+
+func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
+	if message.User.Name == b.cfg.Admin {
+		if strings.HasPrefix(message.Message, "!status") {
+			uptime := humanize.TimeSince(b.startTime)
+			b.twitchClient.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
+		}
+		if strings.HasPrefix(message.Message, "!justlog join ") {
+			input := strings.TrimPrefix(message.Message, "!justlog join ")
+
+			users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+			if err != nil {
+				log.Error(err)
+				b.twitchClient.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+			}
+
+			ids := []string{}
+			for _, user := range users {
+				ids = append(ids, user.ID)
+			}
+			b.cfg.AddChannels(ids...)
+			b.twitchClient.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
+		}
+	}
 }
