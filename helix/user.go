@@ -2,6 +2,7 @@ package helix
 
 import (
 	"net/http"
+	"strings"
 
 	helixClient "github.com/nicklaw5/helix"
 	log "github.com/sirupsen/logrus"
@@ -110,8 +111,8 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 	var filteredUsernames []string
 
 	for _, username := range usernames {
-		if _, ok := userCacheByUsername[username]; !ok {
-			filteredUsernames = append(filteredUsernames, username)
+		if _, ok := userCacheByUsername[strings.ToLower(username)]; !ok {
+			filteredUsernames = append(filteredUsernames, strings.ToLower(username))
 		}
 	}
 
@@ -146,7 +147,7 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 	result := make(map[string]UserData)
 
 	for _, username := range usernames {
-		result[username] = *userCacheByUsername[username]
+		result[strings.ToLower(username)] = *userCacheByUsername[strings.ToLower(username)]
 	}
 
 	return result, nil

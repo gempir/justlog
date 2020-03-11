@@ -36,7 +36,7 @@ type logTime struct {
 }
 
 var (
-	pathRegex = regexp.MustCompile(`\/(channel|channelid)\/([a-zA-Z0-9]+)(?:\/(user|userid)\/([a-zA-Z0-9]+))?(?:(?:\/(\d{4})\/(\d{1,2})(?:\/(\d{1,2}))?)|(?:\/(range|random)))?`)
+	pathRegex = regexp.MustCompile(`\/(channel|channelid)\/(\w+)(?:\/(user|userid)\/(\w+))?(?:(?:\/(\d{4})\/(\d{1,2})(?:\/(\d{1,2}))?)|(?:\/(range|random)))?`)
 )
 
 func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
@@ -153,10 +153,10 @@ func (s *Server) fillIds(request logRequest) (logRequest, error) {
 	}
 
 	if request.channelid == "" {
-		request.channelid = ids[request.channel].ID
+		request.channelid = ids[strings.ToLower(request.channel)].ID
 	}
 	if request.userid == "" {
-		request.userid = ids[request.user].ID
+		request.userid = ids[strings.ToLower(request.user)].ID
 	}
 
 	return request, nil
