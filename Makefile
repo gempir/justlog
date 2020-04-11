@@ -1,6 +1,6 @@
 full: web build
 
-build:
+build: init_assets
 	go build
 
 run: build
