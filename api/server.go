@@ -220,13 +220,13 @@ func writeJSON(data interface{}, code int, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	w.Write(js)
 }
 
 func writeRaw(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(code)
 
 	for _, cMessage := range cLog.Messages {
@@ -235,7 +235,7 @@ func writeRaw(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
 }
 
 func writeText(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(code)
 
 	for _, cMessage := range cLog.Messages {
