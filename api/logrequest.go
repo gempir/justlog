@@ -80,6 +80,13 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		request.userid = params[4]
 	}
 
+	var err error
+	request, err = s.fillIds(request)
+	if err != nil {
+		log.Error(err)
+		return logRequest{}, nil
+	}
+
 	if request.isUserRequest && len(params) == 7 {
 		request.time.year = params[5]
 		request.time.month = params[6]
@@ -93,8 +100,20 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		request.time.from = r.URL.Query().Get("from")
 		request.time.to = r.URL.Query().Get("to")
 	} else {
-		request.time.year = fmt.Sprintf("%d", time.Now().Year())
-		request.time.month = fmt.Sprintf("%d", time.Now().Month())
+		if request.isChannelRequest {
+			request.time.year = fmt.Sprintf("%d", time.Now().Year())
+			request.time.month = fmt.Sprintf("%d", time.Now().Month())
+		} else {
+			year, month, err := s.fileLogger.GetLastLogYearAndMonthForUser(request.channelid, request.userid)
+			if err == nil {
+				request.time.year = fmt.Sprintf("%d", year)
+				request.time.month = fmt.Sprintf("%d", month)
+			} else {
+				request.time.year = fmt.Sprintf("%d", time.Now().Year())
+				request.time.month = fmt.Sprintf("%d", time.Now().Month())
+			}
+		}
+
 		timePath := request.time.year + "/" + request.time.month
 
 		if request.isChannelRequest {
@@ -126,13 +145,6 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		request.responseType = responseTypeRaw
 	} else {
 		request.responseType = responseTypeText
-	}
-
-	var err error
-	request, err = s.fillIds(request)
-	if err != nil {
-		log.Error(err)
-		return logRequest{}, nil
 	}
 
 	return request, nil
