@@ -27,7 +27,7 @@ type Config struct {
 
 // ChannelConfig config for indiviual channels
 type ChannelConfig struct {
-	MessageTypes []twitch.MessageType `json:"messageTypes"`
+	MessageTypes []twitch.MessageType `json:"messageTypes,omitempty"`
 }
 
 // NewConfig create configuration from file
@@ -60,6 +60,18 @@ func (cfg *Config) SetMessageTypes(channelID string, messageTypes []twitch.Messa
 		cfg.ChannelConfigs[channelID] = ChannelConfig{
 			MessageTypes: messageTypes,
 		}
+	}
+
+	cfg.persistConfig()
+}
+
+// ResetMessageTypes removed message type option and therefore resets it
+func (cfg *Config) ResetMessageTypes(channelID string) {
+	if _, ok := cfg.ChannelConfigs[channelID]; ok {
+		channelCfg := cfg.ChannelConfigs[channelID]
+		channelCfg.MessageTypes = nil
+
+		cfg.ChannelConfigs[channelID] = channelCfg
 	}
 
 	cfg.persistConfig()

@@ -58,18 +58,23 @@ func (b *Bot) handleMessageType(message twitch.PrivateMessage) {
 		return
 	}
 
-	var messageTypes []twitch.MessageType
-	for _, msgType := range strings.Split(parts[1], ",") {
-		messageType, err := strconv.Atoi(msgType)
-		if err != nil {
-			log.Error(err)
-			return
+	if parts[1] == "reset" {
+		b.cfg.ResetMessageTypes(users[parts[0]].ID)
+		log.Infof("[bot] setting %s config messageTypes to default", parts[0])
+	} else {
+		var messageTypes []twitch.MessageType
+		for _, msgType := range strings.Split(parts[1], ",") {
+			messageType, err := strconv.Atoi(msgType)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			messageTypes = append(messageTypes, twitch.MessageType(messageType))
 		}
 
-		messageTypes = append(messageTypes, twitch.MessageType(messageType))
+		b.cfg.SetMessageTypes(users[parts[0]].ID, messageTypes)
+		b.updateMessageTypesToLog()
+		log.Infof("[bot] setting %s config messageTypes to %v", parts[0], messageTypes)
 	}
-
-	b.cfg.SetMessageTypes(users[parts[0]].ID, messageTypes)
-	b.updateMessageTypesToLog()
-	log.Infof("[bot] setting %s config messageTypes to %v", parts[0], messageTypes)
 }

@@ -4,6 +4,7 @@ export default () => {
     return {
         apiBaseUrl: process.env.apiBaseUrl,
         channels: [],
+        bttvChannelEmotes: null,
         logs: {},
         loading: false,
         twitchEmotes: {},

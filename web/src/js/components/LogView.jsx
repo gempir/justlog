@@ -11,7 +11,7 @@ class LogView extends Component {
 	state = {
 		loading: false,
 		height: 0,
-		buttonText: "load"
+		buttonText: "load",
 	};
 
 	componentDidMount() {
@@ -58,6 +58,16 @@ class LogView extends Component {
 			));
 		}
 
+		if (this.props.bttvChannelEmotes) {
+			for (const emote of this.props.bttvChannelEmotes.emotes) {
+				const regex = new RegExp(`(?:^|\ )(${emote.code})(?:$|\ )`);
+	
+				message = reactStringReplace(message, regex, (match, i) => (
+					<img key={i} src={this.buildBttvEmote(this.props.bttvChannelEmotes.urlTemplate, emote.id)} alt={match} />
+				));
+			}
+		}
+
 		return (
 			<p>
 				{message}
@@ -79,10 +89,14 @@ class LogView extends Component {
 	buildTwitchEmote = (id) => {
 		return `https://static-cdn.jtvnw.net/emoticons/v1/${id}/1.0`;
 	}
+
+	buildBttvEmote = (urlTemplate, id) => {
+		return urlTemplate.replace("{{id}}", id).replace("{{image}}", "1x");
+	}
 }
 const mapStateToProps = (state) => {
     return {
-
+		bttvChannelEmotes: state.bttvChannelEmotes,
     };
 };
 

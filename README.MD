@@ -8,6 +8,7 @@ commands, etc. yet, it focuses on logging and providing an api for the logs.
 - `!justlog status` will respond with uptime
 - `!justlog join gempir,pajlada` will join the channels and append them to the config
 - `!justlog messageType gempir 1,2` will set the recorded message types to 1 and 2 in channel gempir (will fetch the userid on its own) 
+- `!justlog messageType gempir reset` will reset to default 
 
 ### Config
 
