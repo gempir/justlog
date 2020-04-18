@@ -12,6 +12,8 @@ export default (state, action) => {
             return { ...state, twitchEmotes: action.twitchEmotes };
         case "SET_BTTV_CHANNEL_EMOTES":
             return { ...state, bttvChannelEmotes: action.bttvChannelEmotes };
+        case "SET_BTTV_EMOTES":
+            return { ...state, bttvEmotes: action.bttvEmotes };
         default:
             return { ...state };
     }

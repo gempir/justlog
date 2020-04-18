@@ -4,11 +4,11 @@
     "description": "frontend for justlog",
     "repository": "github.com/gempir/justlog",
     "dependencies": {
+        "irc-message": "^3.0.2",
         "prop-types": "^15.7.2",
         "react": "^16.12.0",
         "react-dom": "^16.12.0",
         "react-redux": "^7.1.3",
-        "react-string-replace": "^0.4.4",
         "react-toastify": "^5.5.0",
         "redux": "^4.0.5",
         "redux-thunk": "^2.3.0"

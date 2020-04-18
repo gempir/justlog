@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import twitchEmotes from "../emotes/twitch";
-import reactStringReplace from "react-string-replace";
 import loadLogs from '../actions/loadLogs';
 import LoadingSpinner from "./LoadingSpinner";
 import AnimateHeight from "./AnimateHeight";
+import { parse } from "irc-message";
 
 class LogView extends Component {
 
@@ -16,7 +15,7 @@ class LogView extends Component {
 
 	componentDidMount() {
 		if (this.props.log.messages.length > 0) {
-			setTimeout(() => this.setState({height: 'auto'}), 10);
+			setTimeout(() => this.setState({ height: 'auto' }), 10);
 		}
 	}
 
@@ -39,46 +38,73 @@ class LogView extends Component {
 		return (
 			<div className={"log-view"}>
 				<AnimateHeight duration={500} easing={"ease-in-out"} height={this.state.height} animateOpacity>
-				{this.props.log.messages.reverse().map((value, key) =>
-					<div key={key} className="line">
-						<span id={value.timestamp} className="timestamp">{this.formatDate(value.timestamp)}</span>{this.renderMessage(value.text)}
-					</div>
-				)}
+					{this.props.log.messages.map((value, key) =>
+						<div key={key} className="line">
+							<span id={value.timestamp} className="timestamp">{this.formatDate(value.timestamp)}</span>{this.renderMessage(value)}
+						</div>
+					)}
 				</AnimateHeight>
 			</div>
 		);
 	}
 
-	renderMessage = (message) => {
-		for (let emoteCode in twitchEmotes) {
-			const regex = new RegExp(`(?:^|\ )(${emoteCode})(?:$|\ )`);
+	renderMessage = (value) => {
+		const msgObj = parse(value.raw);
+		let message = value.text;
 
-			message = reactStringReplace(message, regex, (match, i) => (
-				<img key={i} src={this.buildTwitchEmote(twitchEmotes[emoteCode].id)} alt={match} />
-			));
+		const replacements = [];
+
+		if (msgObj.tags.emotes && msgObj.tags.emotes !== true) {
+			for (const emoteString of msgObj.tags.emotes.split("/")) {
+				const [emoteId, occurences] = emoteString.split(":");
+				for (const occurence of occurences.split(",")) {
+					const [start, end] = occurence.split("-");
+					replacements.push({start: Number(start), end: Number(end) + 1, emoteId});
+				}
+			}
+		}
+
+		replacements.sort((a, b) => {
+			if (a.start > b.start) {
+				return -1;
+			}
+			if (a.start < b.start) {
+				return 1;
+			}
+			return 0;
+		})
+
+		for (const replacement of replacements) {
+			const emote = `<img src="${this.buildTwitchEmote(replacement.emoteId)}" alt="${replacement.emoteId}" />`;
+			message = message.slice(0, replacement.start) + emote + message.slice(replacement.end);
 		}
 
 		if (this.props.bttvChannelEmotes) {
 			for (const emote of this.props.bttvChannelEmotes.emotes) {
-				const regex = new RegExp(`(?:^|\ )(${emote.code})(?:$|\ )`);
-	
-				message = reactStringReplace(message, regex, (match, i) => (
-					<img key={i} src={this.buildBttvEmote(this.props.bttvChannelEmotes.urlTemplate, emote.id)} alt={match} />
-				));
+				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
+
+				message = message.replace(regex, `<img src="${this.buildBttvEmote(this.props.bttvChannelEmotes.urlTemplate, emote.id)}" alt="${emote.id}" />`);
+			}
+		}
+
+		if (this.props.bttvEmotes) {
+			for (const emote of this.props.bttvEmotes.emotes) {
+				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
+
+				message = message.replace(regex, `<img src="${this.buildBttvEmote(this.props.bttvEmotes.urlTemplate, emote.id)}" alt="${emote.id}" />`);
 			}
 		}
 
 		return (
-			<p>
-				{message}
+			<p dangerouslySetInnerHTML={{ __html: message }}>
 			</p>
 		);
 	}
 
 	loadLog = () => {
-		this.setState({loading: true});
-		this.props.dispatch(loadLogs(null, null, this.props.log.year, this.props.log.month)).then(() => this.setState({loading: false})).catch(() => {
-			this.setState({loading: false, buttonText: "not found"});
+		this.setState({ loading: true });
+		this.props.dispatch(loadLogs(null, null, this.props.log.year, this.props.log.month)).then(() => this.setState({ loading: false })).catch(() => {
+			this.setState({ loading: false, buttonText: "not found" });
 		});
 	}
 
@@ -95,9 +121,10 @@ class LogView extends Component {
 	}
 }
 const mapStateToProps = (state) => {
-    return {
+	return {
 		bttvChannelEmotes: state.bttvChannelEmotes,
-    };
+		bttvEmotes: state.bttvEmotes,
+	};
 };
 
 export default connect(mapStateToProps)(LogView);

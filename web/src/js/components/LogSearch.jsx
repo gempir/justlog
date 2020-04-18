@@ -4,21 +4,23 @@ import LogView from "./LogView";
 import { connect } from "react-redux";
 import loadChannels from "../actions/loadChannels";
 import loadLogs from "../actions/loadLogs";
-import loadBttvEmotes from "../actions/loadBttvEmotes";
+import loadBttvChannelEmotes from "../actions/loadBttvChannelEmotes";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
+import loadBttvEmotes from "../actions/loadBttvEmotes";
 
 class LogSearch extends Component {
     constructor(props) {
         super(props);
 
         props.dispatch(loadChannels());
+        props.dispatch(loadBttvEmotes());
     }
 
     componentDidMount() {
         if (this.props.channel && this.props.username) {
             this.props.dispatch(loadLogs());
-            this.props.dispatch(loadBttvEmotes(this.props.channel));
+            this.props.dispatch(loadBttvChannelEmotes(this.props.channel));
         }
     }
 

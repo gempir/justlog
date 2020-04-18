@@ -24,7 +24,7 @@ export default function (channel, username, year, month) {
 
             channel = channel.replace("id:", "")
             username = username.replace("id:", "")
-            const url = `${getState().apiBaseUrl}/${channelPath}/${channel}/${usernamePath}/${username}/${year}/${month}`;
+            const url = `${getState().apiBaseUrl}/${channelPath}/${channel}/${usernamePath}/${username}/${year}/${month}?reverse`;
 
             fetch(url, { headers: { "Content-Type": "application/json" } }).then((response) => {
                 if (response.status >= 200 && response.status < 300) {

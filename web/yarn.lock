@@ -4055,6 +4055,24 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"irc-message@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "irc-message@npm:3.0.2"
+  dependencies:
+    irc-prefix-parser: ^1.0.1
+    iso8601-convert: ^1.0.0
+    through2: ^0.6.3
+  checksum: bbfb84172342308b201314b0cce13af2490e659f98724c87bb2f9b9b9f0face0eb79ae7d08ebed365e464f06596e3162f4985c35f3bf8a6cdc1fc8b80262e0ec
+  languageName: node
+  linkType: hard
+
+"irc-prefix-parser@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "irc-prefix-parser@npm:1.0.1"
+  checksum: bf86c815fe998b1b99581954c81d86144d926f14bd1bc8ab91750052d1f9c56098a2e87350982cd78f2d0081e71dda446dbc0a2e8e14bf0b26a460633f0ff20b
+  languageName: node
+  linkType: hard
+
 "is-absolute-url@npm:^3.0.3":
   version: 3.0.3
   resolution: "is-absolute-url@npm:3.0.3"
@@ -4333,6 +4351,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"isarray@npm:0.0.1":
+  version: 0.0.1
+  resolution: "isarray@npm:0.0.1"
+  checksum: 86e6b850bfa7b1851b557982f80e35dd4dfe972828b0b1a90ec0e51199d6b4f435953756b03002721f5e43ea4ebc5d6bad05c5c1e158c3ff2cdf749f67e067ee
+  languageName: node
+  linkType: hard
+
 "isarray@npm:1.0.0, isarray@npm:^1.0.0, isarray@npm:~1.0.0":
   version: 1.0.0
   resolution: "isarray@npm:1.0.0"
@@ -4344,6 +4369,13 @@ fsevents@^1.2.7:
   version: 2.0.0
   resolution: "isexe@npm:2.0.0"
   checksum: 1f6f7ccf6206a544097e27f04018fbd4fdb45d71eadac305d4b60cc18668d35c970d3c0bfadc4b348dd603d5536496a5634dd5f64792ea5e745c62cbc0ce9730
+  languageName: node
+  linkType: hard
+
+"iso8601-convert@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "iso8601-convert@npm:1.0.0"
+  checksum: 61d9cd19bfe797ac8dd78f79767cf31500fd9bc42ef3c2cfdf7eaaa461028d03c39425de7793f540bfbbc056acf96532bc3fa4654a23596fb2fcdd84b0420248
   languageName: node
   linkType: hard
 
@@ -4592,7 +4624,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.0.0, lodash@npm:^4.17.11, lodash@npm:^4.17.13, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.4, lodash@npm:~4.17.10":
+"lodash@npm:^4.0.0, lodash@npm:^4.17.11, lodash@npm:^4.17.13, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:~4.17.10":
   version: 4.17.15
   resolution: "lodash@npm:4.17.15"
   checksum: b018ec8d4c95f14a4b57005a247eca1bc25639322939471a1958d3bc721b4f18e90edb6ea564854593a8bc1f94956a0352cf0cd372991b98c42d61c0cd11e5a3
@@ -6148,15 +6180,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-string-replace@npm:^0.4.4":
-  version: 0.4.4
-  resolution: "react-string-replace@npm:0.4.4"
-  dependencies:
-    lodash: ^4.17.4
-  checksum: b52f03b1c7ef7a5eac5a49d749f6bf09a5f59617f8418ed1cb78af334bf66f68d58a54f8c640316dca11f00af03e27255ceb3dd0ec5273b672fffd3466899f3f
-  languageName: node
-  linkType: hard
-
 "react-toastify@npm:^5.5.0":
   version: 5.5.0
   resolution: "react-toastify@npm:5.5.0"
@@ -6231,6 +6254,18 @@ fsevents@^1.2.7:
     string_decoder: ~1.1.1
     util-deprecate: ~1.0.1
   checksum: db7e5f72c0cb5429d0b0ae1298dc77a3a1cc79bf448014c0dbd76d9baaaeb9452fd4b39481ea4c35cfef342558dc57e4f2ebd0acfb398da47b1d161e68d676ad
+  languageName: node
+  linkType: hard
+
+"readable-stream@npm:>=1.0.33-1 <1.1.0-0":
+  version: 1.0.34
+  resolution: "readable-stream@npm:1.0.34"
+  dependencies:
+    core-util-is: ~1.0.0
+    inherits: ~2.0.1
+    isarray: 0.0.1
+    string_decoder: ~0.10.x
+  checksum: 49e5f1b5774f5b5eb74ff4ff3ba31aefe6c662607388c606250e09543a905a20ece5a5865ce54ff6166059d6bf7ff0c44e4eacb983690e5399c3c684b3f903c6
   languageName: node
   linkType: hard
 
@@ -7219,6 +7254,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"string_decoder@npm:~0.10.x":
+  version: 0.10.31
+  resolution: "string_decoder@npm:0.10.31"
+  checksum: ba5a62269d7ef0f804eb4e3ad02a4c2466661ffd089c76521c7a8be436618c7022f7388523202d89f174df6a24e832af9b04e7c3e0b8a9a08960e03b8471cffc
+  languageName: node
+  linkType: hard
+
 "string_decoder@npm:~1.1.1":
   version: 1.1.1
   resolution: "string_decoder@npm:1.1.1"
@@ -7395,6 +7437,16 @@ fsevents@^1.2.7:
   bin:
     terser: bin/terser
   checksum: 2bf1d02f053beec5ec00ab2b84a92ad77601f6e2fd3622632c8fcf7d255cf2908106949ff512c4356bdfcbc311f567e4e7a5a6129f50bc9be5201a6f66c16c60
+  languageName: node
+  linkType: hard
+
+"through2@npm:^0.6.3":
+  version: 0.6.5
+  resolution: "through2@npm:0.6.5"
+  dependencies:
+    readable-stream: ">=1.0.33-1 <1.1.0-0"
+    xtend: ">=4.0.0 <4.1.0-0"
+  checksum: 993b6f6b3c642d7999b12a4e3eda6ac7236acb9bcf68b1e9d8eed6c4a893bfc791e62fc944249a75b552444b90da70401898825fc3f2b02a4677b193abeead41
   languageName: node
   linkType: hard
 
@@ -7810,6 +7862,7 @@ fsevents@^1.2.7:
     "@babel/preset-react": ^7.8.3
     babel-loader: ^8.0.6
     css-loader: ^3.4.2
+    irc-message: ^3.0.2
     mini-css-extract-plugin: ^0.9.0
     node-sass: ^4.13.1
     pnp-webpack-plugin: ^1.6.0
@@ -7817,7 +7870,6 @@ fsevents@^1.2.7:
     react: ^16.12.0
     react-dom: ^16.12.0
     react-redux: ^7.1.3
-    react-string-replace: ^0.4.4
     react-toastify: ^5.5.0
     redux: ^4.0.5
     redux-thunk: ^2.3.0
@@ -8063,7 +8115,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"xtend@npm:^4.0.0, xtend@npm:~4.0.1":
+"xtend@npm:>=4.0.0 <4.1.0-0, xtend@npm:^4.0.0, xtend@npm:~4.0.1":
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: a3135d48b0013d88a38859cb364f2d40418a81ff98d3c7de389eac50ec0357fbba42be29186e21ee7dafffca0aff558bef001e0ab0c4166efdcf6e4fb986f1ef
