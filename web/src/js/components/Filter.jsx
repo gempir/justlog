@@ -11,11 +11,11 @@ class Filter extends Component {
     render() {
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
-                <AutocompleteInput placeholder="xqcow" onChange={this.onChannelChange} value={this.props.channel} autocompletions={this.props.channels.map(channel => channel.name)} onSubmit={() => this.username.focus()} />
+                <AutocompleteInput placeholder="channel" onChange={this.onChannelChange} value={this.props.channel} autocompletions={this.props.channels.map(channel => channel.name)} onSubmit={() => this.username.focus()} />
                 <input
                     ref={el => this.username = el}
                     type="text"
-                    placeholder="gempir"
+                    placeholder="username"
                     onChange={this.onUsernameChange}
                     value={this.props.username}
                 />
