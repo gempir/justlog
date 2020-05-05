@@ -48,7 +48,7 @@ func NewClient(clientID string, clientSecret string) Client {
 	return Client{
 		clientID:       clientID,
 		clientSecret:   clientSecret,
-		appAccessToken: clientSecret,
+		appAccessToken: resp.Data.AccessToken,
 		client:         client,
 		httpClient:     &http.Client{},
 	}
