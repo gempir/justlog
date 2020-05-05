@@ -4,6 +4,7 @@
     "username": "gempbot",
     "oauth": "oauthtokenforchat",
     "clientID": "mytwitchclientid",
+    "clientSecret": "mysecret",
     "logLevel": "info",
     "channels": ["77829817", "11148817"],
     "channelConfigs": {

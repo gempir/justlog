@@ -21,6 +21,7 @@ type Config struct {
 	Admin                 string                   `json:"admin"`
 	Channels              []string                 `json:"channels"`
 	ClientID              string                   `json:"clientID"`
+	ClientSecret          string                   `json:"clientSecret"`
 	LogLevel              string                   `json:"logLevel"`
 	ChannelConfigs        map[string]ChannelConfig `json:"channelConfigs"`
 }
