@@ -3,6 +3,7 @@ package helix
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	helixClient "github.com/nicklaw5/helix"
 	log "github.com/sirupsen/logrus"
@@ -10,9 +11,11 @@ import (
 
 // Client wrapper for helix
 type Client struct {
-	clientID   string
-	client     *helixClient.Client
-	httpClient *http.Client
+	clientID       string
+	clientSecret   string
+	appAccessToken string
+	client         *helixClient.Client
+	httpClient     *http.Client
 }
 
 var (
@@ -35,10 +38,19 @@ func NewClient(clientID string, clientSecret string) Client {
 		panic(err)
 	}
 
+	resp, err := client.GetAppAccessToken()
+	if err != nil {
+		panic(err)
+	}
+	log.Infof("Requested access token, response: %d, expires in: %d", resp.StatusCode, resp.Data.ExpiresIn)
+	client.SetAppAccessToken(resp.Data.AccessToken)
+
 	return Client{
-		clientID:   clientID,
-		client:     client,
-		httpClient: &http.Client{},
+		clientID:       clientID,
+		clientSecret:   clientSecret,
+		appAccessToken: clientSecret,
+		client:         client,
+		httpClient:     &http.Client{},
 	}
 }
 
@@ -58,6 +70,22 @@ type UserData struct {
 	OfflineImageURL string `json:"offline_image_url"`
 	ViewCount       int    `json:"view_count"`
 	Email           string `json:"email"`
+}
+
+// StartRefreshTokenRoutine refresh our token
+func (c *Client) StartRefreshTokenRoutine() {
+	ticker := time.NewTicker(24 * time.Hour)
+
+	for range ticker.C {
+		resp, err := c.client.GetAppAccessToken()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		log.Infof("Requested access token from routine, response: %d, expires in: %d", resp.StatusCode, resp.Data.ExpiresIn)
+
+		c.client.SetAppAccessToken(resp.Data.AccessToken)
+	}
 }
 
 // GetUsersByUserIds receive userData for given ids
