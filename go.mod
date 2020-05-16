@@ -3,7 +3,7 @@ module github.com/gempir/justlog
 go 1.12
 
 require (
-	github.com/gempir/go-twitch-irc/v2 v2.2.0
+	github.com/gempir/go-twitch-irc/v2 v2.3.1
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/nicklaw5/helix v0.5.8
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
