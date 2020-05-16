@@ -20,7 +20,8 @@ class LogSearch extends Component {
     componentDidMount() {
         if (this.props.channel && this.props.username) {
             this.props.dispatch(loadLogs());
-            this.props.dispatch(loadBttvChannelEmotes(this.props.channel));
+            // load again when i figure out good way to fetch the id
+            // this.props.dispatch(loadBttvChannelEmotes(this.props.channel));
         }
     }
 

@@ -56,7 +56,13 @@ class LogView extends Component {
 
 		if (msgObj.tags.emotes && msgObj.tags.emotes !== true) {
 			for (const emoteString of msgObj.tags.emotes.split("/")) {
+				if (typeof emoteString !== "string") {
+					continue;
+				}
 				const [emoteId, occurences] = emoteString.split(":");
+				if (typeof occurences !== "string") {
+					continue;
+				}
 				for (const occurence of occurences.split(",")) {
 					const [start, end] = occurence.split("-");
 					replacements.push({start: Number(start), end: Number(end) + 1, emoteId});
@@ -83,15 +89,15 @@ class LogView extends Component {
 			for (const emote of this.props.bttvChannelEmotes.emotes) {
 				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
 
-				message = message.replace(regex, `<img src="${this.buildBttvEmote(this.props.bttvChannelEmotes.urlTemplate, emote.id)}" alt="${emote.id}" />`);
+				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.id}" />`);
 			}
 		}
 
 		if (this.props.bttvEmotes) {
-			for (const emote of this.props.bttvEmotes.emotes) {
+			for (const emote of this.props.bttvEmotes) {
 				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
 
-				message = message.replace(regex, `<img src="${this.buildBttvEmote(this.props.bttvEmotes.urlTemplate, emote.id)}" alt="${emote.id}" />`);
+				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.id}" />`);
 			}
 		}
 
@@ -116,8 +122,8 @@ class LogView extends Component {
 		return `https://static-cdn.jtvnw.net/emoticons/v1/${id}/1.0`;
 	}
 
-	buildBttvEmote = (urlTemplate, id) => {
-		return urlTemplate.replace("{{id}}", id).replace("{{image}}", "1x");
+	buildBttvEmote = (id) => {
+		return `https://cdn.betterttv.net/emote/${id}/1x`;
 	}
 }
 const mapStateToProps = (state) => {

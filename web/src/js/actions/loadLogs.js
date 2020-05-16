@@ -7,6 +7,9 @@ export default function (channel, username, year, month) {
         return new Promise((resolve, reject) => {
             channel = channel || getState().channel;
             username = username || getState().username;
+            channel = channel.toLowerCase();
+            username = username.toLowerCase();
+
             const date = new Date();
             year = year || date.getFullYear();
             month = month || date.getMonth() + 1;
@@ -14,11 +17,11 @@ export default function (channel, username, year, month) {
             dispatch(setLoading(true));
 
             let channelPath = "channel";
-            if (channel.toLowerCase().startsWith("id:")) {
+            if (channel.startsWith("id:")) {
                 channelPath = "id";
             }
             let usernamePath = "user";
-            if (username.toLowerCase().startsWith("id:")) {
+            if (username.startsWith("id:")) {
                 usernamePath = "id";
             }
 

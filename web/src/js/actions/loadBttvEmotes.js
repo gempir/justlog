@@ -1,9 +1,9 @@
 import setBttvEmotes from "./setBttvEmotes";
 
-export default function (channel) {
+export default function () {
     return function (dispatch, getState) {
         return new Promise((resolve, reject) => {
-            fetch("https://api.betterttv.net/2/emotes").then((response) => {
+            fetch("https://api.betterttv.net/3/cached/emotes/global").then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response
                 } else {
