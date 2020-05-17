@@ -4,6 +4,7 @@ import loadLogs from '../actions/loadLogs';
 import LoadingSpinner from "./LoadingSpinner";
 import AnimateHeight from "./AnimateHeight";
 import { parse } from "irc-message";
+import loadBttvChannelEmotes from "../actions/loadBttvChannelEmotes";
 
 class LogView extends Component {
 
@@ -12,6 +13,8 @@ class LogView extends Component {
 		height: 0,
 		buttonText: "load",
 	};
+
+	loadedBttvEmotes = false;
 
 	componentDidMount() {
 		if (this.props.log.messages.length > 0) {
@@ -52,6 +55,11 @@ class LogView extends Component {
 		const msgObj = parse(value.raw);
 		let message = value.text;
 
+		if (this.loadedBttvEmotes !== msgObj.tags["room-id"]) {
+			this.props.dispatch(loadBttvChannelEmotes(msgObj.tags["room-id"]));
+			this.loadedBttvEmotes = msgObj.tags["room-id"];
+		}
+
 		const replacements = [];
 
 		if (msgObj.tags.emotes && msgObj.tags.emotes !== true) {
@@ -86,7 +94,7 @@ class LogView extends Component {
 		}
 
 		if (this.props.bttvChannelEmotes) {
-			for (const emote of this.props.bttvChannelEmotes.emotes) {
+			for (const emote of [...this.props.bttvChannelEmotes.channelEmotes, ...this.props.bttvChannelEmotes.sharedEmotes]) {
 				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
 
 				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.id}" />`);

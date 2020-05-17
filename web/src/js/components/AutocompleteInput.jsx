@@ -54,7 +54,6 @@ export default class AutocompleteInput extends Component {
     }
 
     handleKeyDown = (e) => {
-        console.log(e.key);
         if (["Backspace"].includes(e.key)) {
             if (this.state.selectedIndex !== -1 && this.getAutocompletions().length > 0) {
                 this.props.onChange(this.getAutocompletions()[this.state.selectedIndex]);
