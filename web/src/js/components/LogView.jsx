@@ -5,6 +5,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import AnimateHeight from "./AnimateHeight";
 import { parse } from "irc-message";
 import loadBttvChannelEmotes from "../actions/loadBttvChannelEmotes";
+import loadFfzChannelEmotes from "../actions/loadFfzChannelEmotes";
 
 class LogView extends Component {
 
@@ -15,6 +16,7 @@ class LogView extends Component {
 	};
 
 	loadedBttvEmotes = false;
+	loadedFfzEmotes = false;
 
 	componentDidMount() {
 		if (this.props.log.messages.length > 0) {
@@ -60,6 +62,11 @@ class LogView extends Component {
 			this.loadedBttvEmotes = msgObj.tags["room-id"];
 		}
 
+		if (this.loadedFfzEmotes !== msgObj.tags["room-id"]) {
+			this.props.dispatch(loadFfzChannelEmotes(msgObj.tags["room-id"]));
+			this.loadedFfzEmotes = msgObj.tags["room-id"];
+		}
+
 		const replacements = [];
 
 		if (msgObj.tags.emotes && msgObj.tags.emotes !== true) {
@@ -89,7 +96,7 @@ class LogView extends Component {
 		})
 
 		for (const replacement of replacements) {
-			const emote = `<img src="${this.buildTwitchEmote(replacement.emoteId)}" alt="${replacement.emoteId}" />`;
+			const emote = `<img src="${this.buildTwitchEmote(replacement.emoteId)}" alt="${message.slice(replacement.start, replacement.end)}" />`;
 			message = message.slice(0, replacement.start) + emote + message.slice(replacement.end);
 		}
 
@@ -97,7 +104,15 @@ class LogView extends Component {
 			for (const emote of [...this.props.bttvChannelEmotes.channelEmotes, ...this.props.bttvChannelEmotes.sharedEmotes]) {
 				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
 
-				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.id}" />`);
+				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.code}" />`);
+			}
+		}
+
+		if (this.props.ffzChannelEmotes) {
+			for (const emote of Object.values(this.props.ffzChannelEmotes.sets).map(set => set.emoticons).flat()) {
+				const regex = new RegExp(`\\b(${emote.name})\\b`, "g");
+
+				message = message.replace(regex, `<img src="${emote.urls[1]}" alt="${emote.name}" />`);
 			}
 		}
 
@@ -105,7 +120,7 @@ class LogView extends Component {
 			for (const emote of this.props.bttvEmotes) {
 				const regex = new RegExp(`\\b(${emote.code})\\b`, "g");
 
-				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.id}" />`);
+				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.code}" />`);
 			}
 		}
 
@@ -138,6 +153,7 @@ const mapStateToProps = (state) => {
 	return {
 		bttvChannelEmotes: state.bttvChannelEmotes,
 		bttvEmotes: state.bttvEmotes,
+		ffzChannelEmotes: state.ffzChannelEmotes,
 	};
 };
 
