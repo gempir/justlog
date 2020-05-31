@@ -93,10 +93,10 @@ func (l *Logger) LogUserNoticeMessageForUser(userID string, message twitch.UserN
 	return nil
 }
 
-type userLogFile struct {
+type UserLogFile struct {
 	path  string
-	year  string
-	month string
+	Year  string `json:"year"`
+	Month string `json:"month"`
 }
 
 func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, int, error) {
@@ -104,7 +104,7 @@ func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, i
 		return 0, 0, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
 	}
 
-	logFiles := []userLogFile{}
+	logFiles := []UserLogFile{}
 
 	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
 
@@ -116,36 +116,82 @@ func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, i
 			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", l.logPath, channelID, year, month, userID)
 			if _, err := os.Stat(path); err == nil {
 
-				logFile := userLogFile{path, year, month}
+				logFile := UserLogFile{path, year, month}
 				logFiles = append(logFiles, logFile)
 			} else if _, err := os.Stat(path + ".gz"); err == nil {
-				logFile := userLogFile{path + ".gz", year, month}
+				logFile := UserLogFile{path + ".gz", year, month}
 				logFiles = append(logFiles, logFile)
 			}
 		}
 	}
 
 	sort.Slice(logFiles, func(i, j int) bool {
-		yearA, _ := strconv.Atoi(logFiles[i].year)
-		yearB, _ := strconv.Atoi(logFiles[j].year)
-		monthA, _ := strconv.Atoi(logFiles[i].month)
-		monthB, _ := strconv.Atoi(logFiles[j].month)
+		yearA, _ := strconv.Atoi(logFiles[i].Year)
+		yearB, _ := strconv.Atoi(logFiles[j].Year)
+		monthA, _ := strconv.Atoi(logFiles[i].Month)
+		monthB, _ := strconv.Atoi(logFiles[j].Month)
 
 		if yearA == yearB {
 			return monthA > monthB
-		} else {
-			return yearA > yearB
 		}
+
+		return yearA > yearB
 	})
 
 	if len(logFiles) > 0 {
-		year, _ := strconv.Atoi(logFiles[0].year)
-		month, _ := strconv.Atoi(logFiles[0].month)
+		year, _ := strconv.Atoi(logFiles[0].Year)
+		month, _ := strconv.Atoi(logFiles[0].Month)
 
 		return year, month, nil
 	}
 
 	return 0, 0, errors.New("No logs file")
+}
+
+func (l *Logger) GetAvailableLogsForUser(channelID, userID string) ([]UserLogFile, error) {
+	if channelID == "" || userID == "" {
+		return []UserLogFile{}, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
+	}
+
+	logFiles := []UserLogFile{}
+
+	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
+
+	for _, yearDir := range years {
+		year := yearDir.Name()
+		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
+		for _, monthDir := range months {
+			month := monthDir.Name()
+			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", l.logPath, channelID, year, month, userID)
+			if _, err := os.Stat(path); err == nil {
+
+				logFile := UserLogFile{path, year, month}
+				logFiles = append(logFiles, logFile)
+			} else if _, err := os.Stat(path + ".gz"); err == nil {
+				logFile := UserLogFile{path + ".gz", year, month}
+				logFiles = append(logFiles, logFile)
+			}
+		}
+	}
+
+	sort.Slice(logFiles, func(i, j int) bool {
+		yearA, _ := strconv.Atoi(logFiles[i].Year)
+		yearB, _ := strconv.Atoi(logFiles[j].Year)
+		monthA, _ := strconv.Atoi(logFiles[i].Month)
+		monthB, _ := strconv.Atoi(logFiles[j].Month)
+
+		if yearA == yearB {
+			return monthA > monthB
+		}
+
+		return yearA > yearB
+	})
+
+	if len(logFiles) > 0 {
+		return logFiles, nil
+	}
+
+	return logFiles, errors.New("No logs file")
 }
 
 // ReadLogForUser fetch logs

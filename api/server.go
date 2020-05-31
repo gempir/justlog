@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -70,6 +71,10 @@ type chatLog struct {
 	Messages []chatMessage `json:"messages"`
 }
 
+type logList struct {
+	AvailableLogs []filelog.UserLogFile `json:"availableLogs"`
+}
+
 type chatMessage struct {
 	Text        string             `json:"text"`
 	Username    string             `json:"username"`
@@ -93,6 +98,7 @@ type timestamp struct {
 func (s *Server) Init() {
 	http.Handle("/", corsHandler(http.HandlerFunc(s.route)))
 
+	log.Infof("Listening on %s", s.listenAddress)
 	log.Fatal(http.ListenAndServe(s.listenAddress, nil))
 }
 
@@ -104,12 +110,45 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query := s.fillUserids(w, r)
+
+	if url == "/list" {
+		s.writeAvailableLogs(w, r, query)
+		return
+	}
+
 	if url == "/channels" {
-		s.getAllChannels(w, r)
+		s.writeAllChannels(w, r)
 		return
 	}
 
 	s.routeLogs(w, r)
+}
+
+func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values {
+	query := r.URL.Query()
+
+	if query.Get("userid") == "" && query.Get("username") != "" {
+		users, err := s.helixClient.GetUsersByUsernames([]string{query.Get("username")})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return nil
+		}
+
+		query.Set("userid", users[query.Get("username")].ID)
+	}
+
+	if query.Get("channelid") == "" && query.Get("channel") != "" {
+		users, err := s.helixClient.GetUsersByUsernames([]string{query.Get("channel")})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return nil
+		}
+
+		query.Set("channelid", users[query.Get("channel")].ID)
+	}
+
+	return query
 }
 
 func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +234,7 @@ func reverseSlice(input []string) []string {
 	return input
 }
 
-func (s *Server) getAllChannels(w http.ResponseWriter, r *http.Request) {
+func (s *Server) writeAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}
 	users, err := s.helixClient.GetUsersByUserIds(s.channels)
