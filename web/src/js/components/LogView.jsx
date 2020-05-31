@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import loadLogs from '../actions/loadLogs';
+import loadLog from '../actions/loadLog';
 import LoadingSpinner from "./LoadingSpinner";
 import AnimateHeight from "./AnimateHeight";
 import { parse } from "irc-message";
@@ -132,7 +132,8 @@ class LogView extends Component {
 
 	loadLog = () => {
 		this.setState({ loading: true });
-		this.props.dispatch(loadLogs(null, null, this.props.log.year, this.props.log.month)).then(() => this.setState({ loading: false })).catch(() => {
+		this.props.dispatch(loadLog(null, null, this.props.log.year, this.props.log.month)).then(() => this.setState({ loading: false })).catch(err => {
+			console.error(err);
 			this.setState({ loading: false, buttonText: "not found" });
 		});
 	}

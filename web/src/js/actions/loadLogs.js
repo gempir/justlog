@@ -10,10 +10,6 @@ export default function (channel, username, year, month) {
             channel = channel.toLowerCase();
             username = username.toLowerCase();
 
-            const date = new Date();
-            year = year || date.getFullYear();
-            month = month || date.getMonth() + 1;
-
             dispatch(setLoading(true));
 
             let channelPath = "channel";
@@ -25,44 +21,69 @@ export default function (channel, username, year, month) {
                 usernamePath = "id";
             }
 
-            channel = channel.replace("id:", "")
-            username = username.replace("id:", "")
-            const url = `${getState().apiBaseUrl}/${channelPath}/${channel}/${usernamePath}/${username}/${year}/${month}?reverse`;
+            const logs = {}
 
-            fetch(url, { headers: { "Content-Type": "application/json" } }).then((response) => {
-                if (response.status >= 200 && response.status < 300) {
-                    return response
-                } else {
-                    var error = new Error(response.statusText)
-                    error.response = response
-                    throw error
-                }
-            }).then((response) => {
-                return response.json()
-            }).then((json) => {
-                for (let value of json.messages) {
-                    value.timestamp = Date.parse(value.timestamp)
-                }
-            
-                const logs = {...getState().logs};
-            
-                for (let prevMonth = month; prevMonth >= 1; prevMonth--) {
-                    logs[`${year}-${prevMonth}`] = new Log(year, prevMonth, [], false);
-                }
-            
-                for (let prevMonth = 12; prevMonth >= 1; prevMonth--) {
-                    logs[`${"2019"}-${prevMonth}`] = new Log("2019", prevMonth, [], false);
-                }
+            fetchAvailableLogs(getState().apiBaseUrl, channel, username).then(data => {
+                data.availableLogs.map(log => logs[`${log.year}-${log.month}`] = new Log(log.year, log.month, [], false));
 
-                logs[`${year}-${month}`] = new Log(year, month, json.messages, true);
+                if (Object.keys(logs).length === 0) {
+                    dispatch(setLoading(false));
+                    reject(new Error("no logs found"));
+                    return;
+                }
+                
+                year = year || data.availableLogs[0].year;
+                month = month || data.availableLogs[0].month;
 
-                dispatch(setLogs(logs));
-                dispatch(setLoading(false));
-                resolve();
-            }).catch((error) => {
-                dispatch(setLoading(false));
-                reject(error);
+                const url = `${getState().apiBaseUrl}/${channelPath}/${channel.replace("id:", "")}/${usernamePath}/${username.replace("id:", "")}/${year}/${month}?reverse`;
+                fetch(url, { headers: { "Content-Type": "application/json" } }).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response
+                    } else {
+                        var error = new Error(response.statusText)
+                        error.response = response
+                        throw error
+                    }
+                }).then((response) => {
+                    return response.json()
+                }).then((json) => {
+                    for (let value of json.messages) {
+                        value.timestamp = Date.parse(value.timestamp)
+                    }
+
+                    logs[`${year}-${month}`] = new Log(year, month, json.messages, true);
+
+                    dispatch(setLogs(logs));
+                    dispatch(setLoading(false));
+                    resolve();
+                }).catch((error) => {
+                    dispatch(setLoading(false));
+                    reject(error);
+                });
             });
         });
     };
+}
+
+function fetchAvailableLogs(baseUrl, channel, username) {
+    let channelQuery = "channel=" + channel;
+    if (channel.startsWith("id:")) {
+        channelQuery = "channelid" + channel.replace("id:", "")
+    }
+    let userQuery = "user=" + username;
+    if (username.startsWith("id:")) {
+        userQuery = "userid" + username.replace("id:", "")
+    }
+
+    return fetch(`${baseUrl}/list?${channelQuery}&${userQuery}`, { headers: { "Content-Type": "application/json" } }).then((response) => {
+        if (response.status >= 200 && response.status < 300) {
+            return response
+        } else {
+            var error = new Error(response.statusText)
+            error.response = response
+            throw error
+        }
+    }).then((response) => {
+        return response.json()
+    });
 }

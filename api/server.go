@@ -128,14 +128,14 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values {
 	query := r.URL.Query()
 
-	if query.Get("userid") == "" && query.Get("username") != "" {
-		users, err := s.helixClient.GetUsersByUsernames([]string{query.Get("username")})
+	if query.Get("userid") == "" && query.Get("user") != "" {
+		users, err := s.helixClient.GetUsersByUsernames([]string{query.Get("user")})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil
 		}
 
-		query.Set("userid", users[query.Get("username")].ID)
+		query.Set("userid", users[query.Get("user")].ID)
 	}
 
 	if query.Get("channelid") == "" && query.Get("channel") != "" {
