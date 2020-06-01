@@ -1,4 +1,4 @@
-# justlog [![Build Status](https://travis-ci.org/gempir/justlog.svg?branch=master)](https://travis-ci.org/gempir/justlog)
+# justlog [![Build Status](https://github.com/gempir/justlog/workflows/ci/badge.svg)](https://github.com/gempir/justlog/actions?query=workflow%3Aci)
 
 ### What is this?
 justlog is a bot I maintain for a couple of channels. Its features differ from other bots in that it doesn't support
