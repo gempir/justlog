@@ -30,7 +30,7 @@ class LogSearch extends Component {
                     channels={this.props.channels}
                 />
                 {Object.values(this.props.logs).map(log =>
-                    <LogView key={log.getTitle()} log={log} />
+                    <LogView key={log.getTitle()} log={log} channel={this.props.channel} username={this.props.username} />
                 )}
             </div>
         );

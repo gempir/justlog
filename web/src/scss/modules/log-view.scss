@@ -59,6 +59,17 @@
         }
     }
 
+    .txt {
+        position: absolute;
+        top: 5px;
+        right: 0;
+        opacity: 0.5;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
     .line {
         padding: 0.25rem;
         color: white;
@@ -80,7 +91,6 @@
             position: relative;
             color: $grey-light;
             margin-right: 0.25rem;
-            user-select: none;
 
             &:hover {
                 color: $grey-lighter;

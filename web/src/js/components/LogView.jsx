@@ -6,6 +6,7 @@ import AnimateHeight from "./AnimateHeight";
 import { parse } from "irc-message";
 import loadBttvChannelEmotes from "../actions/loadBttvChannelEmotes";
 import loadFfzChannelEmotes from "../actions/loadFfzChannelEmotes";
+import Txt from '../icons/Txt';
 
 class LogView extends Component {
 
@@ -42,6 +43,7 @@ class LogView extends Component {
 
 		return (
 			<div className={"log-view"}>
+				<a className="txt" target="__blank" href={`/channel/${this.props.channel}/user/${this.props.username}/${this.props.log.year}/${this.props.log.month}`}><Txt /></a>
 				<AnimateHeight duration={500} easing={"ease-in-out"} height={this.state.height} animateOpacity>
 					{this.props.log.messages.map((value, key) =>
 						<div key={key} className="line">
@@ -123,6 +125,8 @@ class LogView extends Component {
 				message = message.replace(regex, `<img src="${this.buildBttvEmote(emote.id)}" alt="${emote.code}" />`);
 			}
 		}
+
+		message = `${value.displayName}: ${message}`;
 
 		return (
 			<p dangerouslySetInnerHTML={{ __html: message }}>
