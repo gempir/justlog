@@ -16,6 +16,8 @@ export default (state, action) => {
             return { ...state, ffzChannelEmotes: action.ffzChannelEmotes };
         case "SET_BTTV_EMOTES":
             return { ...state, bttvEmotes: action.bttvEmotes };
+        case "SET_SETTINGS":
+            return { ...state, settings: action.settings };
         default:
             return { ...state };
     }

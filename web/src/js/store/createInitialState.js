@@ -12,5 +12,6 @@ export default () => {
         twitchEmotes: {},
         channel: urlParams.get("channel") || "",
         username: urlParams.get("username") || "",
+        settings: JSON.parse(localStorage.getItem('settings')) || { showEmotes: true, showDisplayName: false },
     }
 }

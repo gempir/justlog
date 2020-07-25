@@ -7,6 +7,7 @@ import loadLogs from "../actions/loadLogs";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 import loadBttvEmotes from "../actions/loadBttvEmotes";
+import Settings from "./Settings";
 
 class LogSearch extends Component {
     constructor(props) {
@@ -26,6 +27,7 @@ class LogSearch extends Component {
         return (
             <div className="log-search">
                 <ToastContainer />
+                <Settings/>
                 <Filter
                     channels={this.props.channels}
                 />
