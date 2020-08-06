@@ -57,7 +57,7 @@ class LogView extends Component {
 
 	renderMessage = (value) => {
 		const msgObj = parse(value.raw);
-		let message = value.text;
+		let message = this.htmlencode(value.text);
 
 		if (this.props.settings.showEmotes) {
 			if (this.loadedBttvEmotes !== msgObj.tags["room-id"]) {
@@ -156,6 +156,18 @@ class LogView extends Component {
 
 	buildBttvEmote = (id) => {
 		return `https://cdn.betterttv.net/emote/${id}/1x`;
+	}
+
+	/**
+	 * HTML entities encode
+	 *
+	 * @param {string} str Input text
+	 * @return {string} Filtered text
+	 */
+	htmlencode = (str) => {
+		var div = document.createElement('div');
+		div.appendChild(document.createTextNode(str));
+		return div.innerHTML;
 	}
 }
 const mapStateToProps = (state) => {
