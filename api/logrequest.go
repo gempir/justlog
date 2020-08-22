@@ -91,9 +91,7 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		request.time.year = params[5]
 		request.time.month = params[6]
 	} else if request.isUserRequest && len(params) == 8 {
-		request.time.year = params[5]
-		request.time.month = params[6]
-		request.time.day = params[7]
+		return logRequest{}, errors.New("route not found")
 	} else if request.isChannelRequest && len(params) == 6 {
 		request.time.year = params[3]
 		request.time.month = params[4]
