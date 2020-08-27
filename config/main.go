@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Config application configuratin
+// Config application configuration
 type Config struct {
 	configFile            string
 	configFilePermissions os.FileMode
@@ -18,7 +18,7 @@ type Config struct {
 	Username              string                   `json:"username"`
 	OAuth                 string                   `json:"oauth"`
 	ListenAddress         string                   `json:"listenAddress"`
-	Admin                 string                   `json:"admin"`
+	Admins                []string                 `json:"admins"`
 	Channels              []string                 `json:"channels"`
 	ClientID              string                   `json:"clientID"`
 	ClientSecret          string                   `json:"clientSecret"`
@@ -26,7 +26,7 @@ type Config struct {
 	ChannelConfigs        map[string]ChannelConfig `json:"channelConfigs"`
 }
 
-// ChannelConfig config for indiviual channels
+// ChannelConfig config for individual channels
 type ChannelConfig struct {
 	MessageTypes []twitch.MessageType `json:"messageTypes,omitempty"`
 }
@@ -110,7 +110,7 @@ func loadConfiguration(filePath string) *Config {
 		OAuth:          "oauth:777777777",
 		Channels:       []string{},
 		ChannelConfigs: make(map[string]ChannelConfig),
-		Admin:          "gempir",
+		Admins:         []string{"gempir"},
 		LogLevel:       "info",
 	}
 

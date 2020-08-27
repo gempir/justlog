@@ -1,5 +1,5 @@
 {
-    "admin": "gempir",
+    "admins": ["gempir"],
     "logsDirectory": "./logs",
     "username": "gempbot",
     "oauth": "oauthtokenforchat",
