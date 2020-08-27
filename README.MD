@@ -14,7 +14,7 @@ commands, etc. yet, it focuses on logging and providing an api for the logs.
 
 ```
 {
-    "admin": "gempir", // will only respond to this user with !status
+    "admins": ["gempir"], // will only respond to commands executed by these users
     "logsDirectory": "./logs", // the directory to log into
     "username": "gempbot", // bot username (can be justinfan123123 if you don't want to use an account)
     "oauth": "oauthtokenforchat", // bot token can be anything if justinfan123123

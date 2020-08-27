@@ -11,7 +11,7 @@ import (
 )
 
 func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
-	if message.User.Name == b.cfg.Admin {
+	if contains(b.cfg.Admins, message.User.Name) {
 		if strings.HasPrefix(message.Message, "!justlog status") || strings.HasPrefix(message.Message, "!status") {
 			uptime := humanize.TimeSince(b.startTime)
 			b.twitchClient.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
@@ -77,4 +77,13 @@ func (b *Bot) handleMessageType(message twitch.PrivateMessage) {
 		b.updateMessageTypesToLog()
 		log.Infof("[bot] setting %s config messageTypes to %v", parts[0], messageTypes)
 	}
+}
+
+func contains(arr []string, str string) bool {
+	for _, x := range arr {
+		if x == str {
+			return true
+		}
+	}
+	return false
 }
