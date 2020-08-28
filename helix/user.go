@@ -38,7 +38,7 @@ func NewClient(clientID string, clientSecret string) Client {
 		panic(err)
 	}
 
-	resp, err := client.GetAppAccessToken()
+	resp, err := client.GetAppAccessToken([]string{})
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +77,7 @@ func (c *Client) StartRefreshTokenRoutine() {
 	ticker := time.NewTicker(24 * time.Hour)
 
 	for range ticker.C {
-		resp, err := c.client.GetAppAccessToken()
+		resp, err := c.client.GetAppAccessToken([]string{})
 		if err != nil {
 			log.Error(err)
 			continue
