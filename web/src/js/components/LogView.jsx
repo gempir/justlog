@@ -57,7 +57,7 @@ class LogView extends Component {
 
 	renderMessage = (value) => {
 		const msgObj = parse(value.raw);
-		let message = this.htmlencode(value.text);
+		let message = [...this.htmlencode(value.text)];
 
 		if (this.props.settings.showEmotes) {
 			if (this.loadedBttvEmotes !== msgObj.tags["room-id"]) {
@@ -70,7 +70,7 @@ class LogView extends Component {
 				this.loadedFfzEmotes = msgObj.tags["room-id"];
 			}
 
-			const replacements = [];
+			const replacements = {};
 
 			if (msgObj.tags.emotes && msgObj.tags.emotes !== true) {
 				for (const emoteString of msgObj.tags.emotes.split("/")) {
@@ -83,25 +83,23 @@ class LogView extends Component {
 					}
 					for (const occurence of occurences.split(",")) {
 						const [start, end] = occurence.split("-");
-						replacements.push({ start: Number(start), end: Number(end) + 1, emoteId });
+						replacements[Number(start)] = { length: Number(end) - Number(start), emoteId };
 					}
 				}
 			}
 
-			replacements.sort((a, b) => {
-				if (a.start > b.start) {
-					return -1;
+			message.forEach((char, key) => {
+				if (typeof replacements[key] !== "undefined") {
+					const emote = `<img src="${this.buildTwitchEmote(replacements[key].emoteId)}" alt="${message.slice(key, replacements[key].end)}" />`;
+					message[key] = emote;
+					for (let i = key + 1; i < (key + replacements[key].length + 1); i++) {
+						message[i] = "";
+					}
 				}
-				if (a.start < b.start) {
-					return 1;
-				}
-				return 0;
-			})
+			});
 
-			for (const replacement of replacements) {
-				const emote = `<img src="${this.buildTwitchEmote(replacement.emoteId)}" alt="${message.slice(replacement.start, replacement.end)}" />`;
-				message = message.slice(0, replacement.start) + emote + message.slice(replacement.end);
-			}
+			message = message.join("");
+
 
 			if (this.props.bttvChannelEmotes) {
 				for (const emote of [...this.props.bttvChannelEmotes.channelEmotes, ...this.props.bttvChannelEmotes.sharedEmotes]) {
