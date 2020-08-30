@@ -36,7 +36,7 @@ func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
-		assets:        []string{"/", "/bundle.js", "/favicon.ico"},
+		assets:        []string{"/", "/assets", "/favicon.ico"},
 		assetHandler:  http.FileServer(assets),
 	}
 }
@@ -105,7 +105,7 @@ func (s *Server) Init() {
 func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.EscapedPath()
 
-	if contains(s.assets, url) {
+	if containsPrefix(s.assets, url) {
 		s.assetHandler.ServeHTTP(w, r)
 		return
 	}
@@ -218,9 +218,9 @@ func corsHandler(h http.Handler) http.Handler {
 	})
 }
 
-func contains(s []string, e string) bool {
+func containsPrefix(s []string, e string) bool {
 	for _, a := range s {
-		if a == e {
+		if strings.HasPrefix(e, a) {
 			return true
 		}
 	}

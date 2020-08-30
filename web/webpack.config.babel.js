@@ -19,7 +19,7 @@ module.exports = (env, options) => {
 	return {
 		entry: './src/index.jsx',
 		output: {
-			path: path.resolve(__dirname, 'public'),
+			path: path.resolve(__dirname, 'public', 'assets'),
 			filename: options.mode === "production" ? 'bundle.[hash].js' : "bundle.js",
 			publicPath: "/",
 		},
@@ -71,7 +71,7 @@ class HashApplier {
 			const fileContents = fs.readFileSync(__dirname + "/public/index.html", "utf8");
 			const newFileContents = fileContents.replace(
 				/<!-- webpack-bundle-start -->(.*)?<!-- webpack-bundle-end -->/,
-				`<!-- webpack-bundle-start --><script src="/bundle/bundle.${data.hash}.js"></script><!-- webpack-bundle-end -->`
+				`<!-- webpack-bundle-start --><script src="/assets/bundle.${data.hash}.js"></script><!-- webpack-bundle-end -->`
 			);
 
 			fs.writeFileSync(__dirname + "/public/index.html", newFileContents);
