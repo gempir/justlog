@@ -57,9 +57,11 @@ class LogView extends Component {
 
 	renderMessage = (value) => {
 		const msgObj = parse(value.raw);
-		let message = [...this.htmlencode(value.text)];
+		let message = this.htmlencode(value.text);
 
 		if (this.props.settings.showEmotes) {
+			message = [...message];
+
 			if (this.loadedBttvEmotes !== msgObj.tags["room-id"]) {
 				this.props.dispatch(loadBttvChannelEmotes(msgObj.tags["room-id"]));
 				this.loadedBttvEmotes = msgObj.tags["room-id"];
