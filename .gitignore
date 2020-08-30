@@ -7,3 +7,4 @@ coverage.out
 .env
 logs/
 config.json
+web/public/bundle*
