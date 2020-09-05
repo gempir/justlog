@@ -118,10 +118,10 @@ class LogView extends Component {
 
 			if (this.props.ffzChannelEmotes) {
 				for (const emote of Object.values(this.props.ffzChannelEmotes.sets).map(set => set.emoticons).flat()) {
-					if (replacedEmoteCodes[emote.code]) {
+					if (replacedEmoteCodes[emote.name]) {
 						continue;
 					}
-					replacedEmoteCodes[emote.code] = true;
+					replacedEmoteCodes[emote.name] = true;
 
 					const regex = new RegExp(`\\b(${emote.name})\\b`, "g");
 					message = message.replace(regex, `<img src="${emote.urls[1]}" alt="${emote.name}" />`);
