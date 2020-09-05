@@ -105,12 +105,7 @@ func (s *Server) Init() {
 func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.EscapedPath()
 
-	if contains(s.assets, url) {
-		s.assetHandler.ServeHTTP(w, r)
-		return
-	}
-
-	if strings.HasPrefix(url, "/assets") {
+	if contains(s.assets, url) || strings.HasPrefix(url, "/bundle") {
 		s.assetHandler.ServeHTTP(w, r)
 		return
 	}

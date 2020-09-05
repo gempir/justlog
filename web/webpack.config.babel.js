@@ -1,7 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const fs = require("fs");
-const PnpWebpackPlugin = require(`pnp-webpack-plugin`);
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = (env, options) => {
 	const plugins = [
@@ -10,17 +10,16 @@ module.exports = (env, options) => {
 				'apiBaseUrl': options.mode === 'development' ? '"http://localhost:8025"' : '""',
 			}
 		}),
+		new HtmlWebpackPlugin({
+			template: path.resolve(__dirname, 'src', 'index.html')
+		})
 	];
-
-	if (options.mode === "production") {
-		plugins.push(new HashApplier());
-	}
 
 	return {
 		entry: './src/index.jsx',
 		output: {
-			path: path.resolve(__dirname, 'public', 'assets'),
-			filename: options.mode === "production" ? 'bundle.[hash].js' : "bundle.js",
+			path: path.resolve(__dirname, 'public'),
+			filename: 'bundle.[hash].js',
 			publicPath: "/",
 		},
 		module: {
@@ -40,16 +39,8 @@ module.exports = (env, options) => {
 		},
 		resolve: {
 			extensions: ['.js', '.jsx'],
-			plugins: [
-				PnpWebpackPlugin,
-			],
 		},
 		plugins: plugins,
-		resolveLoader: {
-			plugins: [
-				PnpWebpackPlugin.moduleLoader(module),
-			],
-		},
 		stats: {
 			// Config for minimal console.log mess.
 			assets: false,
@@ -64,17 +55,3 @@ module.exports = (env, options) => {
 		}
 	}
 };
-
-class HashApplier {
-	apply(compiler) {
-		compiler.hooks.done.tap('hash-applier', data => {
-			const fileContents = fs.readFileSync(__dirname + "/public/index.html", "utf8");
-			const newFileContents = fileContents.replace(
-				/<!-- webpack-bundle-start -->(.*)?<!-- webpack-bundle-end -->/,
-				`<!-- webpack-bundle-start --><script src="/assets/bundle.${data.hash}.js"></script><!-- webpack-bundle-end -->`
-			);
-
-			fs.writeFileSync(__dirname + "/public/index.html", newFileContents);
-		});
-	}
-}
