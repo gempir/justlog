@@ -42,7 +42,7 @@ func NewBot(cfg *config.Config, helixClient *helix.Client, fileLogger *filelog.L
 func (b *Bot) Connect() {
 	b.startTime = time.Now()
 	b.twitchClient = twitch.NewClient(b.cfg.Username, "oauth:"+b.cfg.OAuth)
-	b.updateMessageTypesToLog()
+	b.UpdateMessageTypesToLog()
 	b.initialJoins()
 
 	if strings.HasPrefix(b.cfg.Username, "justinfan") {
@@ -156,7 +156,8 @@ func (b *Bot) shouldLog(channelName string, receivedMsgType twitch.MessageType) 
 	return false
 }
 
-func (b *Bot) updateMessageTypesToLog() {
+// UpdateMessageTypesToLog reload the config
+func (b *Bot) UpdateMessageTypesToLog() {
 	messageTypesToLog := make(map[string][]twitch.MessageType)
 
 	for _, channel := range b.channels {

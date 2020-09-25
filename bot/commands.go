@@ -74,7 +74,7 @@ func (b *Bot) handleMessageType(message twitch.PrivateMessage) {
 		}
 
 		b.cfg.SetMessageTypes(users[parts[0]].ID, messageTypes)
-		b.updateMessageTypesToLog()
+		b.UpdateMessageTypesToLog()
 		log.Infof("[bot] setting %s config messageTypes to %v", parts[0], messageTypes)
 	}
 }

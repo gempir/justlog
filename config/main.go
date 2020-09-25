@@ -15,6 +15,7 @@ type Config struct {
 	configFile            string
 	configFilePermissions os.FileMode
 	LogsDirectory         string                   `json:"logsDirectory"`
+	AdminAPIKey           string                   `json:"adminAPIKey"`
 	Username              string                   `json:"username"`
 	OAuth                 string                   `json:"oauth"`
 	ListenAddress         string                   `json:"listenAddress"`

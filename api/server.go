@@ -10,6 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gempir/justlog/bot"
+
+	"github.com/gempir/justlog/config"
+
 	"github.com/gempir/justlog/helix"
 	log "github.com/sirupsen/logrus"
 
@@ -21,6 +25,8 @@ import (
 type Server struct {
 	listenAddress string
 	logPath       string
+	bot           *bot.Bot
+	cfg           *config.Config
 	fileLogger    *filelog.Logger
 	helixClient   *helix.Client
 	channels      []string
@@ -29,10 +35,12 @@ type Server struct {
 }
 
 // NewServer create api Server
-func NewServer(logPath string, listenAddress string, fileLogger *filelog.Logger, helixClient *helix.Client, channels []string) Server {
+func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient *helix.Client, channels []string) Server {
 	return Server{
-		listenAddress: listenAddress,
-		logPath:       logPath,
+		listenAddress: cfg.ListenAddress,
+		bot:           bot,
+		logPath:       cfg.LogsDirectory,
+		cfg:           cfg,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
@@ -119,6 +127,14 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 
 	if url == "/channels" {
 		s.writeAllChannels(w, r)
+		return
+	}
+
+	if strings.HasPrefix(url, "/admin/channelConfigs/") {
+		success := s.authenticateAdmin(w, r)
+		if success {
+			s.writeConfig(w, r)
+		}
 		return
 	}
 

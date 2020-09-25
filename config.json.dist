@@ -1,6 +1,7 @@
 {
     "admins": ["gempir"],
     "logsDirectory": "./logs",
+    "adminAPIKey": "noshot",
     "username": "gempbot",
     "oauth": "oauthtokenforchat",
     "clientID": "mytwitchclientid",

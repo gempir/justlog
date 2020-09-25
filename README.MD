@@ -28,3 +28,19 @@ commands, etc. yet, it focuses on logging and providing an api for the logs.
     }
 }
 ```
+
+### Admin API
+
+`POST` `/admin/channelConfigs/{channelID}`
+
+##### Headers
+```
+X-Api-Key: yourcoolapikey
+```
+
+##### Body
+```
+{
+    "messageTypes": [1]
+}
+```

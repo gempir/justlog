@@ -24,9 +24,10 @@ func main() {
 	archiver := archiver.NewArchiver(cfg.LogsDirectory)
 	go archiver.Boot()
 
-	apiServer := api.NewServer(cfg.LogsDirectory, cfg.ListenAddress, &fileLogger, &helixClient, cfg.Channels)
+	bot := bot.NewBot(cfg, &helixClient, &fileLogger)
+
+	apiServer := api.NewServer(cfg, bot, &fileLogger, &helixClient, cfg.Channels)
 	go apiServer.Init()
 
-	bot := bot.NewBot(cfg, &helixClient, &fileLogger)
 	bot.Connect()
 }
