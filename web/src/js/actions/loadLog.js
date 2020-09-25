@@ -16,7 +16,7 @@ export default function (channel, username, year, month) {
             }
             let usernamePath = "user";
             if (username.startsWith("id:")) {
-                usernamePath = "id";
+                usernamePath = "userid";
             }
 
             dispatch(setLoading(true));

@@ -18,7 +18,7 @@ export default function (channel, username, year, month) {
             }
             let usernamePath = "user";
             if (username.startsWith("id:")) {
-                usernamePath = "id";
+                usernamePath = "userid";
             }
 
             const logs = {}
@@ -72,7 +72,7 @@ function fetchAvailableLogs(baseUrl, channel, username) {
     }
     let userQuery = "user=" + username;
     if (username.startsWith("id:")) {
-        userQuery = "userid" + username.replace("id:", "")
+        userQuery = "userid=" + username.replace("id:", "")
     }
 
     return fetch(`${baseUrl}/list?${channelQuery}&${userQuery}`, { headers: { "Content-Type": "application/json" } }).then((response) => {
