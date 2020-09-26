@@ -44,3 +44,17 @@ X-Api-Key: yourcoolapikey
     "messageTypes": [1]
 }
 ```
+
+`DELETE` `/admin/channelConfigs/{channelID}`
+
+##### Headers
+```
+X-Api-Key: yourcoolapikey
+```
+
+##### Body
+```
+{
+    "messageTypes": true
+}
+```
