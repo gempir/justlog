@@ -17,7 +17,7 @@ func (s *Server) authenticateAdmin(w http.ResponseWriter, r *http.Request) bool 
 		return false
 	}
 
-	return true
+	return apiKey == s.cfg.AdminAPIKey
 }
 
 type channelConfigsDeleteRequest struct {
