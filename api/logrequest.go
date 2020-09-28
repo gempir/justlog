@@ -42,6 +42,10 @@ var (
 func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 	path := r.URL.EscapedPath()
 
+	if path != strings.ToLower(path) {
+		return logRequest{redirectPath: fmt.Sprintf("%s?%s", strings.ToLower(path), r.URL.Query().Encode())}, nil
+	}
+
 	if !strings.HasPrefix(path, "/channel") && !strings.HasPrefix(path, "/channelid") {
 		return logRequest{}, errors.New("route not found")
 	}
