@@ -15,6 +15,7 @@ type Config struct {
 	configFile            string
 	configFilePermissions os.FileMode
 	LogsDirectory         string                   `json:"logsDirectory"`
+	Archive               bool                     `json:"archive"`
 	AdminAPIKey           string                   `json:"adminAPIKey"`
 	Username              string                   `json:"username"`
 	OAuth                 string                   `json:"oauth"`
@@ -113,6 +114,7 @@ func loadConfiguration(filePath string) *Config {
 		ChannelConfigs: make(map[string]ChannelConfig),
 		Admins:         []string{"gempir"},
 		LogLevel:       "info",
+		Archive:        true,
 	}
 
 	info, err := os.Stat(filePath)

@@ -8,6 +8,7 @@
     "clientSecret": "mysecret",
     "logLevel": "info",
     "channels": ["77829817", "11148817"],
+    "archive": true,
     "channelConfigs": {
         "77829817": {
             "messageTypes": [1]
