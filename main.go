@@ -21,8 +21,11 @@ func main() {
 	fileLogger := filelog.NewFileLogger(cfg.LogsDirectory)
 	helixClient := helix.NewClient(cfg.ClientID, cfg.ClientSecret)
 	go helixClient.StartRefreshTokenRoutine()
-	archiver := archiver.NewArchiver(cfg.LogsDirectory)
-	go archiver.Boot()
+
+	if cfg.Archive {
+		archiver := archiver.NewArchiver(cfg.LogsDirectory)
+		go archiver.Boot()
+	}
 
 	bot := bot.NewBot(cfg, &helixClient, &fileLogger)
 
