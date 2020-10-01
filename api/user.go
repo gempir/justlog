@@ -6,7 +6,6 @@ import (
 	"net/url"
 
 	"github.com/gempir/go-twitch-irc/v2"
-	log "github.com/sirupsen/logrus"
 )
 
 // RandomQuoteJSON response when request a random message
@@ -71,8 +70,7 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q url.Values) {
 	logs, err := s.fileLogger.GetAvailableLogsForUser(q.Get("channelid"), q.Get("userid"))
 	if err != nil {
-		log.Error(err)
-		http.Error(w, "failed to get available logs: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "failed to get available logs: "+err.Error(), http.StatusNotFound)
 		return
 	}
 

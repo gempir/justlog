@@ -8,6 +8,18 @@ import LoadingSpinner from "./LoadingSpinner";
 class Filter extends Component {
     username;
 
+    state = {
+        buttonText: "Show logs"
+    }
+    
+    componentDidMount() {
+        if (this.props.channel && this.props.username) {
+            this.props.dispatch(loadLogs()).catch(err => {
+                this.setState({buttonText: err.message});
+            });
+        }
+    }
+
     render() {
         return (
             <form className="filter" autoComplete="off" onSubmit={this.onSubmit}>
@@ -19,7 +31,7 @@ class Filter extends Component {
                     onChange={this.onUsernameChange}
                     value={this.props.username}
                 />
-                <button type="submit" className="show-logs">{this.props.loading ? <LoadingSpinner /> : <>Show logs</>}</button>
+                <button type="submit" className="show-logs">{this.props.loading ? <LoadingSpinner /> : <>{this.state.buttonText}</>}</button>
             </form>
         )
     }
@@ -41,7 +53,9 @@ class Filter extends Component {
         params.set('username', this.props.username);
         window.location.search = params.toString();
 
-        this.props.dispatch(loadLogs());
+        this.props.dispatch(loadLogs()).catch(err => {
+            this.setState({buttonText: err.message});
+        });
     }
 }
 

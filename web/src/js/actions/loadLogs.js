@@ -28,7 +28,7 @@ export default function (channel, username, year, month) {
 
                 if (Object.keys(logs).length === 0) {
                     dispatch(setLoading(false));
-                    reject(new Error("no logs found"));
+                    reject(new Error("not found"));
                     return;
                 }
                 
@@ -60,6 +60,9 @@ export default function (channel, username, year, month) {
                     dispatch(setLoading(false));
                     reject(error);
                 });
+            }).catch((error) => {
+                dispatch(setLoading(false));
+                reject(new Error("not found"));
             });
         });
     };

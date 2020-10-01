@@ -3,9 +3,6 @@ import Filter from "./Filter";
 import LogView from "./LogView";
 import { connect } from "react-redux";
 import loadChannels from "../actions/loadChannels";
-import loadLogs from "../actions/loadLogs";
-import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.min.css';
 import loadBttvEmotes from "../actions/loadBttvEmotes";
 import Settings from "./Settings";
 
@@ -17,16 +14,9 @@ class LogSearch extends Component {
         props.dispatch(loadBttvEmotes());
     }
 
-    componentDidMount() {
-        if (this.props.channel && this.props.username) {
-            this.props.dispatch(loadLogs());
-        }
-    }
-
     render() {
         return (
             <div className="log-search">
-                <ToastContainer />
                 <Settings/>
                 <Filter
                     channels={this.props.channels}

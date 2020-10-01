@@ -155,7 +155,7 @@ class LogView extends Component {
 		this.setState({ loading: true });
 		this.props.dispatch(loadLog(null, null, this.props.log.year, this.props.log.month)).then(() => this.setState({ loading: false })).catch(err => {
 			console.error(err);
-			this.setState({ loading: false, buttonText: "not found" });
+			this.setState({ loading: false, buttonText: err.message });
 		});
 	}
 

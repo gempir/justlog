@@ -28,7 +28,8 @@ export default function (channel, username, year, month) {
                 } else {
                     var error = new Error(response.statusText)
                     error.response = response
-                    throw error
+                    dispatch(setLoading(false));
+                    reject(error);
                 }
             }).then((response) => {
                 return response.json()
