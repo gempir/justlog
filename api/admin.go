@@ -57,6 +57,8 @@ func (s *Server) writeChannelConfigs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		http.Error(w, "Uhhhhhh...", http.StatusBadRequest)
+		return
 	}
 
 	var request channelConfigsRequest
