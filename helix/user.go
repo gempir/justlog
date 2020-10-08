@@ -88,6 +88,14 @@ func (c *Client) StartRefreshTokenRoutine() {
 	}
 }
 
+func chunkBy(items []string, chunkSize int) (chunks [][]string) {
+	for chunkSize < len(items) {
+		items, chunks = items[chunkSize:], append(chunks, items[0:chunkSize:chunkSize])
+	}
+
+	return append(chunks, items)
+}
+
 // GetUsersByUserIds receive userData for given ids
 func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error) {
 	var filteredUserIDs []string
@@ -99,30 +107,34 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 	}
 
 	if len(filteredUserIDs) > 0 {
-		resp, err := c.client.GetUsers(&helixClient.UsersParams{
-			IDs: filteredUserIDs,
-		})
-		if err != nil {
-			return map[string]UserData{}, err
-		}
+		chunks := chunkBy(filteredUserIDs, 100)
 
-		log.Infof("%d GetUsersByUserIds %v", resp.StatusCode, filteredUserIDs)
-
-		for _, user := range resp.Data.Users {
-			data := &UserData{
-				ID:              user.ID,
-				Login:           user.Login,
-				DisplayName:     user.Login,
-				Type:            user.Type,
-				BroadcasterType: user.BroadcasterType,
-				Description:     user.Description,
-				ProfileImageURL: user.ProfileImageURL,
-				OfflineImageURL: user.OfflineImageURL,
-				ViewCount:       user.ViewCount,
-				Email:           user.Email,
+		for _, chunk := range chunks {
+			resp, err := c.client.GetUsers(&helixClient.UsersParams{
+				IDs: chunk,
+			})
+			if err != nil {
+				return map[string]UserData{}, err
 			}
-			userCacheByID[user.ID] = data
-			userCacheByUsername[user.Login] = data
+
+			log.Infof("%d GetUsersByUserIds %v", resp.StatusCode, chunk)
+
+			for _, user := range resp.Data.Users {
+				data := &UserData{
+					ID:              user.ID,
+					Login:           user.Login,
+					DisplayName:     user.Login,
+					Type:            user.Type,
+					BroadcasterType: user.BroadcasterType,
+					Description:     user.Description,
+					ProfileImageURL: user.ProfileImageURL,
+					OfflineImageURL: user.OfflineImageURL,
+					ViewCount:       user.ViewCount,
+					Email:           user.Email,
+				}
+				userCacheByID[user.ID] = data
+				userCacheByUsername[user.Login] = data
+			}
 		}
 	}
 
@@ -150,30 +162,34 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 	}
 
 	if len(filteredUsernames) > 0 {
-		resp, err := c.client.GetUsers(&helixClient.UsersParams{
-			Logins: filteredUsernames,
-		})
-		if err != nil {
-			return map[string]UserData{}, err
-		}
+		chunks := chunkBy(filteredUsernames, 100)
 
-		log.Infof("%d GetUsersByUsernames %v", resp.StatusCode, filteredUsernames)
-
-		for _, user := range resp.Data.Users {
-			data := &UserData{
-				ID:              user.ID,
-				Login:           user.Login,
-				DisplayName:     user.Login,
-				Type:            user.Type,
-				BroadcasterType: user.BroadcasterType,
-				Description:     user.Description,
-				ProfileImageURL: user.ProfileImageURL,
-				OfflineImageURL: user.OfflineImageURL,
-				ViewCount:       user.ViewCount,
-				Email:           user.Email,
+		for _, chunk := range chunks {
+			resp, err := c.client.GetUsers(&helixClient.UsersParams{
+				Logins: chunk,
+			})
+			if err != nil {
+				return map[string]UserData{}, err
 			}
-			userCacheByID[user.ID] = data
-			userCacheByUsername[user.Login] = data
+
+			log.Infof("%d GetUsersByUsernames %v", resp.StatusCode, chunk)
+
+			for _, user := range resp.Data.Users {
+				data := &UserData{
+					ID:              user.ID,
+					Login:           user.Login,
+					DisplayName:     user.Login,
+					Type:            user.Type,
+					BroadcasterType: user.BroadcasterType,
+					Description:     user.Description,
+					ProfileImageURL: user.ProfileImageURL,
+					OfflineImageURL: user.OfflineImageURL,
+					ViewCount:       user.ViewCount,
+					Email:           user.Email,
+				}
+				userCacheByID[user.ID] = data
+				userCacheByUsername[user.Login] = data
+			}
 		}
 	}
 
