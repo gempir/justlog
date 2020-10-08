@@ -171,6 +171,20 @@ func (b *Bot) UpdateMessageTypesToLog() {
 	b.messageTypesToLog = messageTypesToLog
 }
 
+func (b *Bot) Depart(channelNames ...string) {
+	for _, channelName := range channelNames {
+		log.Info("[bot] leaving " + channelName)
+		b.twitchClient.Depart(channelName)
+	}
+}
+
+func (b *Bot) Join(channelNames ...string) {
+	for _, channel := range channelNames {
+		log.Info("[bot] joining " + channel)
+		b.twitchClient.Join(channel)
+	}
+}
+
 func (b *Bot) initialJoins() {
 	for _, channel := range b.channels {
 		log.Info("[bot] joining " + channel.Login)
