@@ -33,28 +33,71 @@ commands, etc. yet, it focuses on logging and providing an api for the logs.
 
 `POST` `/admin/channelConfigs/{channelID}`
 
-##### Headers
+Will set the messageTypes logged for a channel
+
+###### Headers
 ```
 X-Api-Key: yourcoolapikey
 ```
 
-##### Body
+###### Body
 ```
 {
     "messageTypes": [1]
 }
 ```
 
+---
+
 `DELETE` `/admin/channelConfigs/{channelID}`
 
-##### Headers
+Will reset the messageTypes logged for a channel
+
+###### Headers
 ```
 X-Api-Key: yourcoolapikey
 ```
 
-##### Body
+###### Body
 ```
 {
     "messageTypes": true
+}
+```
+
+---
+
+
+`POST` `/admin/channels`
+
+Will add the channels to log
+
+###### Headers
+```
+X-Api-Key: yourcoolapikey
+```
+
+###### Body
+```
+{
+    "channels": ["77829817"]
+}
+```
+
+---
+
+`DELETE` `/admin/channels`
+
+Will remove the channels to log
+
+###### Headers
+```
+X-Api-Key: yourcoolapikey
+```
+
+###### Body
+```
+{
+    "channels": ["77829817"]
 }
 ```

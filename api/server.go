@@ -133,7 +133,15 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(url, "/admin/channelConfigs/") {
 		success := s.authenticateAdmin(w, r)
 		if success {
-			s.writeConfig(w, r)
+			s.writeChannelConfigs(w, r)
+		}
+		return
+	}
+
+	if strings.HasPrefix(url, "/admin/channels") {
+		success := s.authenticateAdmin(w, r)
+		if success {
+			s.writeChannels(w, r)
 		}
 		return
 	}

@@ -52,6 +52,24 @@ func (cfg *Config) AddChannels(channelIDs ...string) {
 	cfg.persistConfig()
 }
 
+// RemoveChannels removes channels from the config
+func (cfg *Config) RemoveChannels(channelIDs ...string) {
+	channels := cfg.Channels
+
+	for i, channel := range channels {
+		for _, removeChannel := range channelIDs {
+			if channel == removeChannel {
+				channels[i] = channels[len(channels)-1]
+				channels[len(channels)-1] = ""
+				channels = channels[:len(channels)-1]
+			}
+		}
+	}
+
+	cfg.Channels = channels
+	cfg.persistConfig()
+}
+
 // SetMessageTypes sets recorded message types for a channel
 func (cfg *Config) SetMessageTypes(channelID string, messageTypes []twitch.MessageType) {
 	if _, ok := cfg.ChannelConfigs[channelID]; ok {
