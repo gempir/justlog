@@ -92,7 +92,7 @@ class LogView extends Component {
 
 			message.forEach((char, key) => {
 				if (typeof replacements[key] !== "undefined") {
-					const emote = `<img src="${this.buildTwitchEmote(replacements[key].emoteId)}" alt="${message.slice(key, replacements[key].end)}" />`;
+					const emote = `<img src="${this.buildTwitchEmote(replacements[key].emoteId)}" alt="${message.slice(key, replacements[key].end).join("")}" />`;
 					message[key] = emote;
 					for (let i = key + 1; i < (key + replacements[key].length + 1); i++) {
 						message[i] = "";
