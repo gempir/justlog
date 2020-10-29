@@ -44,7 +44,7 @@ func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, hel
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
-		assets:        []string{"/", "/favicon.ico"},
+		assets:        []string{"/", "/favicon.ico", "/robots.txt"},
 		assetHandler:  http.FileServer(assets),
 	}
 }
