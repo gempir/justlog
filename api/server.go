@@ -211,6 +211,9 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Disable content type sniffing for log output
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
 	if request.responseType == responseTypeJSON {
 		writeJSON(logs, http.StatusOK, w, r)
 		return
