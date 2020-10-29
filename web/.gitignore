@@ -17,3 +17,4 @@ yarn-error.log*dist/
 
 public/*
 !public/favicon.ico
+!public/robots.txt
