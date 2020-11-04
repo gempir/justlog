@@ -1,8 +1,13 @@
-import React, { useContext } from "react";
-import { store } from "../store";
+import React from "react";
+import styled from "styled-components";
+import { Filters } from "./Filters";
+
+const PageContainer = styled.div`
+	
+`;
 
 export function Page() {
-	const { state } = useContext(store);
-
-	return <div>{state.apiBaseUrl}</div>;
+	return <PageContainer>
+		<Filters />
+	</PageContainer>;
 }
