@@ -16,8 +16,6 @@ const pageTheme = createMuiTheme({
 function App() {
 	const { state } = useContext(store);
 
-	console.log(process.env);
-
 	return <ReactQueryCacheProvider queryCache={state.queryCache}>
 		<Page />
 	</ReactQueryCacheProvider>

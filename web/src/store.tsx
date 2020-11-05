@@ -10,37 +10,52 @@ export interface State {
     settings: Settings,
     queryCache: QueryCache,
     apiBaseUrl: string,
+    currentChannel: string | null,
+    currentUsername: string | null,
 }
 
 export type Action = Record<string, unknown>;
 
 const defaultContext = {
-	state: {
+    state: {
         queryCache: new QueryCache(),
-        apiBaseUrl: process.env.REACT_APP_API_BASE_URL 
-	} as State,
-	setState: (state: State) => {
-		// do nothing
-    },
-    setSettings: (newSettings: Settings) => {
-		// do nothing
-	},
+        apiBaseUrl: process.env.REACT_APP_API_BASE_URL,
+        currentChannel: null,
+        currentUsername: null,
+    } as State,
+    setState: (state: State) => {},
+    setCurrents: (currentChannel: string | null = null, currentUsername: string | null = null) => {},
+    setSettings: (newSettings: Settings) => {},
 };
 
 const store = createContext(defaultContext);
 const { Provider } = store;
 
 const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => {
-	
-	const [settings, setSettingsStorage] = useLocalStorage("settings", defaultContext.state.settings);
-    const [state, setState] = useState({ ...defaultContext.state, settings});
-    
+
+    const [settings, setSettingsStorage] = useLocalStorage("settings", defaultContext.state.settings);
+    const [state, setState] = useState({ ...defaultContext.state, settings });
+
     const setSettings = (newSettings: Settings) => {
         setSettingsStorage(newSettings);
-        setState({...state, settings: newSettings});
+        setState({ ...state, settings: newSettings });
     }
 
-	return <Provider value={{ state, setState, setSettings}}>{children}</Provider>;
+    const setCurrents = (currentChannel: string | null = null, currentUsername: string | null = null) => {
+        setState({ ...state, currentChannel, currentUsername });
+        
+        const url = new URL(window.location.href);
+        if (currentChannel) {
+            url.searchParams.set("channel", currentChannel);
+        }
+        if (currentUsername) {
+            url.searchParams.set("channel", currentUsername);
+        }
+
+        window.history.replaceState( {} , "justlog", url.toString());
+    }
+
+    return <Provider value={{ state, setState, setSettings, setCurrents }}>{children}</Provider>;
 };
 
 export { store, StateProvider };
