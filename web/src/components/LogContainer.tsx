@@ -1,20 +1,20 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
+import { useAvailableLogs } from "../hooks/useAvailableLogs";
 import { store } from "../store";
+import { Log } from "./Log";
 
 const LogContainerDiv = styled.div`
     margin: 2rem;
-    padding: 0.5rem;
-    background: var(--bg);
     color: white;
 `;
 
 export function LogContainer() {
-    const {state} = useContext(store);
+    const { state } = useContext(store);
 
+    const availableLogs = useAvailableLogs(state.currentChannel, state.currentUsername);
 
     return <LogContainerDiv>
-        {state.currentChannel}
-        {state.currentUsername}
+        {availableLogs.map(log => <Log year={log.year} month={log.month} />)}
     </LogContainerDiv>
 }
