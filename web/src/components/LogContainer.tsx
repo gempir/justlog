@@ -15,6 +15,6 @@ export function LogContainer() {
     const availableLogs = useAvailableLogs(state.currentChannel, state.currentUsername);
 
     return <LogContainerDiv>
-        {availableLogs.map(log => <Log year={log.year} month={log.month} />)}
+        {availableLogs.map(log => <Log key={`${log.year}:${log.month}`} year={log.year} month={log.month} />)}
     </LogContainerDiv>
 }
