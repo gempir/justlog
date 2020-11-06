@@ -16,12 +16,13 @@ export interface State {
 
 export type Action = Record<string, unknown>;
 
+const url = new URL(window.location.href);
 const defaultContext = {
     state: {
         queryCache: new QueryCache(),
         apiBaseUrl: process.env.REACT_APP_API_BASE_URL,
-        currentChannel: null,
-        currentUsername: null,
+        currentChannel: url.searchParams.get("channel"),
+        currentUsername: url.searchParams.get("username"),
     } as State,
     setState: (state: State) => {},
     setCurrents: (currentChannel: string | null = null, currentUsername: string | null = null) => {},
@@ -49,7 +50,7 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
             url.searchParams.set("channel", currentChannel);
         }
         if (currentUsername) {
-            url.searchParams.set("channel", currentUsername);
+            url.searchParams.set("username", currentUsername);
         }
 
         window.history.replaceState( {} , "justlog", url.toString());

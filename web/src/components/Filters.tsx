@@ -14,7 +14,7 @@ const FiltersContainer = styled.form`
 `;
 
 export function Filters() {
-    const {setCurrents} = useContext(store);
+    const { setCurrents, state } = useContext(store);
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,8 +27,8 @@ export function Filters() {
     };
 
     return <FiltersContainer onSubmit={handleSubmit} action="none">
-        <TextField name="channel" label="channel" variant="filled" autoComplete="off" />
-        <TextField name="username" label="username" variant="filled" autoComplete="off" />
+        <TextField name="channel" label="channel" variant="filled" autoComplete="off" defaultValue={state.currentChannel} />
+        <TextField name="username" label="username" variant="filled" autoComplete="off" defaultValue={state.currentUsername} />
         <Button variant="contained" color="primary" size="large" type="submit">load</Button>
     </FiltersContainer>
 }
