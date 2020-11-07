@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
+import { store } from "../store";
 import { LogMessage } from "../types/log";
 
 const LogLineContainer = styled.li`
@@ -20,10 +21,11 @@ const LogLineContainer = styled.li`
 `;
 
 export function LogLine({ message }: { message: LogMessage }) {
+    const {state} = useContext(store);
 
     return <LogLineContainer>
         <span className="timestamp">{message.timestamp.toLocaleString()}</span>
-        <span className="name">{message.displayName}:</span>
+        {state.settings.showName.value && <span className="name">{message.displayName}:</span>}
         <span className="text">{message.text}</span>
     </LogLineContainer>
 }

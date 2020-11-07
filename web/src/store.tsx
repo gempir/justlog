@@ -3,7 +3,13 @@ import { QueryCache } from "react-query";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 export interface Settings {
+    showEmotes: Setting,
+    showName: Setting,
+}
 
+export interface Setting {
+    displayName: string,
+    value: boolean,
 }
 
 export interface State {
@@ -21,12 +27,22 @@ const defaultContext = {
     state: {
         queryCache: new QueryCache(),
         apiBaseUrl: process.env.REACT_APP_API_BASE_URL,
+        settings: {
+            showEmotes: {
+                displayName: "Show Emotes",
+                value: true,
+            },
+            showName: {
+                displayName: "Show Name",
+                value: false,
+            }
+        },
         currentChannel: url.searchParams.get("channel"),
         currentUsername: url.searchParams.get("username"),
     } as State,
-    setState: (state: State) => {},
-    setCurrents: (currentChannel: string | null = null, currentUsername: string | null = null) => {},
-    setSettings: (newSettings: Settings) => {},
+    setState: (state: State) => { },
+    setCurrents: (currentChannel: string | null = null, currentUsername: string | null = null) => { },
+    setSettings: (newSettings: Settings) => { },
 };
 
 const store = createContext(defaultContext);
@@ -44,7 +60,7 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
 
     const setCurrents = (currentChannel: string | null = null, currentUsername: string | null = null) => {
         setState({ ...state, currentChannel, currentUsername });
-        
+
         const url = new URL(window.location.href);
         if (currentChannel) {
             url.searchParams.set("channel", currentChannel);
@@ -53,7 +69,7 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
             url.searchParams.set("username", currentUsername);
         }
 
-        window.history.replaceState( {} , "justlog", url.toString());
+        window.history.replaceState({}, "justlog", url.toString());
     }
 
     return <Provider value={{ state, setState, setSettings, setCurrents }}>{children}</Provider>;
