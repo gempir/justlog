@@ -92,6 +92,7 @@ type chatMessage struct {
 	ID          string             `json:"id"`
 	Type        twitch.MessageType `json:"type"`
 	Raw         string             `json:"raw"`
+	Tags        map[string]string  `json:"tags"`
 }
 
 // ErrorResponse a simple error response

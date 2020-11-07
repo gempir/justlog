@@ -55,6 +55,7 @@ func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 				Channel:     message.Channel,
 				Raw:         message.Raw,
 				ID:          message.ID,
+				Tags:        message.Tags,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -74,6 +75,7 @@ func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				Tags:        message.Tags,
 			}
 		case *twitch.UserNoticeMessage:
 			message := *parsedMessage.(*twitch.UserNoticeMessage)
@@ -87,6 +89,7 @@ func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 				Channel:     message.Channel,
 				Raw:         message.Raw,
 				ID:          message.ID,
+				Tags:        message.Tags,
 			}
 		}
 
@@ -140,6 +143,7 @@ func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
 				Channel:     message.Channel,
 				Raw:         message.Raw,
 				ID:          message.ID,
+				Tags:        message.Tags,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -163,6 +167,7 @@ func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				Tags:        message.Tags,
 			}
 		case *twitch.UserNoticeMessage:
 			message := *parsedMessage.(*twitch.UserNoticeMessage)
@@ -176,6 +181,7 @@ func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
 				Channel:     message.Channel,
 				Raw:         message.Raw,
 				ID:          message.ID,
+				Tags:        message.Tags,
 			}
 		}
 
