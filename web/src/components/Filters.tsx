@@ -8,7 +8,9 @@ const FiltersContainer = styled.form`
     align-items: center;
     justify-content: space-between;
     padding: 15px;
-    background: var(--bg);
+    background: var(--bg-bright);
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
     width: 600px;
 	margin: 0 auto;
 `;

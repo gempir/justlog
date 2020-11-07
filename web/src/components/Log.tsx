@@ -6,7 +6,8 @@ import { store } from "../store";
 import { LogLine } from "./LogLine";
 
 const LogContainer = styled.div`
-    background: var(--bg);
+    background: var(--bg-bright);
+    border-radius: 3px;
     padding: 0.5rem;
     margin-top: 1rem;
 `;
@@ -15,7 +16,9 @@ export function Log({ year, month, initialLoad = false }: { year: string, month:
     const [load, setLoad] = useState(initialLoad);
 
     if (!load) {
-        return <LoadableLog year={year} month={month} onLoad={() => setLoad(true)} />
+        return <LogContainer>
+            <LoadableLog year={year} month={month} onLoad={() => setLoad(true)} />
+        </LogContainer>
     }
 
     return <LogContainer>
@@ -45,6 +48,6 @@ const LoadableLogContainer = styled.div`
 
 function LoadableLog({ year, month, onLoad }: { year: string, month: string, onLoad: () => void }) {
     return <LoadableLogContainer>
-        <Button variant="contained" color="primary" size="large" onClick={onLoad}>load</Button>
+        <Button variant="contained" color="primary" size="large" onClick={onLoad}>load {year}/{month}</Button>
     </LoadableLogContainer>
 }

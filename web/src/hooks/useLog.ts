@@ -14,7 +14,7 @@ export function useLog(channel: string, username: string, year: string, month: s
             const channelIsId = isUserId(channel);
             const usernameIsId = isUserId(username);
 
-            const queryUrl = new URL(`${state.apiBaseUrl}/channel${channelIsId ? "id" : ""}/${channel}/user${usernameIsId ? "id" : ""}/${username}/2020/11?reverse&json`);
+            const queryUrl = new URL(`${state.apiBaseUrl}/channel${channelIsId ? "id" : ""}/${channel}/user${usernameIsId ? "id" : ""}/${username}/${year}/${month}?reverse&json`);
 
             return fetch(queryUrl.toString()).then((response) => {
                 if (response.ok) {
