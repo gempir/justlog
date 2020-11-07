@@ -34,5 +34,10 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
 		}
 	};
 
-	return [storedValue, setValue];
+	let returnValue = storedValue;
+	if (typeof initialValue === "object") {
+		returnValue = { ...initialValue, storedValue };
+	}
+
+	return [returnValue, setValue];
 }
