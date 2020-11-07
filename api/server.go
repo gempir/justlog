@@ -89,6 +89,7 @@ type chatMessage struct {
 	DisplayName string             `json:"displayName"`
 	Channel     string             `json:"channel"`
 	Timestamp   timestamp          `json:"timestamp"`
+	ID          string             `json:"id"`
 	Type        twitch.MessageType `json:"type"`
 	Raw         string             `json:"raw"`
 }

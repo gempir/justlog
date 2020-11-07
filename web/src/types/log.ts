@@ -1,13 +1,18 @@
 export interface UserLogResponse {
-    messages: LogMessage[];
+    messages: RawLogMessage[];
 }
 
-export interface LogMessage {
+export interface LogMessage extends Omit<RawLogMessage, "timestamp"> {
+    timestamp: Date;
+}
+
+export interface RawLogMessage {
     text: string;
     username: string;
     displayName: string;
     channel: string;
-    timestamp: Date;
+    timestamp: string;
     type: number;
     raw: string;
+    id: string;
 }

@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { useLog } from "../hooks/useLog";
 import { store } from "../store";
+import { LogLine } from "./LogLine";
 
 const LogContainer = styled.div`
     background: var(--bg);
@@ -22,16 +23,19 @@ export function Log({ year, month, initialLoad = false }: { year: string, month:
     </LogContainer>
 }
 
-const ContentLogContainer = styled.div`
+const ContentLogContainer = styled.ul`
+    list-style: none;
+    padding: 0;
+    margin: 0;
 `;
 
 function ContentLog({ year, month }: { year: string, month: string }) {
-    const {state} = useContext(store);
+    const { state } = useContext(store);
 
     const logs = useLog(state.currentChannel ?? "", state.currentUsername ?? "", year, month)
 
     return <ContentLogContainer>
-        {JSON.stringify(logs)}
+        {logs.map(log => <LogLine key={log.id} message={log} />)}
     </ContentLogContainer>
 }
 

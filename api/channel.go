@@ -54,6 +54,7 @@ func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -85,6 +86,7 @@ func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		}
 
@@ -137,6 +139,7 @@ func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -172,6 +175,7 @@ func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		}
 

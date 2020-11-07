@@ -22,7 +22,15 @@ export function useLog(channel: string, username: string, year: string, month: s
                 }
 
                 throw Error(response.statusText);
-            }).then(response => response.json()).then((data: UserLogResponse) => data.messages);
+            }).then(response => response.json()).then((data: UserLogResponse) => {
+                const messages: Array<LogMessage> = [];
+
+                for (const msg of data.messages) {
+                    messages.push({ ...msg, timestamp: new Date(msg.timestamp) })
+                }
+
+                return messages;
+            });
         }
 
         return [];

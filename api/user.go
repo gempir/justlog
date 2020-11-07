@@ -37,6 +37,7 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 			Type:        message.Type,
 			Channel:     message.Channel,
 			Raw:         message.Raw,
+			ID:          message.ID,
 		}
 	case *twitch.ClearChatMessage:
 		message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -61,6 +62,7 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 			Type:        message.Type,
 			Channel:     message.Channel,
 			Raw:         message.Raw,
+			ID:          message.ID,
 		}
 	}
 
@@ -106,6 +108,7 @@ func (s *Server) getUserLogs(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -130,6 +133,7 @@ func (s *Server) getUserLogs(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		}
 
@@ -183,6 +187,7 @@ func (s *Server) getUserLogsRange(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		case *twitch.ClearChatMessage:
 			message := *parsedMessage.(*twitch.ClearChatMessage)
@@ -211,6 +216,7 @@ func (s *Server) getUserLogsRange(request logRequest) (*chatLog, error) {
 				Type:        message.Type,
 				Channel:     message.Channel,
 				Raw:         message.Raw,
+				ID:          message.ID,
 			}
 		}
 
