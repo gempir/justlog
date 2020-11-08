@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import React, { useContext } from "react";
 import styled from "styled-components";
 import { useThirdPartyEmotes } from "../hooks/useThirdPartyEmotes";
@@ -5,6 +6,12 @@ import { store } from "../store";
 import { LogMessage } from "../types/log";
 import { Message } from "./Message";
 import { User } from "./User";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.guess()
 
 const LogLineContainer = styled.li`
 	display: flex;
@@ -13,6 +20,7 @@ const LogLineContainer = styled.li`
     .timestamp {
         color: var(--text-dark);
         user-select: none;
+        font-family: monospace;
     }
 
     .user {
@@ -33,7 +41,7 @@ export function LogLine({ message }: { message: LogMessage }) {
     }
 
     return <LogLineContainer>
-        <span className="timestamp">{message.timestamp.toISOString()}</span>
+        <span className="timestamp">{dayjs(message.timestamp).format("YYYY-MM-DD HH:mm:ss")}</span>
         {state.settings.showName.value && <User displayName={message.displayName} color={message.tags["color"]} />}
         <Message message={message} thirdPartyEmotes={[]} />
     </LogLineContainer>

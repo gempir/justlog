@@ -8,6 +8,8 @@ import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 const MessageContainer = styled.div`
 	display: inline-flex;
 	align-items: center;
+	font-size: 1rem;
+	line-height: 1rem;
 
 	a {
 		margin: 0 2px;
