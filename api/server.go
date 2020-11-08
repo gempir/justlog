@@ -30,7 +30,6 @@ type Server struct {
 	fileLogger    *filelog.Logger
 	helixClient   *helix.Client
 	channels      []string
-	assets        []string
 	assetHandler  http.Handler
 }
 
@@ -44,7 +43,6 @@ func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, hel
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
-		assets:        []string{"/", "/favicon.ico", "/robots.txt"},
 		assetHandler:  http.FileServer(assets),
 	}
 }
@@ -89,8 +87,10 @@ type chatMessage struct {
 	DisplayName string             `json:"displayName"`
 	Channel     string             `json:"channel"`
 	Timestamp   timestamp          `json:"timestamp"`
+	ID          string             `json:"id"`
 	Type        twitch.MessageType `json:"type"`
 	Raw         string             `json:"raw"`
+	Tags        map[string]string  `json:"tags"`
 }
 
 // ErrorResponse a simple error response
@@ -112,11 +112,6 @@ func (s *Server) Init() {
 
 func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.EscapedPath()
-
-	if contains(s.assets, url) || strings.HasPrefix(url, "/bundle") {
-		s.assetHandler.ServeHTTP(w, r)
-		return
-	}
 
 	query := s.fillUserids(w, r)
 
@@ -146,7 +141,12 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.routeLogs(w, r)
+	routedLogs := s.routeLogs(w, r)
+
+	if !routedLogs {
+		s.assetHandler.ServeHTTP(w, r)
+		return
+	}
 }
 
 func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values {
@@ -175,16 +175,14 @@ func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values 
 	return query
 }
 
-func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
+func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 
 	request, err := s.newLogRequestFromURL(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return false
 	}
 	if request.redirectPath != "" {
-		http.Redirect(w, r, request.redirectPath, http.StatusFound)
-		return
+		return false
 	}
 
 	var logs *chatLog
@@ -208,7 +206,7 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error(err)
 		http.Error(w, "could not load logs", http.StatusInternalServerError)
-		return
+		return true
 	}
 
 	// Disable content type sniffing for log output
@@ -216,20 +214,20 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) {
 
 	if request.responseType == responseTypeJSON {
 		writeJSON(logs, http.StatusOK, w, r)
-		return
+		return true
 	}
 
 	if request.responseType == responseTypeRaw {
 		writeRaw(logs, http.StatusOK, w, r)
-		return
+		return true
 	}
 
 	if request.responseType == responseTypeText {
 		writeText(logs, http.StatusOK, w, r)
-		return
+		return true
 	}
 
-	http.Error(w, "unkown response type", http.StatusBadRequest)
+	return false
 }
 
 func corsHandler(h http.Handler) http.Handler {
