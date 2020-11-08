@@ -4,6 +4,7 @@ export interface UserLogResponse {
 
 export interface LogMessage extends Omit<RawLogMessage, "timestamp"> {
     timestamp: Date,
+    emotes: Array<Emote>,
 }
 
 export interface RawLogMessage {
@@ -16,4 +17,11 @@ export interface RawLogMessage {
     raw: string,
     id: string,
     tags: Record<string, string>,
+}
+
+export interface Emote {
+    startIndex: number,
+    endIndex: number,
+    code: string,
+    id: string,
 }

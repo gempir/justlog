@@ -26,18 +26,18 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 		const c = message.text[x];
 
 		replaced = false;
-		// for (const emote of message.emotes) {
-		// 	if (emote.startIndex === x) {
-		// 		replaced = true;
-		// 		renderMessage.push(<Emote
-		// 			key={x}
-		// 			alt={emote.code}
-		// 			src={`https://static-cdn.jtvnw.net/emoticons/v1/${emote.id}/1.0`}
-		// 		/>);
-		// 		x += emote.endIndex - emote.startIndex - 1;
-		// 		break;
-		// 	}
-		// }
+		for (const emote of message.emotes) {
+			if (emote.startIndex === x) {
+				replaced = true;
+				renderMessage.push(<Emote
+					key={x}
+					alt={emote.code}
+					src={`https://static-cdn.jtvnw.net/emoticons/v1/${emote.id}/1.0`}
+				/>);
+				x += emote.endIndex - emote.startIndex - 1;
+				break;
+			}
+		}
 
 		if (!replaced) {
 			if (c !== " " && x !== message.text.length) {

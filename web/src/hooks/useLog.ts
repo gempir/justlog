@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { useQuery } from "react-query";
 import { isUserId } from "../services/isUserId";
 import { store } from "../store";
-import { LogMessage, UserLogResponse } from "../types/log";
+import { Emote, LogMessage, UserLogResponse } from "../types/log";
 
 
 
@@ -26,7 +26,7 @@ export function useLog(channel: string, username: string, year: string, month: s
                 const messages: Array<LogMessage> = [];
 
                 for (const msg of data.messages) {
-                    messages.push({ ...msg, timestamp: new Date(msg.timestamp) })
+                    messages.push({ ...msg, timestamp: new Date(msg.timestamp), emotes: parseEmotes(msg.text, msg.tags["emotes"]) })
                 }
 
                 return messages;
@@ -37,4 +37,34 @@ export function useLog(channel: string, username: string, year: string, month: s
     });
 
     return data ?? [];
+}
+
+function parseEmotes(messageText: string, emotes: string): Array<Emote> {
+    const parsed: Array<Emote> = [];
+    if (emotes === "") {
+        return parsed;
+    }
+
+    const groups = emotes.split(";");
+
+    for (const group of groups) {
+        const [id, positions] = group.split(":");
+        const positionGroups = positions.split(",");
+
+        for (const positionGroup of positionGroups) {
+            const [startPos, endPos] = positionGroup.split("-");
+
+            const startIndex = Number(startPos);
+            const endIndex = Number(endPos) + 1;
+
+            parsed.push({
+                id,
+                startIndex: startIndex,
+                endIndex: endIndex,
+                code: messageText.substr(startIndex, startIndex + endIndex)
+            });
+        }
+    }
+
+    return parsed;
 }
