@@ -53,7 +53,7 @@ export function LogLineWithEmotes({ message }: { message: LogMessage }) {
     const { state } = useContext(store);
 
     return <LogLineContainer>
-        <span className="timestamp">{message.timestamp.toISOString()}</span>
+        <span className="timestamp">{dayjs(message.timestamp).format("YYYY-MM-DD HH:mm:ss")}</span>
         {state.settings.showName.value && <User displayName={message.displayName} color={message.tags["color"]} />}
         <Message message={message} thirdPartyEmotes={thirdPartyEmotes} />
     </LogLineContainer>

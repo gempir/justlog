@@ -38,7 +38,7 @@ function ContentLog({ year, month }: { year: string, month: string }) {
     const logs = useLog(state.currentChannel ?? "", state.currentUsername ?? "", year, month)
 
     return <ContentLogContainer>
-        {logs.map(log => <LogLine key={log.id} message={log} />)}
+        {logs.map((log, index) => <LogLine key={log.id ? log.id : index} message={log} />)}
     </ContentLogContainer>
 }
 

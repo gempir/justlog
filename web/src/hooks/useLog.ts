@@ -39,9 +39,9 @@ export function useLog(channel: string, username: string, year: string, month: s
     return data ?? [];
 }
 
-function parseEmotes(messageText: string, emotes: string): Array<Emote> {
+function parseEmotes(messageText: string, emotes: string | undefined): Array<Emote> {
     const parsed: Array<Emote> = [];
-    if (emotes === "") {
+    if (!emotes) {
         return parsed;
     }
 
