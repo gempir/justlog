@@ -27,7 +27,7 @@ const url = new URL(window.location.href);
 const defaultContext = {
     state: {
         queryCache: new QueryCache(),
-        apiBaseUrl: process.env.REACT_APP_API_BASE_URL,
+        apiBaseUrl: process.env.REACT_APP_API_BASE_URL ?? window.location.protocol + "//" + window.location.host,
         settings: {
             showEmotes: {
                 displayName: "Show Emotes",

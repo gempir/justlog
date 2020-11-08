@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useQuery } from "react-query";
 import { isUserId } from "../services/isUserId";
-import { QueryDefaults, store } from "../store";
+import { store } from "../store";
 
 export type AvailableLogs = Array<{ month: string, year: string }>;
 
@@ -27,13 +27,13 @@ export function useAvailableLogs(channel: string | null, username: string | null
                 .then((data: { availableLogs: AvailableLogs }) => data.availableLogs)
                 .catch(() => {
                     setState({ ...state, error: true });
-                    
+
                     return [];
                 });
         }
 
         return [];
-    }, QueryDefaults);
+    }, { refetchOnWindowFocus: false, refetchOnReconnect: false });
 
     return data ?? [];
 }

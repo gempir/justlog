@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useQuery } from "react-query";
 import { isUserId } from "../services/isUserId";
-import { QueryDefaults, store } from "../store";
+import { store } from "../store";
 import { Emote, LogMessage, UserLogResponse } from "../types/log";
 
 
@@ -34,7 +34,7 @@ export function useLog(channel: string, username: string, year: string, month: s
         }
 
         return [];
-    }, QueryDefaults);
+    }, { refetchOnWindowFocus: false, refetchOnReconnect: false });
 
     return data ?? [];
 }

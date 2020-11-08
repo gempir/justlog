@@ -9,7 +9,7 @@ import (
 	"github.com/shurcooL/vfsgen"
 )
 
-var assets http.FileSystem = http.Dir("web/public")
+var assets http.FileSystem = http.Dir("web/build")
 
 func main() {
 	err := vfsgen.Generate(assets, vfsgen.Options{
