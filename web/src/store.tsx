@@ -18,6 +18,7 @@ export interface State {
     apiBaseUrl: string,
     currentChannel: string | null,
     currentUsername: string | null,
+    error: boolean,
 }
 
 export type Action = Record<string, unknown>;
@@ -39,6 +40,7 @@ const defaultContext = {
         },
         currentChannel: url.searchParams.get("channel"),
         currentUsername: url.searchParams.get("username"),
+        error: false,
     } as State,
     setState: (state: State) => { },
     setCurrents: (currentChannel: string | null = null, currentUsername: string | null = null) => { },
@@ -59,7 +61,7 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
     }
 
     const setCurrents = (currentChannel: string | null = null, currentUsername: string | null = null) => {
-        setState({ ...state, currentChannel, currentUsername });
+        setState({ ...state, currentChannel, currentUsername, error: false });
 
         const url = new URL(window.location.href);
         if (currentChannel) {
