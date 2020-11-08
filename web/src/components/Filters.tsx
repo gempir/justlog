@@ -1,7 +1,8 @@
 import { Button, TextField } from "@material-ui/core";
+import { Autocomplete } from '@material-ui/lab';
 import React, { FormEvent, useContext } from "react";
-import { useQueryCache } from "react-query";
 import styled from "styled-components";
+import { useChannels } from "../hooks/useChannels";
 import { store } from "../store";
 import { Settings } from "./Settings";
 
@@ -29,7 +30,7 @@ const FiltersWrapper = styled.div`
 
 export function Filters() {
     const { setCurrents, state } = useContext(store);
-    const queryCache = useQueryCache();
+    const channels = useChannels();
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -40,14 +41,21 @@ export function Filters() {
             const channel = data.get("channel") as string | null;
             const username = data.get("username") as string | null;
 
-            queryCache.invalidateQueries(`${channel}:${username}`);
             setCurrents(channel, username);
         }
     };
 
     return <FiltersWrapper>
         <FiltersContainer onSubmit={handleSubmit} action="none">
-            <TextField name="channel" label="channel" variant="filled" autoComplete="off" defaultValue={state.currentChannel} autoFocus={state.currentChannel === null} />
+            <Autocomplete
+                id="autocomplete-channels"
+                options={channels.map(channel => channel.name)}
+                style={{ width: 225 }}
+                defaultValue={state.currentChannel}
+                getOptionLabel={(channel: string) => channel}
+                clearOnBlur={false}
+                renderInput={(params) => <TextField {...params} name="channel" label="channel" variant="filled" autoFocus={state.currentChannel === null} />}
+            />
             <TextField error={state.error} name="username" label="username" variant="filled" autoComplete="off" defaultValue={state.currentUsername} autoFocus={state.currentChannel !== null && state.currentUsername === null} />
             <Button variant="contained" color="primary" size="large" type="submit">load</Button>
             <Settings />
