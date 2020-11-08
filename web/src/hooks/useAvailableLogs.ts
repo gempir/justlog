@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useQuery } from "react-query";
 import { isUserId } from "../services/isUserId";
-import { store } from "../store";
+import { QueryDefaults, store } from "../store";
 
 export type AvailableLogs = Array<{ month: string, year: string }>;
 
@@ -33,7 +33,7 @@ export function useAvailableLogs(channel: string | null, username: string | null
         }
 
         return [];
-    });
+    }, QueryDefaults);
 
     return data ?? [];
 }

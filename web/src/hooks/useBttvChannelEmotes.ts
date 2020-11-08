@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { QueryDefaults } from "../store";
 import { BttvChannelEmotesResponse } from "../types/Bttv";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
@@ -11,7 +12,7 @@ export function useBttvChannelEmotes(channelId: string): Array<ThirdPartyEmote> 
 		return fetch(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`).then(res =>
 			res.json() as Promise<BttvChannelEmotesResponse>
 		);
-	});
+	}, QueryDefaults);
 
 	if (isLoading) {
 		return [];

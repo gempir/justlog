@@ -1,5 +1,6 @@
 import { Button, TextField } from "@material-ui/core";
 import React, { FormEvent, useContext } from "react";
+import { useQueryCache } from "react-query";
 import styled from "styled-components";
 import { store } from "../store";
 import { Settings } from "./Settings";
@@ -28,6 +29,7 @@ const FiltersWrapper = styled.div`
 
 export function Filters() {
     const { setCurrents, state } = useContext(store);
+    const queryCache = useQueryCache();
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -35,7 +37,11 @@ export function Filters() {
         if (e.target instanceof HTMLFormElement) {
             const data = new FormData(e.target);
 
-            setCurrents(data.get("channel") as string | null, data.get("username") as string | null);
+            const channel = data.get("channel") as string | null;
+            const username = data.get("username") as string | null;
+
+            queryCache.invalidateQueries(`${channel}:${username}`);
+            setCurrents(channel, username);
         }
     };
 

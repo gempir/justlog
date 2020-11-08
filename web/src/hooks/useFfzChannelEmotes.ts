@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { QueryDefaults } from "../store";
 import { EmoteSet, FfzChannelEmotesResponse } from "../types/Ffz";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
@@ -11,7 +12,7 @@ export function useFfzChannelEmotes(channelId: string): Array<ThirdPartyEmote> {
 		return fetch(`https://api.frankerfacez.com/v1/room/id/${channelId}`).then(res =>
 			res.json() as Promise<FfzChannelEmotesResponse>
 		);
-	});
+	}, QueryDefaults);
 
 	if (isLoading || !data?.sets) {
 		return [];

@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { QueryDefaults } from "../store";
 import { EmoteSet, FfzGlobalEmotesResponse } from "../types/Ffz";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
@@ -7,7 +8,7 @@ export function useFfzGlobalEmotes(): Array<ThirdPartyEmote> {
 		return fetch("https://api.frankerfacez.com/v1/set/global").then(res =>
 			res.json() as Promise<FfzGlobalEmotesResponse>
 		);
-	});
+	}, QueryDefaults);
 
 	if (isLoading || !data?.sets) {
 		return [];

@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { QueryDefaults } from "../store";
 import { BttvGlobalEmotesResponse } from "../types/Bttv";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
@@ -7,7 +8,7 @@ export function useBttvGlobalEmotes(): Array<ThirdPartyEmote> {
 		return fetch("https://api.betterttv.net/3/cached/emotes/global").then(res =>
 			res.json() as Promise<BttvGlobalEmotesResponse>
 		);
-	});
+	}, QueryDefaults);
 
 	if (isLoading || !data) {
 		return [];
