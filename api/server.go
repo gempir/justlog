@@ -182,7 +182,8 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	if request.redirectPath != "" {
-		return false
+		http.Redirect(w, r, request.redirectPath, http.StatusFound)
+		return true
 	}
 
 	var logs *chatLog
