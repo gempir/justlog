@@ -54,10 +54,6 @@ func NewClient(clientID string, clientSecret string) Client {
 	}
 }
 
-type userResponse struct {
-	Data []UserData `json:"data"`
-}
-
 // UserData exported data from twitch
 type UserData struct {
 	ID              string `json:"id"`
