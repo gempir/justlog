@@ -8,9 +8,7 @@ const UserContainer = styled.div.attrs(props => ({
 		color: props.color,
 	}
 }))`
-	display: inline-block;
-	margin-left: 5px;
-	font-weight: bold;
+	display: inline;
 `;
 
 export function User({ displayName, color }: { displayName: string, color: string }): JSX.Element {

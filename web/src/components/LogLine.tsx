@@ -26,6 +26,7 @@ const LogLineContainer = styled.li`
     .user {
         margin-left: 5px;
         user-select: none;
+        font-weight: bold;
     }
 
     .message {
