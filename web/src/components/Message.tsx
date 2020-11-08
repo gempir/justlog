@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import Linkify from "react-linkify";
 import styled from "styled-components";
+import { store } from "../store";
 import { LogMessage } from "../types/log";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
 const MessageContainer = styled.div`
 	display: inline-flex;
 	align-items: center;
+
+	a {
+		margin: 0 2px;
+	}
 `;
 
 const Emote = styled.img`
@@ -16,7 +21,7 @@ const Emote = styled.img`
 `;
 
 export function Message({ message, thirdPartyEmotes }: { message: LogMessage, thirdPartyEmotes: Array<ThirdPartyEmote> }): JSX.Element {
-
+	const { state } = useContext(store);
 	const renderMessage = [];
 
 	let replaced;
@@ -26,16 +31,19 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 		const c = message.text[x];
 
 		replaced = false;
-		for (const emote of message.emotes) {
-			if (emote.startIndex === x) {
-				replaced = true;
-				renderMessage.push(<Emote
-					key={x}
-					alt={emote.code}
-					src={`https://static-cdn.jtvnw.net/emoticons/v1/${emote.id}/1.0`}
-				/>);
-				x += emote.endIndex - emote.startIndex - 1;
-				break;
+
+		if (state.settings.showEmotes.value) {
+			for (const emote of message.emotes) {
+				if (emote.startIndex === x) {
+					replaced = true;
+					renderMessage.push(<Emote
+						key={x}
+						alt={emote.code}
+						src={`https://static-cdn.jtvnw.net/emoticons/v1/${emote.id}/1.0`}
+					/>);
+					x += emote.endIndex - emote.startIndex - 1;
+					break;
+				}
 			}
 		}
 

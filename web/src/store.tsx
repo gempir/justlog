@@ -31,11 +31,11 @@ const defaultContext = {
         settings: {
             showEmotes: {
                 displayName: "Show Emotes",
-                value: true,
+                value: false,
             },
             showName: {
                 displayName: "Show Name",
-                value: false,
+                value: true,
             }
         },
         currentChannel: url.searchParams.get("channel"),
@@ -52,7 +52,7 @@ const { Provider } = store;
 
 const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => {
 
-    const [settings, setSettingsStorage] = useLocalStorage("settings", defaultContext.state.settings);
+    const [settings, setSettingsStorage] = useLocalStorage("justlog:settings", defaultContext.state.settings);
     const [state, setState] = useState({ ...defaultContext.state, settings });
 
     const setSettings = (newSettings: Settings) => {

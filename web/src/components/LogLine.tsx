@@ -4,6 +4,7 @@ import { useThirdPartyEmotes } from "../hooks/useThirdPartyEmotes";
 import { store } from "../store";
 import { LogMessage } from "../types/log";
 import { Message } from "./Message";
+import { User } from "./User";
 
 const LogLineContainer = styled.li`
 	display: flex;
@@ -14,7 +15,7 @@ const LogLineContainer = styled.li`
         user-select: none;
     }
 
-    .name {
+    .user {
         margin-left: 5px;
         user-select: none;
     }
@@ -32,8 +33,8 @@ export function LogLine({ message }: { message: LogMessage }) {
     }
 
     return <LogLineContainer>
-        <span className="timestamp">{message.timestamp.toLocaleString()}</span>
-        {state.settings.showName.value && <span className="name">{message.displayName}:</span>}
+        <span className="timestamp">{message.timestamp.toISOString()}</span>
+        {state.settings.showName.value && <User displayName={message.displayName} color={message.tags["color"]} />}
         <Message message={message} thirdPartyEmotes={[]} />
     </LogLineContainer>
 }
@@ -43,8 +44,8 @@ export function LogLineWithEmotes({ message }: { message: LogMessage }) {
     const { state } = useContext(store);
 
     return <LogLineContainer>
-        <span className="timestamp">{message.timestamp.toLocaleString()}</span>
-        {state.settings.showName.value && <span className="name">{message.displayName}:</span>}
+        <span className="timestamp">{message.timestamp.toISOString()}</span>
+        {state.settings.showName.value && <User displayName={message.displayName} color={message.tags["color"]} />}
         <Message message={message} thirdPartyEmotes={thirdPartyEmotes} />
     </LogLineContainer>
 }
