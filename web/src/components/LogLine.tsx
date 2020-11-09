@@ -15,22 +15,27 @@ dayjs.tz.guess()
 
 const LogLineContainer = styled.li`
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
+    margin-bottom: 1px;
 
     .timestamp {
         color: var(--text-dark);
         user-select: none;
         font-family: monospace;
+        white-space: nowrap;
+        line-height: 1.1rem;
     }
 
     .user {
         margin-left: 5px;
         user-select: none;
         font-weight: bold;
+        line-height: 1.1rem;
     }
 
     .message {
         margin-left: 5px;
+        line-height: 1.1rem;
     }
 `;
 
