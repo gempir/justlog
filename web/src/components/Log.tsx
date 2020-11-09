@@ -2,17 +2,31 @@ import { Button } from "@material-ui/core";
 import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { useLog } from "../hooks/useLog";
+import { Txt } from "../icons/Txt";
 import { store } from "../store";
 import { LogLine } from "./LogLine";
 
 const LogContainer = styled.div`
+    position: relative;
     background: var(--bg-bright);
     border-radius: 3px;
     padding: 0.5rem;
     margin-top: 1rem;
+
+    .txt {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        opacity: 0.5;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
 `;
 
 export function Log({ year, month, initialLoad = false }: { year: string, month: string, initialLoad?: boolean }) {
+    const { state } = useContext(store);
     const [load, setLoad] = useState(initialLoad);
 
     if (!load) {
@@ -22,6 +36,7 @@ export function Log({ year, month, initialLoad = false }: { year: string, month:
     }
 
     return <LogContainer>
+        <a className="txt" target="__blank" href={`${state.apiBaseUrl}/channel/${state.currentChannel}/user/${state.currentUsername}/${year}/${month}?reverse`} rel="noopener noreferrer"><Txt /></a>
         <ContentLog year={year} month={month} />
     </LogContainer>
 }
