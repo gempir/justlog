@@ -46,7 +46,7 @@ export function LogLine({ message }: { message: LogMessage }) {
         return <LogLineWithEmotes message={message} />;
     }
 
-    return <LogLineContainer>
+    return <LogLineContainer className="logLine">
         {state.settings.showTimestamp.value &&<span className="timestamp">{dayjs(message.timestamp).format("YYYY-MM-DD HH:mm:ss")}</span>}
         {state.settings.showName.value && <User displayName={message.displayName} color={message.tags["color"]} />}
         <Message message={message} thirdPartyEmotes={[]} />
@@ -57,7 +57,7 @@ export function LogLineWithEmotes({ message }: { message: LogMessage }) {
     const thirdPartyEmotes = useThirdPartyEmotes(message.tags["room-id"])
     const { state } = useContext(store);
 
-    return <LogLineContainer>
+    return <LogLineContainer className="logLine">
         {state.settings.showTimestamp.value &&<span className="timestamp">{dayjs(message.timestamp).format("YYYY-MM-DD HH:mm:ss")}</span>}
         {state.settings.showName.value && <User displayName={message.displayName} color={message.tags["color"]} />}
         <Message message={message} thirdPartyEmotes={thirdPartyEmotes} />

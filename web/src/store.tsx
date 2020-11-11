@@ -6,6 +6,7 @@ export interface Settings {
     showEmotes: Setting,
     showName: Setting,
     showTimestamp: Setting,
+    performanceMode: Setting,
 }
 
 export interface Setting {
@@ -32,7 +33,7 @@ const defaultContext = {
         settings: {
             showEmotes: {
                 displayName: "Show Emotes",
-                value: false,
+                value: true,
             },
             showName: {
                 displayName: "Show Name",
@@ -40,6 +41,10 @@ const defaultContext = {
             },
             showTimestamp: {
                 displayName: "Show Timestamp",
+                value: true,
+            },
+            performanceMode: {
+                displayName: "Performace Mode",
                 value: true,
             }
         },
