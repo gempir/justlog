@@ -17,8 +17,10 @@ const LogContainer = styled.div`
     .txt {
         position: absolute;
         top: 5px;
-        right: 5px;
-        opacity: 0.5;
+        right: 15px;
+        opacity: 0.9;
+        cursor: pointer;
+        z-index: 999;
 
         &:hover {
             opacity: 1;
