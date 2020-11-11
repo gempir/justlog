@@ -5,6 +5,7 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 export interface Settings {
     showEmotes: Setting,
     showName: Setting,
+    showTimestamp: Setting,
 }
 
 export interface Setting {
@@ -35,6 +36,10 @@ const defaultContext = {
             },
             showName: {
                 displayName: "Show Name",
+                value: true,
+            },
+            showTimestamp: {
+                displayName: "Show Timestamp",
                 value: true,
             }
         },
