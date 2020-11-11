@@ -6,8 +6,6 @@ import { LogMessage } from "../types/log";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
 const MessageContainer = styled.div`
-	display: inline-flex;
-	align-items: center;
 
 	a {
 		margin: 0 2px;
@@ -15,8 +13,9 @@ const MessageContainer = styled.div`
 `;
 
 const Emote = styled.img`
-	max-height: 14px;
+	max-height: 18px;
 	margin: 0 2px;
+	margin-bottom: -2px;
 	width: auto;
 `;
 
