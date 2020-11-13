@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { useQuery } from "react-query";
-import { isUserId } from "../services/isUserId";
+import { getUserId, isUserId } from "../services/isUserId";
 import { store } from "../store";
 
 export type AvailableLogs = Array<{ month: string, year: string }>;
@@ -12,6 +12,13 @@ export function useAvailableLogs(channel: string | null, username: string | null
         if (channel && username) {
             const channelIsId = isUserId(channel);
             const usernameIsId = isUserId(username);
+            
+            if (channelIsId) {
+                channel = getUserId(channel)
+            }
+            if (usernameIsId) {
+                username = getUserId(username)
+            }
 
             const queryUrl = new URL(`${state.apiBaseUrl}/list`);
             queryUrl.searchParams.append(`channel${channelIsId ? "id" : ""}`, channel);

@@ -71,8 +71,8 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
     }
 
     const setCurrents = (currentChannel: string | null = null, currentUsername: string | null = null) => {
-        currentChannel = currentChannel?.toLowerCase() ?? null;
-        currentUsername = currentChannel?.toLowerCase() ?? null;
+        currentChannel = currentChannel?.toLowerCase().trim() ?? null;
+        currentUsername = currentChannel?.toLowerCase().trim() ?? null;
 
         setState({ ...state, currentChannel, currentUsername, error: false });
 
