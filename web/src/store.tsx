@@ -71,6 +71,9 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
     }
 
     const setCurrents = (currentChannel: string | null = null, currentUsername: string | null = null) => {
+        currentChannel = currentChannel?.toLowerCase() ?? null;
+        currentUsername = currentChannel?.toLowerCase() ?? null;
+
         setState({ ...state, currentChannel, currentUsername, error: false });
 
         const url = new URL(window.location.href);
