@@ -1,18 +1,19 @@
-import { Button } from "@material-ui/core";
-import React, { CSSProperties, useContext, useState } from "react";
+import { Button, InputAdornment, TextField } from "@material-ui/core";
+import React, { CSSProperties, useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useLog } from "../hooks/useLog";
 import { Txt } from "../icons/Txt";
 import { store } from "../store";
 import { LogLine } from "./LogLine";
 import { FixedSizeList as List } from 'react-window';
+import { Search } from "@material-ui/icons";
 
 const LogContainer = styled.div`
     position: relative;
     background: var(--bg-bright);
     border-radius: 3px;
     padding: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 3rem;
 
     .txt {
         position: absolute;
@@ -49,6 +50,14 @@ export function Log({ year, month, initialLoad = false }: { year: string, month:
 const PerformanceContentLogContainer = styled.ul`
     padding: 0;
     margin: 0;
+    position: relative;
+
+    .search {
+        position: absolute;
+        top: -52px;
+        width: 320px;
+        left: 0;
+    }
 
     .logLine {
         white-space: nowrap;
@@ -60,15 +69,43 @@ const PerformanceContentLogContainer = styled.ul`
 `;
 
 function PerformanceContentLog({ year, month }: { year: string, month: string }) {
-    const { state } = useContext(store);
+    const { state, setState } = useContext(store);
+    const [searchText, setSearchText] = useState("");
 
     const logs = useLog(state.currentChannel ?? "", state.currentUsername ?? "", year, month)
+        .filter(log => log.text.toLowerCase().includes(searchText.toLowerCase()));
 
     const Row = ({ index, style }: { index: number, style: CSSProperties }) => (
         <div style={style}><LogLine key={logs[index].id ? logs[index].id : index} message={logs[index]} /></div>
     );
 
-    return <PerformanceContentLogContainer>
+    const search = useRef<HTMLInputElement>(null);
+
+    const handleMouseEnter = () => {
+        setState({ ...state, activeSearchField: search.current })
+    }
+
+    useEffect(() => {
+        setState({ ...state, activeSearchField: search.current })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
+    return <PerformanceContentLogContainer onMouseEnter={handleMouseEnter}>
+        <TextField
+            className="search"
+            label="Search"
+            inputRef={search}
+            onChange={e => setSearchText(e.target.value)}
+            size="small"
+            InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <Search />
+                    </InputAdornment>
+                ),
+            }}
+        />
         <List
             className="list"
             height={600}

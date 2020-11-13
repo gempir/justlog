@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useAvailableLogs } from "../hooks/useAvailableLogs";
 import { store } from "../store";
@@ -13,6 +13,21 @@ const LogContainerDiv = styled.div`
 
 export function LogContainer() {
     const { state } = useContext(store);
+
+    useEffect(() => {
+        const listener = function (e: KeyboardEvent) {
+            if (e.ctrlKey && e.code === "KeyF") {
+                e.preventDefault();
+                if (state.activeSearchField) {
+                    state.activeSearchField.focus();
+                }
+            }
+        };
+
+        window.addEventListener("keydown", listener)
+
+        return () => window.removeEventListener("keydown", listener);
+    }, [state.activeSearchField]);
 
     const availableLogs = useAvailableLogs(state.currentChannel, state.currentUsername);
 

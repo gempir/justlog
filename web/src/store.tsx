@@ -21,6 +21,7 @@ export interface State {
     currentChannel: string | null,
     currentUsername: string | null,
     error: boolean,
+    activeSearchField: HTMLInputElement | null,
 }
 
 export type Action = Record<string, unknown>;
@@ -72,7 +73,7 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
 
     const setCurrents = (currentChannel: string | null = null, currentUsername: string | null = null) => {
         currentChannel = currentChannel?.toLowerCase().trim() ?? null;
-        currentUsername = currentChannel?.toLowerCase().trim() ?? null;
+        currentUsername = currentUsername?.toLowerCase().trim() ?? null;
 
         setState({ ...state, currentChannel, currentUsername, error: false });
 
