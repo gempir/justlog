@@ -42,6 +42,7 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 				if (emote.startIndex === x) {
 					replaced = true;
 					renderMessage.push(<Emote
+						className="emote"
 						key={x}
 						alt={emote.code}
 						src={`https://static-cdn.jtvnw.net/emoticons/v1/${emote.id}/1.0`}
@@ -62,6 +63,7 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 			for (const emote of thirdPartyEmotes) {
 				if (buffer.trim() === emote.code) {
 					renderMessage.push(<Emote
+						className="emote"
 						key={x}
 						alt={emote.code}
 						src={emote.urls.small}

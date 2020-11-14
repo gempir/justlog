@@ -6,7 +6,7 @@ export interface Settings {
     showEmotes: Setting,
     showName: Setting,
     showTimestamp: Setting,
-    performanceMode: Setting,
+    twitchChatMode: Setting,
 }
 
 export interface Setting {
@@ -44,9 +44,9 @@ const defaultContext = {
                 displayName: "Show Timestamp",
                 value: true,
             },
-            performanceMode: {
-                displayName: "Performace Mode",
-                value: true,
+            twitchChatMode: {
+                displayName: "Twitch Chat Mode",
+                value: false,
             }
         },
         currentChannel: url.searchParams.get("channel"),

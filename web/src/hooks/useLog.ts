@@ -68,7 +68,7 @@ function parseEmotes(messageText: string, emotes: string | undefined): Array<Emo
                 id,
                 startIndex: startIndex,
                 endIndex: endIndex,
-                code: messageText.substr(startIndex, startIndex + endIndex)
+                code: messageText.substr(startIndex, endIndex - startIndex)
             });
         }
     }
