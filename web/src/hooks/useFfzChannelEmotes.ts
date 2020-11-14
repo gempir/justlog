@@ -4,7 +4,7 @@ import { EmoteSet, FfzChannelEmotesResponse } from "../types/Ffz";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
 export function useFfzChannelEmotes(channelId: string): Array<ThirdPartyEmote> {
-	const { isLoading, error, data } = useQuery(`ffz:channel:${channelId}`, () => {
+	const { isLoading, error, data } = useQuery(["ffz:channel", { channelId: channelId }], () => {
 		if (channelId === "") {
 			return Promise.resolve({sets: {}});
 		}

@@ -8,11 +8,11 @@ export type AvailableLogs = Array<{ month: string, year: string }>;
 export function useAvailableLogs(channel: string | null, username: string | null): AvailableLogs {
     const { state, setState } = useContext(store);
 
-    const { data } = useQuery<AvailableLogs>(`${channel}:${username}`, () => {
+    const { data } = useQuery<AvailableLogs>(["availableLogs", { channel: channel, username: username }], () => {
         if (channel && username) {
             const channelIsId = isUserId(channel);
             const usernameIsId = isUserId(username);
-            
+
             if (channelIsId) {
                 channel = getUserId(channel)
             }

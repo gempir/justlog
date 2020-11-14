@@ -4,9 +4,9 @@ import { BttvChannelEmotesResponse } from "../types/Bttv";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
 export function useBttvChannelEmotes(channelId: string): Array<ThirdPartyEmote> {
-	const { isLoading, error, data } = useQuery(`bttv:channel:${channelId}`, () => {
+	const { isLoading, error, data } = useQuery(["bttv:channel", { channelId: channelId }], () => {
 		if (channelId === "") {
-			return Promise.resolve({sharedEmotes: [], channelEmotes: []});
+			return Promise.resolve({ sharedEmotes: [], channelEmotes: [] });
 		}
 
 		return fetch(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`).then(res =>
