@@ -9,7 +9,7 @@ import { Emote, LogMessage, UserLogResponse } from "../types/log";
 export function useLog(channel: string, username: string, year: string, month: string): Array<LogMessage> {
     const { state } = useContext(store);
 
-    const { data } = useQuery<Array<LogMessage>>(`${channel}:${username}:${year}:${month}`, () => {
+    const { data } = useQuery<Array<LogMessage>>(["log", { channel: channel, username: username, year: year, month: month }], () => {
         if (channel && username) {
             const channelIsId = isUserId(channel);
             const usernameIsId = isUserId(username);

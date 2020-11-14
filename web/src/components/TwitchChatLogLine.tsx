@@ -39,6 +39,10 @@ const TwitchChatLogLineContainer = styled.li`
         display: inline;
         line-height: 20px;
 
+        a {
+            word-wrap: break-word;
+        }
+
         .emote {
             max-height: 28px;
             margin: 0 2px;
