@@ -9,6 +9,13 @@ export interface Settings {
     twitchChatMode: Setting,
 }
 
+export enum LocalStorageSettings {
+    showEmotes,
+    showName,
+    showTimestamp,
+    twitchChatMode,
+}
+
 export interface Setting {
     displayName: string,
     value: boolean,
@@ -67,6 +74,12 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
     const [state, setState] = useState({ ...defaultContext.state, settings });
 
     const setSettings = (newSettings: Settings) => {
+        for (const key of Object.keys(newSettings)) {
+            if (typeof (defaultContext.state.settings as unknown as Record<string, Setting>)[key] === "undefined") {
+                delete (newSettings as unknown as Record<string, Setting>)[key];
+            }
+        }
+
         setSettingsStorage(newSettings);
         setState({ ...state, settings: newSettings });
     }
@@ -94,5 +107,5 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
 export { store, StateProvider };
 
 export const QueryDefaults = {
-	staleTime: 5 * 60  * 1000,
+    staleTime: 5 * 60 * 1000,
 };
