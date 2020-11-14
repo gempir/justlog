@@ -9,6 +9,12 @@ const MessageContainer = styled.div`
 
 	a {
 		margin: 0 2px;
+		color: var(--theme2);
+		text-decoration: none;
+
+		&:hover, &:active, &:focus {
+			color: var(--theme2-bright);
+		}
 	}
 `;
 

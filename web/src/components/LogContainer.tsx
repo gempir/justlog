@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { useAvailableLogs } from "../hooks/useAvailableLogs";
 import { store } from "../store";
