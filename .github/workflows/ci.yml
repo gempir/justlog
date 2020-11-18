@@ -35,6 +35,7 @@ jobs:
   release:
     if: ${{ github.ref == 'master' }}
     needs: build
+    steps:
 
     - name: trigger update
       run: |
