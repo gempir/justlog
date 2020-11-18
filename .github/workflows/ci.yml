@@ -31,3 +31,11 @@ jobs:
 
     - name: Test
       run: go test -v .
+
+  release:
+    if: ${{ github.ref == 'master' }}
+    needs: build
+
+    - name: trigger update
+      run: |
+        curl -H "x-auth: ${{ secrets.UPDATE_KEY }}" https://api.ivr.fi/bot/update-justlog
