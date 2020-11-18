@@ -1,10 +1,12 @@
 name: ci
-
+env:
+  SHORTSHA: $(git rev-parse --short=4 ${{ github.sha }})
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
 
 jobs:
 
@@ -44,4 +46,4 @@ jobs:
 
     - name: announce update
       run: |
-        echo -en "PASS ${{ secrets.TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :nymnLander ${{ github.event.head_commit.message }} https://github.com/gempir/justlog/commit/${{ github.sha }} | justlog update\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
+        echo -en "PASS ${{ secrets.TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :nymnLander ${{ github.event.head_commit.message }} https://github.com/gempir/justlog/commit/$SHORTSHA | justlog update\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
