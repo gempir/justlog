@@ -43,10 +43,9 @@ jobs:
       run: |
         curl -H "x-auth: ${{ secrets.UPDATE_KEY }}" ${{ secrets.UPDATE_URL }}
 
-    - name: get shortsha
+    - name: Set outputs
       id: vars
-      run: |
-        echo ::set-output name=sha_short::$(git rev-parse --short=4 ${{ github.sha }})
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
     - name: announce update
       run: |
