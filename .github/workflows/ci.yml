@@ -40,4 +40,8 @@ jobs:
 
     - name: trigger update
       run: |
-        curl -H "x-auth: ${{ secrets.UPDATE_KEY }}" https://api.ivr.fi/bot/update-justlog
+        curl -H "x-auth: ${{ secrets.UPDATE_KEY }}" ${{ secrets.UPDATE_URL }}
+
+    - name: announce update
+      run: |
+        echo -en "PASS ${{ TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :Updated justlog https://github.com/gempir/justlog/commit/${{ github.sha }}\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
