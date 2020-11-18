@@ -107,5 +107,5 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
 export { store, StateProvider };
 
 export const QueryDefaults = {
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 10 * 1000,
 };
