@@ -44,4 +44,4 @@ jobs:
 
     - name: announce update
       run: |
-        echo -en "PASS ${{ TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :Updated justlog https://github.com/gempir/justlog/commit/${{ github.sha }}\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
+        echo -en "PASS ${{ secrets.TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :Updated justlog https://github.com/gempir/justlog/commit/${{ github.sha }}\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
