@@ -45,7 +45,7 @@ jobs:
 
     - name: Set outputs
       id: vars
-      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      run: echo "::set-output name=sha_short::$(echo ${{ github.sha }} | cut -c1-4)"
 
     - name: announce update
       run: |
