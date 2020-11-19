@@ -330,6 +330,10 @@ func (t *timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func createLogResult() chatLog {
+	return chatLog{Messages: []chatMessage{}}
+}
+
 func parseFromTo(from, to string, limit float64) (time.Time, time.Time, error) {
 	var fromTime time.Time
 	var toTime time.Time
@@ -369,6 +373,48 @@ func parseFromTo(from, to string, limit float64) (time.Time, time.Time, error) {
 	}
 
 	return fromTime, toTime, nil
+}
+
+func createChatMessage(parsedMessage twitch.Message) chatMessage {
+	switch message := parsedMessage.(type) {
+	case *twitch.PrivateMessage:
+		return chatMessage{
+			Timestamp:   timestamp{message.Time},
+			Username:    message.User.Name,
+			DisplayName: message.User.DisplayName,
+			Text:        message.Message,
+			Type:        message.Type,
+			Channel:     message.Channel,
+			Raw:         message.Raw,
+			ID:          message.ID,
+			Tags:        message.Tags,
+		}
+	case *twitch.ClearChatMessage:
+		return chatMessage{
+			Timestamp:   timestamp{message.Time},
+			Username:    message.TargetUsername,
+			DisplayName: message.TargetUsername,
+			Text:        buildClearChatMessageText(*message),
+			Type:        message.Type,
+			Channel:     message.Channel,
+			Raw:         message.Raw,
+			Tags:        message.Tags,
+		}
+	case *twitch.UserNoticeMessage:
+		return chatMessage{
+			Timestamp:   timestamp{message.Time},
+			Username:    message.User.Name,
+			DisplayName: message.User.DisplayName,
+			Text:        message.SystemMsg + " " + message.Message,
+			Type:        message.Type,
+			Channel:     message.Channel,
+			Raw:         message.Raw,
+			ID:          message.ID,
+			Tags:        message.Tags,
+		}
+	}
+
+	return chatMessage{}
 }
 
 func parseTimestamp(timestamp string) (time.Time, error) {

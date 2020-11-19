@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -36,7 +37,7 @@ type logTime struct {
 }
 
 var (
-	pathRegex = regexp.MustCompile(`\/(channel|channelid)\/(\w+)(?:\/(user|userid)\/(\w+))?(?:(?:\/(\d{4})\/(\d{1,2})(?:\/(\d{1,2}))?)|(?:\/(range|random)))?`)
+	pathRegex = regexp.MustCompile(`\/(channel|channelid)\/(\w+)(?:\/(user|userid)\/(\w+))?(?:(?:\/(\d{4})\/(\d{1,2})(?:\/(\d{1,2}))?)|(?:\/(random)))?`)
 )
 
 func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
@@ -102,9 +103,6 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		request.time.day = params[5]
 	} else if request.isUserRequest && len(params) == 6 && params[5] == "random" {
 		request.time.random = true
-	} else if (request.isUserRequest && len(params) == 6 && params[5] == "range") || (request.isChannelRequest && len(params) == 4 && params[3] == "range") {
-		request.time.from = r.URL.Query().Get("from")
-		request.time.to = r.URL.Query().Get("to")
 	} else {
 		if request.isChannelRequest {
 			request.time.year = fmt.Sprintf("%d", time.Now().Year())
@@ -128,8 +126,6 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		}
 
 		query := r.URL.Query()
-		query.Del("from")
-		query.Del("to")
 
 		encodedQuery := ""
 		if query.Encode() != "" {
@@ -137,6 +133,17 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		}
 
 		return logRequest{redirectPath: fmt.Sprintf("%s/%s%s", params[0], timePath, encodedQuery)}, nil
+	}
+
+	if r.URL.Query().Get("from") != "" || r.URL.Query().Get("to") != "" {
+		request.time.from = r.URL.Query().Get("from")
+		if request.time.from == "" {
+			request.time.from = strconv.FormatInt(time.Now().Unix(), 10)
+		}
+		request.time.to = r.URL.Query().Get("to")
+		if request.time.to == "" {
+			request.time.to = strconv.FormatInt(time.Now().Unix(), 10)
+		}
 	}
 
 	if _, ok := r.URL.Query()["reverse"]; ok {
