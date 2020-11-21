@@ -50,6 +50,7 @@ export function ContentLog({ year, month }: { year: string, month: string }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+
     return <ContentLogContainer onMouseEnter={handleMouseEnter}>
         <TextField
             className="search"
@@ -68,7 +69,7 @@ export function ContentLog({ year, month }: { year: string, month: string }) {
         <List
             className="list"
             height={600}
-            itemCount={logs.length - 1}
+            itemCount={logs.length}
             itemSize={20}
             width={"100%"}
         >
