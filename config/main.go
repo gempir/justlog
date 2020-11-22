@@ -125,7 +125,7 @@ func loadConfiguration(filePath string) *Config {
 	cfg := Config{
 		configFile:     filePath,
 		LogsDirectory:  "./logs",
-		ListenAddress:  "127.0.0.1:8025",
+		ListenAddress:  ":8025",
 		Username:       "justinfan777777",
 		OAuth:          "oauth:777777777",
 		Channels:       []string{},

@@ -4,6 +4,13 @@
 justlog is a bot I maintain for a couple of channels. Its features differ from other bots in that it doesn't support
 commands, etc. yet, it focuses on logging and providing an api for the logs.
 
+### Docker
+
+```
+mkdir logs # Make sure the log folder is set correctly in your config, we need to create it first to have correct permissions
+docker run -p 8025:8025 --user $(id -u):$(id -g) -v $PWD/config.json:/etc/justlog.json -v $PWD/logs:/logs ghcr.io/gempir/justlog
+```
+
 ### Commands
 - `!justlog status` will respond with uptime
 - `!justlog join gempir,pajlada` will join the channels and append them to the config
