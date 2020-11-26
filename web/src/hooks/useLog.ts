@@ -52,7 +52,7 @@ function parseEmotes(messageText: string, emotes: string | undefined): Array<Emo
         return parsed;
     }
 
-    const groups = emotes.split(";");
+    const groups = emotes.split("/");
 
     for (const group of groups) {
         const [id, positions] = group.split(":");
