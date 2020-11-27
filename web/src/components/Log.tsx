@@ -2,6 +2,7 @@ import { Button } from "@material-ui/core";
 import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { Txt } from "../icons/Txt";
+import { getUserId, isUserId } from "../services/isUserId";
 import { store } from "../store";
 import { ContentLog } from "./ContentLog";
 import { TwitchChatContentLog } from "./TwitchChatLogContainer";
@@ -37,8 +38,23 @@ export function Log({ year, month, initialLoad = false }: { year: string, month:
         </LogContainer>
     }
 
+    let txtHref = `${state.apiBaseUrl}`
+    if (state.currentChannel && isUserId(state.currentChannel)) {
+        txtHref += `/channelid/${getUserId(state.currentChannel)}`
+    } else {
+        txtHref += `/channel/${state.currentChannel}`
+    }
+
+    if (state.currentUsername && isUserId(state.currentUsername)) {
+        txtHref += `/userid/${getUserId(state.currentUsername)}`
+    } else {
+        txtHref += `/user/${state.currentUsername}`
+    }
+
+    txtHref += `/${year}/${month}?reverse`;
+
     return <LogContainer>
-        <a className="txt" target="__blank" href={`${state.apiBaseUrl}/channel/${state.currentChannel}/user/${state.currentUsername}/${year}/${month}?reverse`} rel="noopener noreferrer"><Txt /></a>
+        <a className="txt" target="__blank" href={txtHref} rel="noopener noreferrer"><Txt /></a>
         {!state.settings.twitchChatMode.value && <ContentLog year={year} month={month} />}
         {state.settings.twitchChatMode.value && <TwitchChatContentLog year={year} month={month} />}
     </LogContainer>
