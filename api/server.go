@@ -1,3 +1,27 @@
+//     Schemes: https
+//     BasePath: /
+//     Version: 0.0.1
+//     License: MIT http://opensource.org/licenses/MIT
+//     Contact: gempir<gempir.dev@gmail.com>
+//
+//     Consumes:
+//     - application/json
+//     - application/xml
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Security:
+//     - api_key:
+//
+//     SecurityDefinitions:
+//     api_key:
+//          type: apiKey
+//          name: X-Api-Key
+//          in: header
+//
+// swagger:meta
 package api
 
 import (
