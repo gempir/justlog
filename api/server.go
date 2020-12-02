@@ -93,8 +93,7 @@ type channel struct {
 	Name   string `json:"name"`
 }
 
-//
-// swagger:response AllChannelsJSON
+// swagger:model
 type AllChannelsJSON struct {
 	Channels []channel `json:"channels"`
 }
@@ -103,6 +102,7 @@ type chatLog struct {
 	Messages []chatMessage `json:"messages"`
 }
 
+// swagger:model
 type logList struct {
 	AvailableLogs []filelog.UserLogFile `json:"availableLogs"`
 }

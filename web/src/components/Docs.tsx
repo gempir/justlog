@@ -19,7 +19,7 @@ export function Docs() {
     }
 
     return <DocsWrapper>
-        <IconButton aria-controls="docs" aria-haspopup="true" onClick={handleClick} size="small">
+        <IconButton aria-controls="docs" aria-haspopup="true" onClick={handleClick} size="small" color={state.showSwagger ? "primary" : "default"}>
             <DescriptionIcon />
         </IconButton>
         <Swagger show={state.showSwagger} />
@@ -29,12 +29,12 @@ export function Docs() {
 const SwaggerWrapper = styled.div`
     position: absolute;
     top: 0;
-    bottom: 0;
     background: var(--bg);
     left: 0;
     right: 0;
-    padding-top: 90px;
-    z-index: -1;
+    margin-top: 90px;
+    z-index: 999;
+    padding-bottom: 90px;
 
     .swagger-ui {
         background: var(--bg);
