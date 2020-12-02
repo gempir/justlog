@@ -22,7 +22,7 @@ container:
 	docker build -t gempir/justlog .
 
 docs:
-	swagger generate spec -o ./api/swagger.json -w api
+	swagger generate spec -o ./web/public/swagger.json -w api
 
 # this is old fix later
 #release:

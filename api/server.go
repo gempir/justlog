@@ -1,8 +1,9 @@
+// Package classification justlog API
+//
+// https://github.com/gempir/justlog
+//
 //     Schemes: https
 //     BasePath: /
-//     Version: 0.0.1
-//     License: MIT http://opensource.org/licenses/MIT
-//     Contact: gempir<gempir.dev@gmail.com>
 //
 //     Consumes:
 //     - application/json
@@ -92,7 +93,8 @@ type channel struct {
 	Name   string `json:"name"`
 }
 
-// AllChannelsJSON inlcudes all channels
+//
+// swagger:response AllChannelsJSON
 type AllChannelsJSON struct {
 	Channels []channel `json:"channels"`
 }
@@ -284,6 +286,18 @@ func reverseSlice(input []string) []string {
 	return input
 }
 
+// swagger:route GET /channels justlog channels
+//
+// List currently logged channels
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Schemes: https
+//
+//     Responses:
+//       200: AllChannelsJSON
 func (s *Server) writeAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}

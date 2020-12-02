@@ -1,0 +1,82 @@
+{
+  "consumes": [
+    "application/json",
+    "application/xml"
+  ],
+  "produces": [
+    "application/json",
+    "text/plain"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "https://github.com/gempir/justlog",
+    "title": "justlog API"
+  },
+  "basePath": "/",
+  "paths": {
+    "/channels": {
+      "get": {
+        "description": "List currently logged channels",
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "justlog"
+        ],
+        "operationId": "channels",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/AllChannelsJSON"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "channel": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "userID": {
+          "type": "string",
+          "x-go-name": "UserID"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    }
+  },
+  "responses": {
+    "AllChannelsJSON": {
+      "headers": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/channel"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "X-Api-Key",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { useQueryCache } from "react-query";
 import styled from "styled-components";
 import { useChannels } from "../hooks/useChannels";
 import { store } from "../store";
+import { Docs } from "./Docs";
 import { Settings } from "./Settings";
 
 const FiltersContainer = styled.form`
@@ -15,6 +16,7 @@ const FiltersContainer = styled.form`
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px;
 	margin: 0 auto;
+    z-index: 99;
 
     > * {
         margin-right: 15px !important;    
@@ -63,6 +65,7 @@ export function Filters() {
             <TextField error={state.error} name="username" label="username" variant="filled" autoComplete="off" defaultValue={state.currentUsername} autoFocus={state.currentChannel !== null && state.currentUsername === null} />
             <Button variant="contained" color="primary" size="large" type="submit">load</Button>
             <Settings />
+            <Docs />
         </FiltersContainer>
     </FiltersWrapper>
 }
