@@ -1,3 +1,28 @@
+// Package classification justlog API
+//
+// https://github.com/gempir/justlog
+//
+//     Schemes: https
+//     BasePath: /
+//
+//     Consumes:
+//     - application/json
+//     - application/xml
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Security:
+//     - api_key:
+//
+//     SecurityDefinitions:
+//     api_key:
+//          type: apiKey
+//          name: X-Api-Key
+//          in: header
+//
+// swagger:meta
 package api
 
 import (
@@ -68,7 +93,7 @@ type channel struct {
 	Name   string `json:"name"`
 }
 
-// AllChannelsJSON inlcudes all channels
+// swagger:model
 type AllChannelsJSON struct {
 	Channels []channel `json:"channels"`
 }
@@ -77,6 +102,7 @@ type chatLog struct {
 	Messages []chatMessage `json:"messages"`
 }
 
+// swagger:model
 type logList struct {
 	AvailableLogs []filelog.UserLogFile `json:"availableLogs"`
 }
@@ -260,6 +286,18 @@ func reverseSlice(input []string) []string {
 	return input
 }
 
+// swagger:route GET /channels justlog channels
+//
+// List currently logged channels
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Schemes: https
+//
+//     Responses:
+//       200: AllChannelsJSON
 func (s *Server) writeAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}

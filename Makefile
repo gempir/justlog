@@ -1,4 +1,4 @@
-full: web build
+full: docs web build
 
 build: init_assets
 	go build
@@ -18,10 +18,13 @@ init_web:
 init_assets:
 	go run api/assets.go
 
-# Docker stuff
 container:
 	docker build -t gempir/justlog .
 
-release:
-	docker push gempir/justlog
+docs:
+	swagger generate spec -m -o ./web/public/swagger.json -w api
+
+# this is old fix later
+#release:
+#	docker push gempir/justlog
 

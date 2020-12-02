@@ -44,7 +44,7 @@ func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 }
 
 func (s *Server) getChannelLogsRange(request logRequest) (*chatLog, error) {
-	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, userHourLimit)
+	fromTime, toTime, err := parseFromTo(request.time.from, request.time.to, channelHourLimit)
 	if err != nil {
 		return &chatLog{}, err
 	}

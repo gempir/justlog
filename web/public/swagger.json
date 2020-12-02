@@ -1,0 +1,153 @@
+{
+  "consumes": [
+    "application/json",
+    "application/xml"
+  ],
+  "produces": [
+    "application/json",
+    "text/plain"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "https://github.com/gempir/justlog",
+    "title": "justlog API"
+  },
+  "basePath": "/",
+  "paths": {
+    "/channels": {
+      "get": {
+        "description": "List currently logged channels",
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "justlog"
+        ],
+        "operationId": "channels",
+        "responses": {
+          "200": {
+            "description": "AllChannelsJSON",
+            "schema": {
+              "$ref": "#/definitions/AllChannelsJSON"
+            }
+          }
+        }
+      }
+    },
+    "/list": {
+      "get": {
+        "description": "Lists available logs of a user",
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "logs"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Channelid",
+            "name": "channelid",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Userid",
+            "name": "userid",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "logList",
+            "schema": {
+              "$ref": "#/definitions/logList"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AllChannelsJSON": {
+      "type": "object",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/channel"
+          },
+          "x-go-name": "Channels"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    },
+    "UserLogFile": {
+      "type": "object",
+      "properties": {
+        "month": {
+          "type": "string",
+          "x-go-name": "Month"
+        },
+        "year": {
+          "type": "string",
+          "x-go-name": "Year"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/filelog"
+    },
+    "channel": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "userID": {
+          "type": "string",
+          "x-go-name": "UserID"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    },
+    "logList": {
+      "type": "object",
+      "properties": {
+        "availableLogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserLogFile"
+          },
+          "x-go-name": "AvailableLogs"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    }
+  },
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "X-Api-Key",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ]
+}

@@ -29,6 +29,18 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 	return &chatLog{Messages: []chatMessage{chatMsg}}, nil
 }
 
+// swagger:route GET /list logs list
+//
+// Lists available logs of a user
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Schemes: https
+//
+//     Responses:
+//       200: logList
 func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q url.Values) {
 	logs, err := s.fileLogger.GetAvailableLogsForUser(q.Get("channelid"), q.Get("userid"))
 	if err != nil {
