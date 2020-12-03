@@ -51,6 +51,27 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 	writeJSON(&logList{logs}, http.StatusOK, w, r)
 }
 
+// swagger:route GET /channel/{channel}/user/{username} logs userLogs
+//
+// Get user logs in channel of current month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channel/{channel}/user/{username}/{year}/{month} logs userLogsYearMonth
+//
+// Get user logs in channel of given year month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
 func (s *Server) getUserLogs(request logRequest) (*chatLog, error) {
 	logMessages, err := s.fileLogger.ReadLogForUser(request.channelid, request.userid, request.time.year, request.time.month)
 	if err != nil {

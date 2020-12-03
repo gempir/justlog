@@ -98,6 +98,7 @@ type AllChannelsJSON struct {
 	Channels []channel `json:"channels"`
 }
 
+// swagger:model
 type chatLog struct {
 	Messages []chatMessage `json:"messages"`
 }

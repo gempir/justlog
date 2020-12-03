@@ -7,6 +7,27 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
+// swagger:route GET /channel/{channel} logs channelLogs
+//
+// Get entire channel logs of current day
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channel/{channel}/{year}/{month}/{day} logs channelLogsYearMonthDay
+//
+// Get entire channel logs of given day
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
 func (s *Server) getChannelLogs(request logRequest) (*chatLog, error) {
 	yearStr := request.time.year
 	monthStr := request.time.month
