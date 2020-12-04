@@ -19,7 +19,7 @@ export function LogContainer() {
 
     useEffect(() => {
         const listener = function (e: KeyboardEvent) {
-            if (e.key === 'f' && e[ctrlKey]) {
+            if (e.key === 'f' && e[ctrlKey] && !state.settings.twitchChatMode.value) {
                 e.preventDefault();
                 if (state.activeSearchField) {
                     state.activeSearchField.focus();
@@ -30,7 +30,7 @@ export function LogContainer() {
         window.addEventListener("keydown", listener)
 
         return () => window.removeEventListener("keydown", listener);
-    }, [state.activeSearchField]);
+    }, [state.activeSearchField, state.settings.twitchChatMode.value, ctrlKey]);
 
     const availableLogs = useAvailableLogs(state.currentChannel, state.currentUsername);
 
