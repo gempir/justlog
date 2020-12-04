@@ -94,6 +94,28 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 //     Responses:
 //       200: chatLog
 
+// swagger:route GET /channelid/{channelid}/username/{username} logs channelIdUserLogs
+//
+// Get user logs in channel of current month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channel/{channel}/userid/{userid} logs channelUserIdLogs
+//
+// Get user logs in channel of current month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
 // swagger:route GET /channel/{channel}/user/{username}/{year}/{month} logs channelUserLogsYearMonth
 //
 // Get user logs in channel of given year month
@@ -106,6 +128,28 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 //       200: chatLog
 
 // swagger:route GET /channelid/{channelid}/userid/{userid}/{year}/{month} logs channelIdUserIdLogsYearMonth
+//
+// Get user logs in channel of given year month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channelid/{channelid}/username/{username}/{year}/{month} logs channelIdUserLogsYearMonth
+//
+// Get user logs in channel of given year month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channel/{channel}/userid/{userid}/{year}/{month} logs channelUserIdLogsYearMonth
 //
 // Get user logs in channel of given year month
 //
