@@ -17,6 +17,27 @@ type RandomQuoteJSON struct {
 	Timestamp   timestamp `json:"timestamp"`
 }
 
+// swagger:route GET /channel/{channel}/user/{username}/random logs channelUserLogsRandom
+//
+// Get a random line from a user in a given channel
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channelid/{channelid}/userid/{userid}/random logs channelIdUserIdLogsRandom
+//
+// Get a random line from a user in a given channel
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
 func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(request.channelid, request.userid)
 	if err != nil {
@@ -51,7 +72,7 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 	writeJSON(&logList{logs}, http.StatusOK, w, r)
 }
 
-// swagger:route GET /channel/{channel}/user/{username} logs userLogs
+// swagger:route GET /channel/{channel}/user/{username} logs channelUserLogs
 //
 // Get user logs in channel of current month
 //
@@ -62,7 +83,29 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 //     Responses:
 //       200: chatLog
 
-// swagger:route GET /channel/{channel}/user/{username}/{year}/{month} logs userLogsYearMonth
+// swagger:route GET /channelid/{channelid}/userid/{userid} logs channelIdUserIdLogs
+//
+// Get user logs in channel of current month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channel/{channel}/user/{username}/{year}/{month} logs channelUserLogsYearMonth
+//
+// Get user logs in channel of given year month
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channelid/{channelid}/userid/{userid}/{year}/{month} logs channelIdUserIdLogsYearMonth
 //
 // Get user logs in channel of given year month
 //
