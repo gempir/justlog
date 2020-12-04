@@ -14,9 +14,12 @@ const LogContainerDiv = styled.div`
 export function LogContainer() {
     const { state } = useContext(store);
 
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const ctrlKey = isMac ? "metaKey" : "ctrlKey";
+
     useEffect(() => {
         const listener = function (e: KeyboardEvent) {
-            if (e.ctrlKey && e.code === "KeyF") {
+            if (e.key === 'f' && e[ctrlKey]) {
                 e.preventDefault();
                 if (state.activeSearchField) {
                     state.activeSearchField.focus();
