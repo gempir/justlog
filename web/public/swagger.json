@@ -339,6 +339,69 @@
         }
       }
     },
+    "/channel/{channel}/userid/{userid}/random": {
+      "get": {
+        "description": "Get a random line from a user in a given channel",
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "tags": [
+          "logs"
+        ],
+        "operationId": "channelUserIdLogsRandom",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Json",
+            "name": "json",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Reverse",
+            "name": "reverse",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "x-go-name": "From",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "x-go-name": "To",
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Channel",
+            "name": "channel",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserId",
+            "name": "userid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "chatLog",
+            "schema": {
+              "$ref": "#/definitions/chatLog"
+            }
+          }
+        }
+      }
+    },
     "/channel/{channel}/userid/{userid}/{year}/{month}": {
       "get": {
         "description": "Get user logs in channel of given year month",
@@ -822,6 +885,69 @@
             "type": "string",
             "x-go-name": "Month",
             "name": "month",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "chatLog",
+            "schema": {
+              "$ref": "#/definitions/chatLog"
+            }
+          }
+        }
+      }
+    },
+    "/channelid/{channelid}/username/{user}/random": {
+      "get": {
+        "description": "Get a random line from a user in a given channel",
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "tags": [
+          "logs"
+        ],
+        "operationId": "channelIdUserLogsRandom",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Json",
+            "name": "json",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Reverse",
+            "name": "reverse",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "x-go-name": "From",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "x-go-name": "To",
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ChannelId",
+            "name": "channelid",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Username",
+            "name": "username",
             "in": "path",
             "required": true
           }

@@ -38,6 +38,28 @@ type RandomQuoteJSON struct {
 //
 //     Responses:
 //       200: chatLog
+
+// swagger:route GET /channelid/{channelid}/username/{user}/random logs channelIdUserLogsRandom
+//
+// Get a random line from a user in a given channel
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channel/{channel}/userid/{userid}/random logs channelUserIdLogsRandom
+//
+// Get a random line from a user in a given channel
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
 func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(request.channelid, request.userid)
 	if err != nil {
