@@ -14,7 +14,7 @@ func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
 	if contains(b.cfg.Admins, message.User.Name) {
 		if strings.HasPrefix(message.Message, "!justlog status") || strings.HasPrefix(message.Message, "!status") {
 			uptime := humanize.TimeSince(b.startTime)
-			b.twitchClient.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
+			b.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
 		}
 		if strings.HasPrefix(message.Message, "!justlog join ") {
 			b.handleJoin(message)
@@ -31,17 +31,17 @@ func (b *Bot) handleJoin(message twitch.PrivateMessage) {
 	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
 	if err != nil {
 		log.Error(err)
-		b.twitchClient.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
 	}
 
 	ids := []string{}
 	for _, user := range users {
 		ids = append(ids, user.ID)
 		log.Infof("[bot] joining %s", user.Login)
-		b.twitchClient.Join(user.Login)
+		b.Join(user.Login)
 	}
 	b.cfg.AddChannels(ids...)
-	b.twitchClient.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
+	b.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
 }
 
 func (b *Bot) handleMessageType(message twitch.PrivateMessage) {
