@@ -1,28 +1,3 @@
-// Package classification justlog API
-//
-// https://github.com/gempir/justlog
-//
-//     Schemes: https
-//     BasePath: /
-//
-//     Consumes:
-//     - application/json
-//     - application/xml
-//
-//     Produces:
-//     - application/json
-//     - text/plain
-//
-//     Security:
-//     - api_key:
-//
-//     SecurityDefinitions:
-//     api_key:
-//          type: apiKey
-//          name: X-Api-Key
-//          in: header
-//
-// swagger:meta
 package api
 
 import (

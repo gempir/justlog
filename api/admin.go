@@ -24,10 +24,53 @@ type channelConfigsDeleteRequest struct {
 	MessageTypes bool `json:"messageTypes,omitempty"`
 }
 
+// swagger:model
 type channelConfigsRequest struct {
 	config.ChannelConfig
 }
 
+// swagger:route POST /admin/channelConfigs/{channelID} admin channelConfigs
+//
+// Will set the messageTypes logged for a channel
+// https://github.com/gempir/go-twitch-irc/blob/master/message.go#L17
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Security:
+//     - api_key:
+//
+//     Schemes: https
+//
+//     Responses:
+//       200:
+//		 400:
+//       405:
+
+// swagger:route DELETE /admin/channelConfigs/{channelID} admin deleteChannelConfigs
+//
+// Will reset the messageTypes logged for a channel
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Security:
+//     - api_key:
+//
+//     Schemes: https
+//
+//     Responses:
+//       200:
+//		 400:
+//       405:
 func (s *Server) writeChannelConfigs(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost && r.Method != http.MethodDelete {
 		http.Error(w, "We'll see, we'll see. The winner gets tea.", http.StatusMethodNotAllowed)
@@ -83,6 +126,49 @@ type channelConfigsJoinRequest struct {
 	Channels []string `json:"channels"`
 }
 
+// swagger:route POST /admin/channels admin addChannels
+//
+// Will add the channels to log
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Security:
+//     - api_key:
+//
+//     Schemes: https
+//
+//     Responses:
+//       200:
+//		 400:
+//       405:
+//       500:
+
+// swagger:route DELETE /admin/channels admin deleteChannels
+//
+// Will remove the channels to log
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Security:
+//     - api_key:
+//
+//     Schemes: https
+//
+//     Responses:
+//       200:
+//		 400:
+//       405:
+//       500:
 func (s *Server) writeChannels(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost && r.Method != http.MethodDelete {
 		http.Error(w, "We'll see, we'll see. The winner gets tea.", http.StatusMethodNotAllowed)

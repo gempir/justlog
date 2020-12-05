@@ -1,8 +1,7 @@
 # justlog [![Build Status](https://github.com/gempir/justlog/workflows/ci/badge.svg)](https://github.com/gempir/justlog/actions?query=workflow%3Aci)
 
 ### What is this?
-justlog is a bot I maintain for a couple of channels. Its features differ from other bots in that it doesn't support
-commands, etc. yet, it focuses on logging and providing an api for the logs.
+Justlog is an twitch irc bot. It focuses on logging and providing an api for the logs.
 
 ### Docker
 
@@ -39,75 +38,10 @@ docker run -p 8025:8025 --user $(id -u):$(id -g) -v $PWD/config.json:/etc/justlo
 }
 ```
 
-### Admin API
+### Development
 
-`POST` `/admin/channelConfigs/{channelID}`
+Development requires [yarn](https://classic.yarnpkg.com/) and [go-swagger](https://goswagger.io/)
 
-Will set the messageTypes logged for a channel
+Run `go build && ./justlog` and `yarn start` in the web folder. 
 
-###### Headers
-```
-X-Api-Key: yourcoolapikey
-```
-
-###### Body
-```
-{
-    "messageTypes": [1]
-}
-```
-
----
-
-`DELETE` `/admin/channelConfigs/{channelID}`
-
-Will reset the messageTypes logged for a channel
-
-###### Headers
-```
-X-Api-Key: yourcoolapikey
-```
-
-###### Body
-```
-{
-    "messageTypes": true
-}
-```
-
----
-
-
-`POST` `/admin/channels`
-
-Will add the channels to log
-
-###### Headers
-```
-X-Api-Key: yourcoolapikey
-```
-
-###### Body
-```
-{
-    "channels": ["77829817"]
-}
-```
-
----
-
-`DELETE` `/admin/channels`
-
-Will remove the channels to log
-
-###### Headers
-```
-X-Api-Key: yourcoolapikey
-```
-
-###### Body
-```
-{
-    "channels": ["77829817"]
-}
-```
+Before committing make sure to run `make` to generate openAPI specs and bundle assets.

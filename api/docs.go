@@ -1,3 +1,25 @@
+// Package classification justlog API
+//
+// https://github.com/gempir/justlog
+//
+//     Schemes: https
+//     BasePath: /
+//
+//     Consumes:
+//     - application/json
+//     - application/xml
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     SecurityDefinitions:
+//     api_key:
+//          type: apiKey
+//          name: X-Api-Key
+//          in: header
+//
+// swagger:meta
 package api
 
 type LogParams struct {
@@ -173,4 +195,28 @@ type ChannelUserIdLogsYearMonthParams struct {
 	// in: path
 	Month string `json:"month"`
 	LogParams
+}
+
+// swagger:parameters channelConfigs
+type ChannelConfigsParameters struct {
+	// in:body
+	Body channelConfigsRequest
+}
+
+// swagger:parameters deleteChannelConfigs
+type DeleteChannelConfigsParameters struct {
+	// in:body
+	Body channelConfigsDeleteRequest
+}
+
+// swagger:parameters addChannels
+type AddChannelsParameters struct {
+	// in:body
+	Body channelConfigsJoinRequest
+}
+
+// swagger:parameters deleteChannels
+type DeleteChannelsParameters struct {
+	// in:body
+	Body channelsDeleteRequest
 }

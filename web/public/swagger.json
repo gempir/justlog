@@ -17,6 +17,156 @@
   },
   "basePath": "/",
   "paths": {
+    "/admin/channelConfigs/{channelID}": {
+      "post": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Will set the messageTypes logged for a channel\nhttps://github.com/gempir/go-twitch-irc/blob/master/message.go#L17",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "operationId": "channelConfigs",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/channelConfigsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "405": {}
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Will reset the messageTypes logged for a channel",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "operationId": "deleteChannelConfigs",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/channelConfigsDeleteRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "405": {}
+        }
+      }
+    },
+    "/admin/channels": {
+      "post": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Will add the channels to log",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "operationId": "addChannels",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/channelConfigsJoinRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "405": {},
+          "500": {}
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Will remove the channels to log",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "text/plain"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "operationId": "deleteChannels",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/channelsDeleteRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "405": {},
+          "500": {}
+        }
+      }
+    },
     "/channel/{channel}": {
       "get": {
         "description": "Get entire channel logs of current day",
@@ -1025,6 +1175,20 @@
       },
       "x-go-package": "github.com/gempir/justlog/api"
     },
+    "ChannelConfig": {
+      "description": "ChannelConfig config for individual channels",
+      "type": "object",
+      "properties": {
+        "messageTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MessageType"
+          },
+          "x-go-name": "MessageTypes"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/config"
+    },
     "MessageType": {
       "description": "MessageType different message types possible to receive via IRC",
       "type": "integer",
@@ -1061,6 +1225,55 @@
         "userID": {
           "type": "string",
           "x-go-name": "UserID"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    },
+    "channelConfigsDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "messageTypes": {
+          "type": "boolean",
+          "x-go-name": "MessageTypes"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    },
+    "channelConfigsJoinRequest": {
+      "type": "object",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Channels"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    },
+    "channelConfigsRequest": {
+      "type": "object",
+      "properties": {
+        "messageTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MessageType"
+          },
+          "x-go-name": "MessageTypes"
+        }
+      },
+      "x-go-package": "github.com/gempir/justlog/api"
+    },
+    "channelsDeleteRequest": {
+      "type": "object",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Channels"
         }
       },
       "x-go-package": "github.com/gempir/justlog/api"
@@ -1145,10 +1358,5 @@
       "name": "X-Api-Key",
       "in": "header"
     }
-  },
-  "security": [
-    {
-      "api_key": []
-    }
-  ]
+  }
 }
