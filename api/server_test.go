@@ -10,25 +10,23 @@ import (
 	"github.com/gempir/justlog/bot"
 	"github.com/gempir/justlog/filelog"
 	"github.com/gempir/justlog/helix"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/gempir/justlog/config"
 )
 
 type helixClientMock struct {
-	mock.Mock
 }
 
 func (m *helixClientMock) GetUsersByUserIds(channels []string) (map[string]helix.UserData, error) {
 	data := make(map[string]helix.UserData)
-	data["test"] = helix.UserData{Login: "gempir", ID: "77829817"}
+	data["77829817"] = helix.UserData{Login: "gempir", ID: "77829817"}
 
 	return data, nil
 }
 
 func (m *helixClientMock) GetUsersByUsernames(channels []string) (map[string]helix.UserData, error) {
 	data := make(map[string]helix.UserData)
-	data["test"] = helix.UserData{Login: "gempir", ID: "77829817"}
+	data["gempir"] = helix.UserData{Login: "gempir", ID: "77829817"}
 
 	return data, nil
 }
@@ -46,14 +44,30 @@ func createTestServer() *Server {
 	return &apiServer
 }
 
-func TestChannels(t *testing.T) {
-	t.Run("Returns channels", func(t *testing.T) {
+func TestApiServer(t *testing.T) {
+	server := createTestServer()
+
+	t.Run("get channels", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/channels", nil)
 		w := httptest.NewRecorder()
 
-		server := createTestServer()
 		server.route(w, r)
-
 		assert.Contains(t, w.Body.String(), "gempir")
+	})
+
+	t.Run("get user logs", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/channel/gempir/user/gempir", nil)
+		w := httptest.NewRecorder()
+
+		server.route(w, r)
+		assert.Equal(t, w.Code, 302)
+	})
+
+	t.Run("get channel logs", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/channel/gempir", nil)
+		w := httptest.NewRecorder()
+
+		server.route(w, r)
+		assert.Equal(t, w.Code, 302)
 	})
 }
