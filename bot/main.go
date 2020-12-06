@@ -17,7 +17,7 @@ import (
 type Bot struct {
 	startTime         time.Time
 	cfg               *config.Config
-	helixClient       *helix.Client
+	helixClient       helix.TwitchApiClient
 	fileLogger        *filelog.Logger
 	worker            []*worker
 	channels          map[string]helix.UserData
@@ -30,7 +30,7 @@ type worker struct {
 }
 
 // NewBot create new bot instance
-func NewBot(cfg *config.Config, helixClient *helix.Client, fileLogger *filelog.Logger) *Bot {
+func NewBot(cfg *config.Config, helixClient helix.TwitchApiClient, fileLogger *filelog.Logger) *Bot {
 	channels, err := helixClient.GetUsersByUserIds(cfg.Channels)
 	if err != nil {
 		log.Fatalf("[bot] failed to load configured channels %s", err.Error())

@@ -28,6 +28,11 @@ func init() {
 	userCacheByUsername = map[string]*UserData{}
 }
 
+type TwitchApiClient interface {
+	GetUsersByUserIds([]string) (map[string]UserData, error)
+	GetUsersByUsernames([]string) (map[string]UserData, error)
+}
+
 // NewClient Create helix client
 func NewClient(clientID string, clientSecret string) Client {
 	client, err := helixClient.NewClient(&helixClient.Options{

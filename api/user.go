@@ -212,7 +212,7 @@ func (s *Server) getUserLogsRange(request logRequest) (*chatLog, error) {
 	logMessages, _ = s.fileLogger.ReadLogForUser(request.channelid, request.userid, fmt.Sprintf("%d", fromTime.Year()), fmt.Sprintf("%d", int(fromTime.Month())))
 
 	if fromTime.Month() != toTime.Month() {
-		additionalMessages, _ := s.fileLogger.ReadLogForUser(request.channelid, request.userid, string(toTime.Year()), string(toTime.Month()))
+		additionalMessages, _ := s.fileLogger.ReadLogForUser(request.channelid, request.userid, fmt.Sprint(toTime.Year()), fmt.Sprint(toTime.Month()))
 
 		logMessages = append(logMessages, additionalMessages...)
 	}

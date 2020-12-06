@@ -28,13 +28,13 @@ type Server struct {
 	bot           *bot.Bot
 	cfg           *config.Config
 	fileLogger    *filelog.Logger
-	helixClient   *helix.Client
+	helixClient   helix.TwitchApiClient
 	channels      []string
 	assetHandler  http.Handler
 }
 
 // NewServer create api Server
-func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient *helix.Client, channels []string) Server {
+func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, channels []string) Server {
 	return Server{
 		listenAddress: cfg.ListenAddress,
 		bot:           bot,
