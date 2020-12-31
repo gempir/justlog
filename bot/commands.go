@@ -60,6 +60,7 @@ func (b *Bot) handleMessageType(message twitch.PrivateMessage) {
 
 	if parts[1] == "reset" {
 		b.cfg.ResetMessageTypes(users[parts[0]].ID)
+		b.UpdateMessageTypesToLog()
 		log.Infof("[bot] setting %s config messageTypes to default", parts[0])
 	} else {
 		var messageTypes []twitch.MessageType
