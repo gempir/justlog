@@ -127,97 +127,9 @@ func (b *Bot) newClient() *twitch.Client {
 	b.worker = append(b.worker, &worker{client, []string{}})
 	log.Infof("[bot] creating new twitch connection, new total: %d", len(b.worker))
 
-	client.OnPrivateMessage(func(message twitch.PrivateMessage) {
-
-		go func() {
-			if !b.shouldLog(message.Channel, message.GetType()) {
-				return
-			}
-
-			err := b.fileLogger.LogPrivateMessageForUser(message.User, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		go func() {
-			if !b.shouldLog(message.Channel, message.GetType()) {
-				return
-			}
-
-			err := b.fileLogger.LogPrivateMessageForChannel(message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		b.handlePrivateMessage(message)
-	})
-
-	client.OnUserNoticeMessage(func(message twitch.UserNoticeMessage) {
-		log.Debug(message.Raw)
-
-		go func() {
-			if !b.shouldLog(message.Channel, message.GetType()) {
-				return
-			}
-
-			err := b.fileLogger.LogUserNoticeMessageForUser(message.User.ID, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		if _, ok := message.Tags["msg-param-recipient-id"]; ok {
-			go func() {
-				if !b.shouldLog(message.Channel, message.GetType()) {
-					return
-				}
-
-				err := b.fileLogger.LogUserNoticeMessageForUser(message.Tags["msg-param-recipient-id"], message)
-				if err != nil {
-					log.Error(err.Error())
-				}
-			}()
-		}
-
-		go func() {
-			if !b.shouldLog(message.Channel, message.GetType()) {
-				return
-			}
-
-			err := b.fileLogger.LogUserNoticeMessageForChannel(message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-	})
-
-	client.OnClearChatMessage(func(message twitch.ClearChatMessage) {
-
-		go func() {
-			if !b.shouldLog(message.Channel, message.GetType()) {
-				return
-			}
-
-			err := b.fileLogger.LogClearchatMessageForUser(message.TargetUserID, message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-
-		go func() {
-			if !b.shouldLog(message.Channel, message.GetType()) {
-				return
-			}
-
-			err := b.fileLogger.LogClearchatMessageForChannel(message)
-			if err != nil {
-				log.Error(err.Error())
-			}
-		}()
-	})
+	client.OnPrivateMessage(b.handlePrivateMessage)
+	client.OnUserNoticeMessage(b.handleUserNotice)
+	client.OnClearChatMessage(b.handleClearChat)
 
 	return client
 }
@@ -226,4 +138,91 @@ func (b *Bot) initialJoins() {
 	for _, channel := range b.channels {
 		b.Join(channel.Login)
 	}
+}
+
+func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
+	go func() {
+		if !b.shouldLog(message.Channel, message.GetType()) {
+			return
+		}
+
+		err := b.fileLogger.LogPrivateMessageForUser(message.User, message)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}()
+
+	go func() {
+		if !b.shouldLog(message.Channel, message.GetType()) {
+			return
+		}
+
+		err := b.fileLogger.LogPrivateMessageForChannel(message)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}()
+
+	b.handlePrivateMessageCommands(message)
+}
+
+func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
+	go func() {
+		if !b.shouldLog(message.Channel, message.GetType()) {
+			return
+		}
+
+		err := b.fileLogger.LogUserNoticeMessageForUser(message.User.ID, message)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}()
+
+	if _, ok := message.Tags["msg-param-recipient-id"]; ok {
+		go func() {
+			if !b.shouldLog(message.Channel, message.GetType()) {
+				return
+			}
+
+			err := b.fileLogger.LogUserNoticeMessageForUser(message.Tags["msg-param-recipient-id"], message)
+			if err != nil {
+				log.Error(err.Error())
+			}
+		}()
+	}
+
+	go func() {
+		if !b.shouldLog(message.Channel, message.GetType()) {
+			return
+		}
+
+		err := b.fileLogger.LogUserNoticeMessageForChannel(message)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}()
+}
+
+func (b *Bot) handleClearChat(message twitch.ClearChatMessage) {
+	go func() {
+		if !b.shouldLog(message.Channel, message.GetType()) {
+			return
+		}
+
+		err := b.fileLogger.LogClearchatMessageForUser(message.TargetUserID, message)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}()
+
+	go func() {
+		if !b.shouldLog(message.Channel, message.GetType()) {
+			return
+		}
+
+		err := b.fileLogger.LogClearchatMessageForChannel(message)
+		if err != nil {
+			log.Error(err.Error())
+		}
+	}()
 }

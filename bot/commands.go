@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
+func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 	if contains(b.cfg.Admins, message.User.Name) {
 		if strings.HasPrefix(message.Message, "!justlog status") || strings.HasPrefix(message.Message, "!status") {
 			uptime := humanize.TimeSince(b.startTime)
