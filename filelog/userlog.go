@@ -218,6 +218,7 @@ func (l *Logger) ReadLogForUser(channelID, userID string, year string, month str
 	if strings.HasSuffix(filename, ".gz") {
 		gz, err := gzip.NewReader(f)
 		if err != nil {
+			log.Error(err)
 			return []string{}, errors.New("file gzip not readable")
 		}
 		reader = gz
@@ -227,6 +228,7 @@ func (l *Logger) ReadLogForUser(channelID, userID string, year string, month str
 
 	scanner := bufio.NewScanner(reader)
 	if err != nil {
+		log.Error(err)
 		return []string{}, errors.New("file not readable")
 	}
 

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gempir/go-twitch-irc/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 func (l *Logger) LogPrivateMessageForChannel(message twitch.PrivateMessage) error {
@@ -99,6 +100,7 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 	if strings.HasSuffix(filename, ".gz") {
 		gz, err := gzip.NewReader(f)
 		if err != nil {
+			log.Error(err)
 			return []string{}, errors.New("file gzip not readable")
 		}
 		reader = gz
@@ -108,6 +110,7 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 
 	scanner := bufio.NewScanner(reader)
 	if err != nil {
+		log.Error(err)
 		return []string{}, errors.New("file not readable")
 	}
 

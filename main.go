@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"runtime"
-	"time"
 
 	"github.com/gempir/justlog/api"
 	"github.com/gempir/justlog/archiver"
@@ -11,7 +9,6 @@ import (
 	"github.com/gempir/justlog/config"
 	"github.com/gempir/justlog/filelog"
 	"github.com/gempir/justlog/helix"
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -35,14 +32,5 @@ func main() {
 	apiServer := api.NewServer(cfg, bot, &fileLogger, &helixClient, cfg.Channels)
 	go apiServer.Init()
 
-	go runtimeMonitoring()
-
 	bot.Connect()
-}
-
-func runtimeMonitoring() {
-	for {
-		log.Infof("Current amount of gorountines: %d", runtime.NumGoroutine())
-		time.Sleep(time.Minute)
-	}
 }
