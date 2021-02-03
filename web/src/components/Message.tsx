@@ -32,8 +32,17 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 	let replaced;
 	let buffer = "";
 
-	for (let x = 0; x <= message.text.length; x++) {
-		const c = message.text[x];
+	let messageText = message.text;
+	let renderMessagePrefix = "";
+	if (message.tags['system-msg']) {
+		messageText = messageText.replace(message.tags['system-msg'] + " ", "");
+
+		renderMessagePrefix = `${message.tags['system-msg']} `;
+	}
+
+
+	for (let x = 0; x <= messageText.length; x++) {
+		const c = messageText[x];
 
 		replaced = false;
 
@@ -54,7 +63,7 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 		}
 
 		if (!replaced) {
-			if (c !== " " && x !== message.text.length) {
+			if (c !== " " && x !== messageText.length) {
 				buffer += c;
 				continue;
 			}
@@ -88,6 +97,6 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 	}
 
 	return <MessageContainer className="message">
-		{renderMessage}
+		{renderMessagePrefix}{renderMessage}
 	</MessageContainer>;
 };
