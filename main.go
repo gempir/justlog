@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 
 	"github.com/gempir/justlog/api"
@@ -10,6 +11,10 @@ import (
 	"github.com/gempir/justlog/filelog"
 	"github.com/gempir/justlog/helix"
 )
+
+// content holds our static web server content.
+//go:embed web/build/*
+var assets embed.FS
 
 func main() {
 
@@ -29,7 +34,7 @@ func main() {
 
 	bot := bot.NewBot(cfg, &helixClient, &fileLogger)
 
-	apiServer := api.NewServer(cfg, bot, &fileLogger, &helixClient, cfg.Channels)
+	apiServer := api.NewServer(cfg, bot, &fileLogger, &helixClient, cfg.Channels, assets)
 	go apiServer.Init()
 
 	bot.Connect()
