@@ -1,6 +1,6 @@
 full: docs web build
 
-build: init_assets
+build:
 	go build
 
 run: build
@@ -14,9 +14,6 @@ web: init_web
 
 init_web:
 	cd web && yarn install
-
-init_assets:
-	go run api/assets.go
 
 container:
 	docker build -t gempir/justlog .
