@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -34,7 +35,8 @@ type Server struct {
 }
 
 // NewServer create api Server
-func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, channels []string) Server {
+func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, channels []string, assets fs.FS) Server {
+
 	return Server{
 		listenAddress: cfg.ListenAddress,
 		bot:           bot,
@@ -43,7 +45,7 @@ func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, hel
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
-		assetHandler:  http.FileServer(assets),
+		assetHandler:  http.FileServer(http.FS(assets)),
 	}
 }
 
@@ -146,7 +148,8 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	routedLogs := s.routeLogs(w, r)
 
 	if !routedLogs {
-		s.assetHandler.ServeHTTP(w, r)
+		http.StripPrefix("/web/build", s.assetHandler)
+		http.StripPrefix("/web/public/", s.assetHandler)
 		return
 	}
 }
