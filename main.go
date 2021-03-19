@@ -13,7 +13,6 @@ import (
 )
 
 // content holds our static web server content.
-//go:embed web/public/*
 //go:embed web/build/*
 var assets embed.FS
 

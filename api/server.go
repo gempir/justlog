@@ -31,11 +31,15 @@ type Server struct {
 	fileLogger    *filelog.Logger
 	helixClient   helix.TwitchApiClient
 	channels      []string
-	assetHandler  http.Handler
+	assetsHandler http.Handler
 }
 
 // NewServer create api Server
 func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, channels []string, assets fs.FS) Server {
+	build, err := fs.Sub(assets, "web/build")
+	if err != nil {
+		log.Fatal("failed to read public assets")
+	}
 
 	return Server{
 		listenAddress: cfg.ListenAddress,
@@ -45,7 +49,7 @@ func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, hel
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
 		channels:      channels,
-		assetHandler:  http.FileServer(http.FS(assets)),
+		assetsHandler: http.FileServer(http.FS(build)),
 	}
 }
 
@@ -148,8 +152,7 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	routedLogs := s.routeLogs(w, r)
 
 	if !routedLogs {
-		http.StripPrefix("/web/build", s.assetHandler)
-		http.StripPrefix("/web/public/", s.assetHandler)
+		s.assetsHandler.ServeHTTP(w, r)
 		return
 	}
 }
