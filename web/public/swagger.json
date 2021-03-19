@@ -1150,6 +1150,32 @@
           "logs"
         ],
         "operationId": "list",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Channel",
+            "name": "channel",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Username",
+            "name": "username",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "ChannelId",
+            "name": "channelid",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Userid",
+            "name": "userid",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "logList",

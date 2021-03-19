@@ -220,3 +220,15 @@ type DeleteChannelsParameters struct {
 	// in:body
 	Body channelsDeleteRequest
 }
+
+//swagger:parameters list
+type ListLogsParams struct {
+	// in: query
+	Channel string `json:"channel"`
+	// in: query
+	Username string `json:"username"`
+	// in: query
+	ChannelId string `json:"channelid"`
+	// in: query
+	Userid string `json:"userid"`
+}
