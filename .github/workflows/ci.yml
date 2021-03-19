@@ -49,4 +49,4 @@ jobs:
 
     - name: announce update
       run: |
-        echo -en "PASS ${{ secrets.TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :nymnREACT ${{ github.event.head_commit.message }} github.com/gempir/justlog/commit/${{ steps.vars.outputs.sha_short }} | justlog update\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
+        echo -en "PASS ${{ secrets.TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :nymnREACT ${${{ github.event.head_commit.message }}//$'\n'/} github.com/gempir/justlog/commit/${{ steps.vars.outputs.sha_short }} | justlog update\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697
