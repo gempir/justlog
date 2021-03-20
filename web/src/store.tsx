@@ -7,6 +7,7 @@ export interface Settings {
     showName: Setting,
     showTimestamp: Setting,
     twitchChatMode: Setting,
+    newOnBottom: Setting,
 }
 
 export enum LocalStorageSettings {
@@ -14,6 +15,7 @@ export enum LocalStorageSettings {
     showName,
     showTimestamp,
     twitchChatMode,
+    newOnBottom,
 }
 
 export interface Setting {
@@ -55,7 +57,11 @@ const defaultContext = {
             twitchChatMode: {
                 displayName: "Twitch Chat Mode",
                 value: false,
-            }
+            },
+            newOnBottom: {
+                displayName: "Newest messages on bottom",
+                value: false,
+            },
         },
         currentChannel: url.searchParams.get("channel"),
         currentUsername: url.searchParams.get("username"),
@@ -96,6 +102,8 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
                 delete (newSettings as unknown as Record<string, Setting>)[key];
             }
         }
+
+        state.queryCache.removeQueries("log");
 
         setSettingsStorage(newSettings);
         setState({ ...state, settings: newSettings });
