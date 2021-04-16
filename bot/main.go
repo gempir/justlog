@@ -175,6 +175,9 @@ func (b *Bot) handleClearChat(message twitch.ClearChatMessage) {
 	}()
 
 	if newCount > 50 {
+		if newCount == 51 {
+			log.Infof("Stopped recording CLEARCHATs in: %s", message.Channel)
+		}
 		return
 	}
 
