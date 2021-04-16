@@ -3,6 +3,7 @@ package bot
 import (
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gempir/justlog/config"
@@ -21,6 +22,7 @@ type Bot struct {
 	fileLogger  *filelog.Logger
 	worker      []*worker
 	channels    map[string]helix.UserData
+	clearchats  sync.Map
 }
 
 type worker struct {
@@ -157,6 +159,25 @@ func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
 }
 
 func (b *Bot) handleClearChat(message twitch.ClearChatMessage) {
+	count, ok := b.clearchats.Load(message.RoomID)
+	if !ok {
+		count = 0
+	}
+	newCount := count.(int) + 1
+	b.clearchats.Store(message.RoomID, newCount)
+
+	go func() {
+		time.Sleep(time.Second * 1)
+		count, ok := b.clearchats.Load(message.RoomID)
+		if ok {
+			b.clearchats.Store(message.RoomID, count.(int)-1)
+		}
+	}()
+
+	if newCount > 50 {
+		return
+	}
+
 	go func() {
 		err := b.fileLogger.LogClearchatMessageForUser(message.TargetUserID, message)
 		if err != nil {
