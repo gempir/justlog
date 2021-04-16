@@ -159,26 +159,28 @@ func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
 }
 
 func (b *Bot) handleClearChat(message twitch.ClearChatMessage) {
-	count, ok := b.clearchats.Load(message.RoomID)
-	if !ok {
-		count = 0
-	}
-	newCount := count.(int) + 1
-	b.clearchats.Store(message.RoomID, newCount)
-
-	go func() {
-		time.Sleep(time.Second * 1)
+	if message.BanDuration == 0 {
 		count, ok := b.clearchats.Load(message.RoomID)
-		if ok {
-			b.clearchats.Store(message.RoomID, count.(int)-1)
+		if !ok {
+			count = 0
 		}
-	}()
+		newCount := count.(int) + 1
+		b.clearchats.Store(message.RoomID, newCount)
 
-	if newCount > 50 {
-		if newCount == 51 {
-			log.Infof("Stopped recording CLEARCHATs in: %s", message.Channel)
+		go func() {
+			time.Sleep(time.Second * 1)
+			count, ok := b.clearchats.Load(message.RoomID)
+			if ok {
+				b.clearchats.Store(message.RoomID, count.(int)-1)
+			}
+		}()
+
+		if newCount > 50 {
+			if newCount == 51 {
+				log.Infof("Stopped recording CLEARCHAT permabans in: %s", message.Channel)
+			}
+			return
 		}
-		return
 	}
 
 	go func() {
