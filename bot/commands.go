@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	twitch "github.com/gempir/go-twitch-irc/v2"
@@ -19,8 +18,8 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 		if strings.HasPrefix(message.Message, "!justlog join ") {
 			b.handleJoin(message)
 		}
-		if strings.HasPrefix(message.Message, "!justlog messageType ") {
-			b.handleMessageType(message)
+		if strings.HasPrefix(message.Message, "!justlog part ") {
+			b.handlePart(message)
 		}
 	}
 }
@@ -37,47 +36,28 @@ func (b *Bot) handleJoin(message twitch.PrivateMessage) {
 	ids := []string{}
 	for _, user := range users {
 		ids = append(ids, user.ID)
-		log.Infof("[bot] joining %s", user.Login)
 		b.Join(user.Login)
 	}
 	b.cfg.AddChannels(ids...)
 	b.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
 }
 
-func (b *Bot) handleMessageType(message twitch.PrivateMessage) {
-	input := strings.TrimPrefix(message.Message, "!justlog messageType ")
+func (b *Bot) handlePart(message twitch.PrivateMessage) {
+	input := strings.TrimPrefix(message.Message, "!justlog part ")
 
-	parts := strings.Split(input, " ")
-	if len(parts) < 2 {
-		return
-	}
-
-	users, err := b.helixClient.GetUsersByUsernames([]string{parts[0]})
+	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
 	if err != nil {
 		log.Error(err)
-		return
+		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
 	}
 
-	if parts[1] == "reset" {
-		b.cfg.ResetMessageTypes(users[parts[0]].ID)
-		b.UpdateMessageTypesToLog()
-		log.Infof("[bot] setting %s config messageTypes to default", parts[0])
-	} else {
-		var messageTypes []twitch.MessageType
-		for _, msgType := range strings.Split(parts[1], ",") {
-			messageType, err := strconv.Atoi(msgType)
-			if err != nil {
-				log.Error(err)
-				return
-			}
-
-			messageTypes = append(messageTypes, twitch.MessageType(messageType))
-		}
-
-		b.cfg.SetMessageTypes(users[parts[0]].ID, messageTypes)
-		b.UpdateMessageTypesToLog()
-		log.Infof("[bot] setting %s config messageTypes to %v", parts[0], messageTypes)
+	ids := []string{}
+	for _, user := range users {
+		ids = append(ids, user.ID)
+		b.Part(user.Login)
 	}
+	b.cfg.RemoveChannels(ids...)
+	b.Say(message.Channel, fmt.Sprintf("%s, removed channels: %v", message.User.DisplayName, ids))
 }
 
 func contains(arr []string, str string) bool {

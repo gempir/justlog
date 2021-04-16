@@ -39,51 +39,6 @@
           "admin"
         ],
         "operationId": "channelConfigs",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/channelConfigsRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {},
-          "400": {},
-          "405": {}
-        }
-      },
-      "delete": {
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "description": "Will reset the messageTypes logged for a channel",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json",
-          "text/plain"
-        ],
-        "schemes": [
-          "https"
-        ],
-        "tags": [
-          "admin"
-        ],
-        "operationId": "deleteChannelConfigs",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/channelConfigsDeleteRequest"
-            }
-          }
-        ],
         "responses": {
           "200": {},
           "400": {},
@@ -1201,20 +1156,6 @@
       },
       "x-go-package": "github.com/gempir/justlog/api"
     },
-    "ChannelConfig": {
-      "description": "ChannelConfig config for individual channels",
-      "type": "object",
-      "properties": {
-        "messageTypes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MessageType"
-          },
-          "x-go-name": "MessageTypes"
-        }
-      },
-      "x-go-package": "github.com/gempir/justlog/config"
-    },
     "MessageType": {
       "description": "MessageType different message types possible to receive via IRC",
       "type": "integer",
@@ -1255,16 +1196,6 @@
       },
       "x-go-package": "github.com/gempir/justlog/api"
     },
-    "channelConfigsDeleteRequest": {
-      "type": "object",
-      "properties": {
-        "messageTypes": {
-          "type": "boolean",
-          "x-go-name": "MessageTypes"
-        }
-      },
-      "x-go-package": "github.com/gempir/justlog/api"
-    },
     "channelConfigsJoinRequest": {
       "type": "object",
       "properties": {
@@ -1274,19 +1205,6 @@
             "type": "string"
           },
           "x-go-name": "Channels"
-        }
-      },
-      "x-go-package": "github.com/gempir/justlog/api"
-    },
-    "channelConfigsRequest": {
-      "type": "object",
-      "properties": {
-        "messageTypes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MessageType"
-          },
-          "x-go-name": "MessageTypes"
         }
       },
       "x-go-package": "github.com/gempir/justlog/api"

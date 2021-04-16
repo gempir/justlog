@@ -197,18 +197,6 @@ type ChannelUserIdLogsYearMonthParams struct {
 	LogParams
 }
 
-// swagger:parameters channelConfigs
-type ChannelConfigsParameters struct {
-	// in:body
-	Body channelConfigsRequest
-}
-
-// swagger:parameters deleteChannelConfigs
-type DeleteChannelConfigsParameters struct {
-	// in:body
-	Body channelConfigsDeleteRequest
-}
-
 // swagger:parameters addChannels
 type AddChannelsParameters struct {
 	// in:body

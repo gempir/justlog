@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	twitch "github.com/gempir/go-twitch-irc/v2"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,12 +24,6 @@ type Config struct {
 	ClientID              string                   `json:"clientID"`
 	ClientSecret          string                   `json:"clientSecret"`
 	LogLevel              string                   `json:"logLevel"`
-	ChannelConfigs        map[string]ChannelConfig `json:"channelConfigs"`
-}
-
-// ChannelConfig config for individual channels
-type ChannelConfig struct {
-	MessageTypes []twitch.MessageType `json:"messageTypes,omitempty"`
 }
 
 // NewConfig create configuration from file
@@ -70,34 +63,6 @@ func (cfg *Config) RemoveChannels(channelIDs ...string) {
 	cfg.persistConfig()
 }
 
-// SetMessageTypes sets recorded message types for a channel
-func (cfg *Config) SetMessageTypes(channelID string, messageTypes []twitch.MessageType) {
-	if _, ok := cfg.ChannelConfigs[channelID]; ok {
-		channelCfg := cfg.ChannelConfigs[channelID]
-		channelCfg.MessageTypes = messageTypes
-
-		cfg.ChannelConfigs[channelID] = channelCfg
-	} else {
-		cfg.ChannelConfigs[channelID] = ChannelConfig{
-			MessageTypes: messageTypes,
-		}
-	}
-
-	cfg.persistConfig()
-}
-
-// ResetMessageTypes removed message type option and therefore resets it
-func (cfg *Config) ResetMessageTypes(channelID string) {
-	if _, ok := cfg.ChannelConfigs[channelID]; ok {
-		channelCfg := cfg.ChannelConfigs[channelID]
-		channelCfg.MessageTypes = nil
-
-		cfg.ChannelConfigs[channelID] = channelCfg
-	}
-
-	cfg.persistConfig()
-}
-
 func appendIfMissing(slice []string, i string) []string {
 	for _, ele := range slice {
 		if ele == i {
@@ -129,7 +94,6 @@ func loadConfiguration(filePath string) *Config {
 		Username:       "justinfan777777",
 		OAuth:          "oauth:777777777",
 		Channels:       []string{},
-		ChannelConfigs: make(map[string]ChannelConfig),
 		Admins:         []string{"gempir"},
 		LogLevel:       "info",
 		Archive:        true,
