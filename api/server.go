@@ -30,12 +30,11 @@ type Server struct {
 	cfg           *config.Config
 	fileLogger    *filelog.Logger
 	helixClient   helix.TwitchApiClient
-	channels      []string
 	assetsHandler http.Handler
 }
 
 // NewServer create api Server
-func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, channels []string, assets fs.FS) Server {
+func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, assets fs.FS) Server {
 	build, err := fs.Sub(assets, "web/build")
 	if err != nil {
 		log.Fatal("failed to read public assets")
@@ -48,14 +47,8 @@ func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, hel
 		cfg:           cfg,
 		fileLogger:    fileLogger,
 		helixClient:   helixClient,
-		channels:      channels,
 		assetsHandler: http.FileServer(http.FS(build)),
 	}
-}
-
-// AddChannel adds a channel to the collection to output on the channels endpoint
-func (s *Server) AddChannel(channel string) {
-	s.channels = append(s.channels, channel)
 }
 
 const (
@@ -130,14 +123,6 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 
 	if url == "/channels" {
 		s.writeAllChannels(w, r)
-		return
-	}
-
-	if strings.HasPrefix(url, "/admin/channelConfigs/") {
-		success := s.authenticateAdmin(w, r)
-		if success {
-			s.writeChannelConfigs(w, r)
-		}
 		return
 	}
 
@@ -283,7 +268,7 @@ func reverseSlice(input []string) []string {
 func (s *Server) writeAllChannels(w http.ResponseWriter, r *http.Request) {
 	response := new(AllChannelsJSON)
 	response.Channels = []channel{}
-	users, err := s.helixClient.GetUsersByUserIds(s.channels)
+	users, err := s.helixClient.GetUsersByUserIds(s.cfg.Channels)
 
 	if err != nil {
 		log.Error(err)

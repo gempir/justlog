@@ -157,8 +157,9 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 	var filteredUsernames []string
 
 	for _, username := range usernames {
-		if _, ok := userCacheByUsername[strings.ToLower(username)]; !ok {
-			filteredUsernames = append(filteredUsernames, strings.ToLower(username))
+		username = strings.ToLower(username)
+		if _, ok := userCacheByUsername[username]; !ok {
+			filteredUsernames = append(filteredUsernames, username)
 		}
 	}
 
@@ -197,11 +198,12 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 	result := make(map[string]UserData)
 
 	for _, username := range usernames {
+		username = strings.ToLower(username)
 		if _, ok := userCacheByUsername[username]; !ok {
 			log.Warningf("Could not find username, channel might be banned: %s", username)
 			continue
 		}
-		result[strings.ToLower(username)] = *userCacheByUsername[strings.ToLower(username)]
+		result[username] = *userCacheByUsername[username]
 	}
 
 	return result, nil

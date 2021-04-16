@@ -34,7 +34,7 @@ func main() {
 
 	bot := bot.NewBot(cfg, &helixClient, &fileLogger)
 
-	apiServer := api.NewServer(cfg, bot, &fileLogger, &helixClient, cfg.Channels, assets)
+	apiServer := api.NewServer(cfg, bot, &fileLogger, &helixClient, assets)
 	go apiServer.Init()
 
 	bot.Connect()
