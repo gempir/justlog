@@ -7,7 +7,7 @@ Justlog is an twitch irc bot. It focuses on logging and providing an api for the
 
 ```
 mkdir logs # Make sure the log folder is set correctly in your config, we need to create it first to have correct permissions
-docker run -p 8025:8025 --user $(id -u):$(id -g) -v $PWD/config.json:/etc/justlog.json -v $PWD/logs:/logs ghcr.io/gempir/justlog
+docker run -p 8025:8025 --restart=unless-stopped --user $(id -u):$(id -g) -v $PWD/config.json:/etc/justlog.json -v $PWD/logs:/logs ghcr.io/gempir/justlog
 ```
 
 ### Commands
