@@ -13,17 +13,18 @@ import (
 type Config struct {
 	configFile            string
 	configFilePermissions os.FileMode
-	LogsDirectory         string                   `json:"logsDirectory"`
-	Archive               bool                     `json:"archive"`
-	AdminAPIKey           string                   `json:"adminAPIKey"`
-	Username              string                   `json:"username"`
-	OAuth                 string                   `json:"oauth"`
-	ListenAddress         string                   `json:"listenAddress"`
-	Admins                []string                 `json:"admins"`
-	Channels              []string                 `json:"channels"`
-	ClientID              string                   `json:"clientID"`
-	ClientSecret          string                   `json:"clientSecret"`
-	LogLevel              string                   `json:"logLevel"`
+	LogsDirectory         string          `json:"logsDirectory"`
+	Archive               bool            `json:"archive"`
+	AdminAPIKey           string          `json:"adminAPIKey"`
+	Username              string          `json:"username"`
+	OAuth                 string          `json:"oauth"`
+	ListenAddress         string          `json:"listenAddress"`
+	Admins                []string        `json:"admins"`
+	Channels              []string        `json:"channels"`
+	ClientID              string          `json:"clientID"`
+	ClientSecret          string          `json:"clientSecret"`
+	LogLevel              string          `json:"logLevel"`
+	OptOut                map[string]bool `json:"optOut"`
 }
 
 // NewConfig create configuration from file
@@ -40,6 +41,31 @@ func (cfg *Config) AddChannels(channelIDs ...string) {
 	cfg.Channels = append(cfg.Channels, channelIDs...)
 	for _, id := range channelIDs {
 		cfg.Channels = appendIfMissing(cfg.Channels, id)
+	}
+
+	cfg.persistConfig()
+}
+
+// OptOutUsers will opt out a user
+func (cfg *Config) OptOutUsers(userIDs ...string) {
+	for _, id := range userIDs {
+		cfg.OptOut[id] = true
+	}
+
+	cfg.persistConfig()
+}
+
+// IsOptedOut check if a user is opted out
+func (cfg *Config) IsOptedOut(userID string) bool {
+	_, ok := cfg.OptOut[userID]
+
+	return ok
+}
+
+// AddChannels remove user from opt out
+func (cfg *Config) RemoveOptOut(userIDs ...string) {
+	for _, id := range userIDs {
+		delete(cfg.OptOut, id)
 	}
 
 	cfg.persistConfig()
@@ -88,15 +114,16 @@ func (cfg *Config) persistConfig() {
 func loadConfiguration(filePath string) *Config {
 	// setup defaults
 	cfg := Config{
-		configFile:     filePath,
-		LogsDirectory:  "./logs",
-		ListenAddress:  ":8025",
-		Username:       "justinfan777777",
-		OAuth:          "oauth:777777777",
-		Channels:       []string{},
-		Admins:         []string{"gempir"},
-		LogLevel:       "info",
-		Archive:        true,
+		configFile:    filePath,
+		LogsDirectory: "./logs",
+		ListenAddress: ":8025",
+		Username:      "justinfan777777",
+		OAuth:         "oauth:777777777",
+		Channels:      []string{},
+		Admins:        []string{"gempir"},
+		LogLevel:      "info",
+		Archive:       true,
+		OptOut:        map[string]bool{},
 	}
 
 	info, err := os.Stat(filePath)

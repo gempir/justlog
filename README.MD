@@ -15,6 +15,8 @@ docker run -p 8025:8025 --restart=unless-stopped --user $(id -u):$(id -g) -v $PW
 - `!justlog join gempir,pajlada` will join the channels and append them to the config
 - `!justlog messageType gempir 1,2` will set the recorded message types to 1 and 2 in channel gempir (will fetch the userid on its own) 
 - `!justlog messageType gempir reset` will reset to default 
+- `!justlog optout gempir,gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
+- `!justlog optin gempir,gempbot` will revert the opt out
 
 ### Config
 

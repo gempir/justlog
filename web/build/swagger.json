@@ -40,9 +40,15 @@
         ],
         "operationId": "channelConfigs",
         "responses": {
-          "200": {},
-          "400": {},
-          "405": {}
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": ""
+          },
+          "405": {
+            "description": ""
+          }
         }
       }
     },
@@ -78,10 +84,18 @@
           }
         ],
         "responses": {
-          "200": {},
-          "400": {},
-          "405": {},
-          "500": {}
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": ""
+          },
+          "405": {
+            "description": ""
+          },
+          "500": {
+            "description": ""
+          }
         }
       },
       "delete": {
@@ -115,10 +129,18 @@
           }
         ],
         "responses": {
-          "200": {},
-          "400": {},
-          "405": {},
-          "500": {}
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": ""
+          },
+          "405": {
+            "description": ""
+          },
+          "500": {
+            "description": ""
+          }
         }
       }
     },

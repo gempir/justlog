@@ -1,14 +1,16 @@
 import { useContext } from "react";
 import { useQuery } from "react-query";
+import { OptOutError } from "../errors/OptOutError";
 import { getUserId, isUserId } from "../services/isUserId";
 import { store } from "../store";
 
 export type AvailableLogs = Array<{ month: string, year: string }>;
 
-export function useAvailableLogs(channel: string | null, username: string | null): AvailableLogs {
+export function useAvailableLogs(channel: string | null, username: string | null): [AvailableLogs, Error | undefined] {
     const { state, setState } = useContext(store);
 
-    const { data } = useQuery<AvailableLogs>(["availableLogs", { channel: channel, username: username }], () => {
+    // @ts-ignore
+    const { data } = useQuery<[AvailableLogs, Error | undefined]>(["availableLogs", { channel: channel, username: username }], () => {
         if (channel && username) {
             const channelIsId = isUserId(channel);
             const usernameIsId = isUserId(username);
@@ -29,18 +31,22 @@ export function useAvailableLogs(channel: string | null, username: string | null
                     return response;
                 }
 
+                setState({ ...state, error: true });
+
+                if (response.status === 403) {
+                    throw new OptOutError();
+                }
+
                 throw Error(response.statusText);
             }).then(response => response.json())
-                .then((data: { availableLogs: AvailableLogs }) => data.availableLogs)
-                .catch(() => {
-                    setState({ ...state, error: true });
-
-                    return [];
+                .then((data: { availableLogs: AvailableLogs }) => [data.availableLogs, undefined])
+                .catch((err) => {
+                    return [[], err];
                 });
         }
 
-        return [];
+        return [[], undefined];
     }, { refetchOnWindowFocus: false, refetchOnReconnect: false });
 
-    return data ?? [];
+    return data ?? [[], undefined];
 }

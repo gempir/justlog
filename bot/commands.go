@@ -15,11 +15,17 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 			uptime := humanize.TimeSince(b.startTime)
 			b.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
 		}
-		if strings.HasPrefix(message.Message, "!justlog join ") {
+		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog join ") {
 			b.handleJoin(message)
 		}
-		if strings.HasPrefix(message.Message, "!justlog part ") {
+		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog part ") {
 			b.handlePart(message)
+		}
+		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog optout ") {
+			b.handleOptOut(message)
+		}
+		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog optin ") {
+			b.handleOptIn(message)
 		}
 	}
 }
@@ -58,6 +64,41 @@ func (b *Bot) handlePart(message twitch.PrivateMessage) {
 	}
 	b.cfg.RemoveChannels(ids...)
 	b.Say(message.Channel, fmt.Sprintf("%s, removed channels: %v", message.User.DisplayName, ids))
+}
+
+func (b *Bot) handleOptOut(message twitch.PrivateMessage) {
+	input := strings.TrimPrefix(strings.ToLower(message.Message), "!justlog optout ")
+
+	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+	if err != nil {
+		log.Error(err)
+		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+	}
+
+	ids := []string{}
+	for _, user := range users {
+		ids = append(ids, user.ID)
+	}
+	b.cfg.OptOutUsers(ids...)
+	b.Say(message.Channel, fmt.Sprintf("%s, opted out channels: %v", message.User.DisplayName, ids))
+}
+
+func (b *Bot) handleOptIn(message twitch.PrivateMessage) {
+	input := strings.TrimPrefix(strings.ToLower(message.Message), "!justlog optin ")
+
+	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+	if err != nil {
+		log.Error(err)
+		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+	}
+
+	ids := []string{}
+	for _, user := range users {
+		ids = append(ids, user.ID)
+	}
+
+	b.cfg.RemoveOptOut(ids...)
+	b.Say(message.Channel, fmt.Sprintf("%s, opted in channels: %v", message.User.DisplayName, ids))
 }
 
 func contains(arr []string, str string) bool {

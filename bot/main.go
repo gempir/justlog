@@ -116,6 +116,12 @@ func (b *Bot) initialJoins() {
 }
 
 func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
+	b.handlePrivateMessageCommands(message)
+
+	if b.cfg.IsOptedOut(message.User.ID) || b.cfg.IsOptedOut(message.RoomID) {
+		return
+	}
+
 	go func() {
 		err := b.fileLogger.LogPrivateMessageForUser(message.User, message)
 		if err != nil {
@@ -129,11 +135,13 @@ func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
 			log.Error(err.Error())
 		}
 	}()
-
-	b.handlePrivateMessageCommands(message)
 }
 
 func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
+	if b.cfg.IsOptedOut(message.User.ID) || b.cfg.IsOptedOut(message.RoomID) {
+		return
+	}
+
 	go func() {
 		err := b.fileLogger.LogUserNoticeMessageForUser(message.User.ID, message)
 		if err != nil {
@@ -159,6 +167,10 @@ func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
 }
 
 func (b *Bot) handleClearChat(message twitch.ClearChatMessage) {
+	if b.cfg.IsOptedOut(message.TargetUserID) || b.cfg.IsOptedOut(message.RoomID) {
+		return
+	}
+
 	if message.BanDuration == 0 {
 		count, ok := b.clearchats.Load(message.RoomID)
 		if !ok {

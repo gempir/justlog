@@ -1,8 +1,10 @@
 import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
+import { OptOutError } from "../errors/OptOutError";
 import { useAvailableLogs } from "../hooks/useAvailableLogs";
 import { store } from "../store";
 import { Log } from "./Log";
+import { OptOutMessage } from "./OptOutMessage";
 
 const LogContainerDiv = styled.div`
     color: white;
@@ -32,7 +34,10 @@ export function LogContainer() {
         return () => window.removeEventListener("keydown", listener);
     }, [state.activeSearchField, state.settings.twitchChatMode.value, ctrlKey]);
 
-    const availableLogs = useAvailableLogs(state.currentChannel, state.currentUsername);
+    const [availableLogs, err] = useAvailableLogs(state.currentChannel, state.currentUsername);
+    if (err instanceof OptOutError) {
+        return <OptOutMessage />;
+    }
 
     return <LogContainerDiv>
         {availableLogs.map((log, index) => <Log key={`${log.year}:${log.month}`} year={log.year} month={log.month} initialLoad={index === 0} />)}

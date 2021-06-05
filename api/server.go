@@ -117,6 +117,11 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	query := s.fillUserids(w, r)
 
 	if url == "/list" {
+		if s.cfg.IsOptedOut(query.Get("userid")) || s.cfg.IsOptedOut(query.Get("channelid")) {
+			http.Error(w, "User or channel has opted out", http.StatusForbidden)
+			return
+		}
+
 		s.writeAvailableLogs(w, r, query)
 		return
 	}
@@ -176,6 +181,11 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 	}
 	if request.redirectPath != "" {
 		http.Redirect(w, r, request.redirectPath, http.StatusFound)
+		return true
+	}
+
+	if s.cfg.IsOptedOut(request.channelid) || s.cfg.IsOptedOut(request.userid) {
+		http.Error(w, "User or channel has opted out", http.StatusForbidden)
 		return true
 	}
 
