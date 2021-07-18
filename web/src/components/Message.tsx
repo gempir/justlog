@@ -54,7 +54,7 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 						className="emote"
 						key={x}
 						alt={emote.code}
-						src={`https://static-cdn.jtvnw.net/emoticons/v1/${emote.id}/1.0`}
+						src={`https://static-cdn.jtvnw.net/emoticons/v2/${emote.id}/default/dark/1.0`}
 					/>);
 					x += emote.endIndex - emote.startIndex - 1;
 					break;
