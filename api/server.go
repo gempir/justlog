@@ -151,23 +151,27 @@ func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values 
 	query := r.URL.Query()
 
 	if query.Get("userid") == "" && query.Get("user") != "" {
-		users, err := s.helixClient.GetUsersByUsernames([]string{query.Get("user")})
+		username := strings.ToLower(query.Get("user"))
+
+		users, err := s.helixClient.GetUsersByUsernames([]string{username})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil
 		}
 
-		query.Set("userid", users[query.Get("user")].ID)
+		query.Set("userid", users[username].ID)
 	}
 
 	if query.Get("channelid") == "" && query.Get("channel") != "" {
-		users, err := s.helixClient.GetUsersByUsernames([]string{query.Get("channel")})
+		channelName := strings.ToLower(query.Get("channel"))
+
+		users, err := s.helixClient.GetUsersByUsernames([]string{channelName})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil
 		}
 
-		query.Set("channelid", users[query.Get("channel")].ID)
+		query.Set("channelid", users[channelName].ID)
 	}
 
 	return query
