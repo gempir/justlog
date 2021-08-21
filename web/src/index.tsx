@@ -1,7 +1,7 @@
 import React from 'react';
 import { useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { ReactQueryCacheProvider } from 'react-query';
+import { QueryClientProvider } from 'react-query';
 import { Page } from './components/Page';
 import { StateProvider, store } from './store';
 import { unstable_createMuiStrictModeTheme as createMuiTheme } from '@material-ui/core';
@@ -16,9 +16,9 @@ const pageTheme = createMuiTheme({
 function App() {
 	const { state } = useContext(store);
 
-	return <ReactQueryCacheProvider queryCache={state.queryCache}>
+	return <QueryClientProvider client={state.queryClient}>
 		<Page />
-	</ReactQueryCacheProvider>
+	</QueryClientProvider>
 }
 
 ReactDOM.render(
