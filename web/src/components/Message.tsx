@@ -6,6 +6,7 @@ import { LogMessage } from "../types/log";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
 const MessageContainer = styled.div`
+	white-space: pre-wrap;
 
 	a {
 		margin: 0 2px;
