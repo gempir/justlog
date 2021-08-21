@@ -1,7 +1,7 @@
 import { Button, TextField } from "@material-ui/core";
 import { Autocomplete } from '@material-ui/lab';
 import React, { FormEvent, useContext } from "react";
-import { useQueryCache } from "react-query";
+import { useQueryClient } from "react-query";
 import styled from "styled-components";
 import { useChannels } from "../hooks/useChannels";
 import { store } from "../store";
@@ -33,7 +33,7 @@ const FiltersWrapper = styled.div`
 
 export function Filters() {
     const { setCurrents, state } = useContext(store);
-    const queryCache = useQueryCache();
+    const queryClient = useQueryClient();
     const channels = useChannels();
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -45,7 +45,7 @@ export function Filters() {
             const channel = data.get("channel") as string | null;
             const username = data.get("username") as string | null;
 
-            queryCache.invalidateQueries(["log", { channel: channel?.toLowerCase(), username: username?.toLowerCase() }]);
+            queryClient.invalidateQueries(["log", { channel: channel?.toLowerCase(), username: username?.toLowerCase() }]);
 
             setCurrents(channel, username);
         }

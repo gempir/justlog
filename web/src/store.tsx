@@ -1,5 +1,5 @@
 import React, { createContext, useState } from "react";
-import { QueryCache } from "react-query";
+import { QueryClient } from 'react-query'
 import { useLocalStorage } from "./hooks/useLocalStorage";
 
 export interface Settings {
@@ -25,7 +25,7 @@ export interface Setting {
 
 export interface State {
     settings: Settings,
-    queryCache: QueryCache,
+    queryClient: QueryClient,
     apiBaseUrl: string,
     currentChannel: string | null,
     currentUsername: string | null,
@@ -39,7 +39,7 @@ export type Action = Record<string, unknown>;
 const url = new URL(window.location.href);
 const defaultContext = {
     state: {
-        queryCache: new QueryCache(),
+        queryClient: new QueryClient(),
         apiBaseUrl: process.env.REACT_APP_API_BASE_URL ?? window.location.protocol + "//" + window.location.host,
         settings: {
             showEmotes: {
@@ -103,7 +103,7 @@ const StateProvider = ({ children }: { children: JSX.Element }): JSX.Element => 
             }
         }
 
-        state.queryCache.removeQueries("log");
+        state.queryClient.removeQueries("log");
 
         setSettingsStorage(newSettings);
         setState({ ...state, settings: newSettings });
