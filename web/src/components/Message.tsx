@@ -6,7 +6,6 @@ import { LogMessage } from "../types/log";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 
 const MessageContainer = styled.div`
-	white-space: pre-wrap;
 
 	a {
 		margin: 0 2px;
@@ -17,6 +16,11 @@ const MessageContainer = styled.div`
 			color: var(--theme2-bright);
 		}
 	}
+`;
+
+const WhitespaceContainer = styled.span`
+	display: inline-block;
+	min-width: 3.5px;
 `;
 
 const Emote = styled.img`
@@ -93,7 +97,12 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 				)}>{buffer}</Linkify>);
 				buffer = "";
 			}
-			renderMessage.push(c);
+
+			if (c === " ") {
+				renderMessage.push(<WhitespaceContainer key={x}>{c}</WhitespaceContainer>);
+			} else {
+				renderMessage.push(c);
+			}
 		}
 	}
 
