@@ -18,11 +18,6 @@ const MessageContainer = styled.div`
 	}
 `;
 
-const WhitespaceContainer = styled.span`
-	display: inline-block;
-	min-width: 3.5px;
-`;
-
 const Emote = styled.img`
 	max-height: 18px;
 	margin: 0 2px;
@@ -98,8 +93,8 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 				buffer = "";
 			}
 
-			if (c === " ") {
-				renderMessage.push(<WhitespaceContainer key={x}>{c}</WhitespaceContainer>);
+			if (c === " " && !state.settings.twitchChatMode.value) {
+				renderMessage.push(<>&nbsp;</>);
 			} else {
 				renderMessage.push(c);
 			}
