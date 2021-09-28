@@ -4,6 +4,7 @@
     "adminAPIKey": "noshot",
     "username": "gempbot",
     "oauth": "oauthtokenforchat",
+    "botVerified": true,
     "clientID": "mytwitchclientid",
     "clientSecret": "mysecret",
     "logLevel": "info",

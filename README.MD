@@ -27,6 +27,7 @@ docker run -p 8025:8025 --restart=unless-stopped --user $(id -u):$(id -g) -v $PW
     "adminAPIKey": "noshot", // your secret api key to access the admin api (documented below)
     "username": "gempbot", // bot username (can be justinfan123123 if you don't want to use an account)
     "oauth": "oauthtokenforchat", // bot token can be anything if justinfan123123
+    "botVerified": true, // increase ratelimits if you have a verified bot, so the bot can join faster, false by default
     "clientID": "mytwitchclientid", // your client ID, needed for fetching userids or usernames etc
     "clientSecret": "mysecret", // your twitch client secret
     "logLevel": "info", // the log level, keep this to info probably
