@@ -13,6 +13,7 @@ import (
 type Config struct {
 	configFile            string
 	configFilePermissions os.FileMode
+	BotVerified           bool            `json:"botVerified"`
 	LogsDirectory         string          `json:"logsDirectory"`
 	Archive               bool            `json:"archive"`
 	AdminAPIKey           string          `json:"adminAPIKey"`

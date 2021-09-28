@@ -99,6 +99,10 @@ func (b *Bot) Join(channelNames ...string) {
 
 func (b *Bot) newClient() *twitch.Client {
 	client := twitch.NewClient(b.cfg.Username, "oauth:"+b.cfg.OAuth)
+	if b.cfg.BotVerified {
+		client.SetRateLimiter(twitch.CreateVerifiedRateLimiter())
+	}
+
 	b.worker = append(b.worker, &worker{client, []string{}})
 	log.Infof("[bot] creating new twitch connection, new total: %d", len(b.worker))
 
