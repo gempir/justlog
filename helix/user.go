@@ -3,6 +3,7 @@ package helix
 import (
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	helixClient "github.com/nicklaw5/helix"
@@ -19,11 +20,13 @@ type Client struct {
 }
 
 var (
+	cacheMutex          *sync.Mutex
 	userCacheByID       map[string]*UserData
 	userCacheByUsername map[string]*UserData
 )
 
 func init() {
+	cacheMutex = &sync.Mutex{}
 	userCacheByID = map[string]*UserData{}
 	userCacheByUsername = map[string]*UserData{}
 }
@@ -133,8 +136,10 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 					ViewCount:       user.ViewCount,
 					Email:           user.Email,
 				}
+				cacheMutex.Lock()
 				userCacheByID[user.ID] = data
 				userCacheByUsername[user.Login] = data
+				cacheMutex.Unlock()
 			}
 		}
 	}
@@ -189,8 +194,10 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 					ViewCount:       user.ViewCount,
 					Email:           user.Email,
 				}
+				cacheMutex.Lock()
 				userCacheByID[user.ID] = data
 				userCacheByUsername[user.Login] = data
+				cacheMutex.Unlock()
 			}
 		}
 	}
