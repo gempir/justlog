@@ -11,7 +11,7 @@ import (
 
 func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 	if contains(b.cfg.Admins, message.User.Name) {
-		if strings.HasPrefix(message.Message, "!justlog status") || strings.HasPrefix(message.Message, "!status") {
+		if strings.HasPrefix(message.Message, "!justlog status") {
 			uptime := humanize.TimeSince(b.startTime)
 			b.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
 		}
