@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	commandPrefix        = "!justlog "
+	commandPrefix        = "!justlog"
 	errNoUsernames       = ", at least 1 username has to be provided. multiple usernames have to be separated with a space"
 	errRequestingUserIDs = ", something went wrong requesting the userids"
 )
@@ -24,8 +24,8 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 		return
 	}
 
-	args := strings.Fields(message.Message)
-	commandName := args[0][len(commandPrefix):]
+	args := strings.Fields(message.Message[len(commandPrefix):])
+	commandName := args[0]
 	args = args[1:]
 
 	switch commandName {
