@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	commandPrefix      = "!justlog "
-	noUsernamesMessage = ", at least 1 username has to be provided. multiple usernames have to be separated with a space"
+	commandPrefix        = "!justlog "
+	errNoUsernames       = ", at least 1 username has to be provided. multiple usernames have to be separated with a space"
+	errRequestingUserIDs = ", something went wrong requesting the userids"
 )
 
 func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
@@ -50,14 +51,14 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 
 func (b *Bot) handleJoin(message twitch.PrivateMessage, args []string) {
 	if len(args) < 1 {
-		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		b.Say(message.Channel, message.User.DisplayName+errNoUsernames)
 		return
 	}
 
 	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
-		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+		b.Say(message.Channel, message.User.DisplayName+errRequestingUserIDs)
 	}
 
 	ids := []string{}
@@ -71,14 +72,14 @@ func (b *Bot) handleJoin(message twitch.PrivateMessage, args []string) {
 
 func (b *Bot) handlePart(message twitch.PrivateMessage, args []string) {
 	if len(args) < 1 {
-		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		b.Say(message.Channel, message.User.DisplayName+errNoUsernames)
 		return
 	}
 
 	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
-		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+		b.Say(message.Channel, message.User.DisplayName+errRequestingUserIDs)
 	}
 
 	ids := []string{}
@@ -92,14 +93,14 @@ func (b *Bot) handlePart(message twitch.PrivateMessage, args []string) {
 
 func (b *Bot) handleOptOut(message twitch.PrivateMessage, args []string) {
 	if len(args) < 1 {
-		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		b.Say(message.Channel, message.User.DisplayName+errNoUsernames)
 		return
 	}
 
 	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
-		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+		b.Say(message.Channel, message.User.DisplayName+errRequestingUserIDs)
 	}
 
 	ids := []string{}
@@ -112,14 +113,14 @@ func (b *Bot) handleOptOut(message twitch.PrivateMessage, args []string) {
 
 func (b *Bot) handleOptIn(message twitch.PrivateMessage, args []string) {
 	if len(args) < 1 {
-		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		b.Say(message.Channel, message.User.DisplayName+errNoUsernames)
 		return
 	}
 
 	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
-		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
+		b.Say(message.Channel, message.User.DisplayName+errRequestingUserIDs)
 	}
 
 	ids := []string{}
@@ -140,8 +141,4 @@ func contains(arr []string, str string) bool {
 		}
 	}
 	return false
-}
-
-func usernamesFromArguments(args []string) {
-	//
 }
