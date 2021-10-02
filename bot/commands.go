@@ -9,31 +9,52 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	commandPrefix      = "!justlog "
+	noUsernamesMessage = ", at least 1 username has to be provided. multiple usernames have to be separated with a space"
+)
+
 func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
-	if contains(b.cfg.Admins, message.User.Name) {
-		if strings.HasPrefix(message.Message, "!justlog status") {
-			uptime := humanize.TimeSince(b.startTime)
-			b.Say(message.Channel, message.User.DisplayName+", uptime: "+uptime)
-		}
-		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog join ") {
-			b.handleJoin(message)
-		}
-		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog part ") {
-			b.handlePart(message)
-		}
-		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog optout ") {
-			b.handleOptOut(message)
-		}
-		if strings.HasPrefix(strings.ToLower(message.Message), "!justlog optin ") {
-			b.handleOptIn(message)
-		}
+	if !strings.HasPrefix(strings.ToLower(message.Message), commandPrefix) {
+		return
+	}
+
+	if !contains(b.cfg.Admins, message.User.Name) {
+		return
+	}
+
+	args := strings.Fields(message.Message)
+	commandName := args[0][len(commandPrefix):]
+	args = args[1:]
+
+	switch commandName {
+	case "status":
+		uptime := humanize.TimeSince(b.startTime)
+		b.Say(message.Channel, fmt.Sprintf("%s, uptime: %s", message.User.DisplayName, uptime))
+
+	case "join":
+		b.handleJoin(message, args)
+
+	case "part":
+		b.handlePart(message, args)
+
+	case "optout":
+		b.handleOptOut(message, args)
+
+	case "optin":
+		b.handleOptIn(message, args)
 	}
 }
 
-func (b *Bot) handleJoin(message twitch.PrivateMessage) {
-	input := strings.TrimPrefix(message.Message, "!justlog join ")
+// Commands
 
-	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+func (b *Bot) handleJoin(message twitch.PrivateMessage, args []string) {
+	if len(args) < 1 {
+		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		return
+	}
+
+	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
 		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
@@ -48,10 +69,13 @@ func (b *Bot) handleJoin(message twitch.PrivateMessage) {
 	b.Say(message.Channel, fmt.Sprintf("%s, added channels: %v", message.User.DisplayName, ids))
 }
 
-func (b *Bot) handlePart(message twitch.PrivateMessage) {
-	input := strings.TrimPrefix(message.Message, "!justlog part ")
+func (b *Bot) handlePart(message twitch.PrivateMessage, args []string) {
+	if len(args) < 1 {
+		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		return
+	}
 
-	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
 		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
@@ -66,10 +90,13 @@ func (b *Bot) handlePart(message twitch.PrivateMessage) {
 	b.Say(message.Channel, fmt.Sprintf("%s, removed channels: %v", message.User.DisplayName, ids))
 }
 
-func (b *Bot) handleOptOut(message twitch.PrivateMessage) {
-	input := strings.TrimPrefix(strings.ToLower(message.Message), "!justlog optout ")
+func (b *Bot) handleOptOut(message twitch.PrivateMessage, args []string) {
+	if len(args) < 1 {
+		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		return
+	}
 
-	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
 		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
@@ -83,10 +110,13 @@ func (b *Bot) handleOptOut(message twitch.PrivateMessage) {
 	b.Say(message.Channel, fmt.Sprintf("%s, opted out channels: %v", message.User.DisplayName, ids))
 }
 
-func (b *Bot) handleOptIn(message twitch.PrivateMessage) {
-	input := strings.TrimPrefix(strings.ToLower(message.Message), "!justlog optin ")
+func (b *Bot) handleOptIn(message twitch.PrivateMessage, args []string) {
+	if len(args) < 1 {
+		b.Say(message.Channel, message.User.DisplayName+noUsernamesMessage)
+		return
+	}
 
-	users, err := b.helixClient.GetUsersByUsernames(strings.Split(input, ","))
+	users, err := b.helixClient.GetUsersByUsernames(args)
 	if err != nil {
 		log.Error(err)
 		b.Say(message.Channel, message.User.DisplayName+", something went wrong requesting the userids")
@@ -101,6 +131,8 @@ func (b *Bot) handleOptIn(message twitch.PrivateMessage) {
 	b.Say(message.Channel, fmt.Sprintf("%s, opted in channels: %v", message.User.DisplayName, ids))
 }
 
+// Utilities
+
 func contains(arr []string, str string) bool {
 	for _, x := range arr {
 		if x == str {
@@ -108,4 +140,8 @@ func contains(arr []string, str string) bool {
 		}
 	}
 	return false
+}
+
+func usernamesFromArguments(args []string) {
+	//
 }
