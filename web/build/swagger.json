@@ -17,41 +17,6 @@
   },
   "basePath": "/",
   "paths": {
-    "/admin/channelConfigs/{channelID}": {
-      "post": {
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "description": "Will set the messageTypes logged for a channel\nhttps://github.com/gempir/go-twitch-irc/blob/master/message.go#L17",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json",
-          "text/plain"
-        ],
-        "schemes": [
-          "https"
-        ],
-        "tags": [
-          "admin"
-        ],
-        "operationId": "channelConfigs",
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
-            "description": ""
-          },
-          "405": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/admin/channels": {
       "post": {
         "security": [
