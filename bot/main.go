@@ -58,7 +58,7 @@ func (b *Bot) Connect() {
 	b.initialJoins()
 
 	if strings.HasPrefix(b.cfg.Username, "justinfan") {
-		log.Info("[bot] joining anonymous")
+		log.Info("[bot] joining as anonymous user")
 	} else {
 		log.Info("[bot] joining as user " + b.cfg.Username)
 	}
