@@ -17,28 +17,6 @@ func (s *Server) authenticateAdmin(w http.ResponseWriter, r *http.Request) bool 
 	return true
 }
 
-// swagger:route POST /admin/channelConfigs/{channelID} admin channelConfigs
-//
-// Will set the messageTypes logged for a channel
-// https://github.com/gempir/go-twitch-irc/blob/master/message.go#L17
-//
-//     Consumes:
-//     - application/json
-//
-//     Produces:
-//     - application/json
-//     - text/plain
-//
-//     Security:
-//     - api_key:
-//
-//     Schemes: https
-//
-//     Responses:
-//       200:
-//		 400:
-//       405:
-
 type channelsDeleteRequest struct {
 	Channels []string `json:"channels"`
 }
