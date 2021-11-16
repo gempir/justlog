@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { store } from "../store";
 import { LogMessage } from "../types/log";
 import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
+import runes from "runes";
 
 const MessageContainer = styled.div`
 
@@ -40,9 +41,10 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 		renderMessagePrefix = `${message.tags['system-msg']} `;
 	}
 
+	const messageTextEmoji = runes(messageText);
 
-	for (let x = 0; x <= messageText.length; x++) {
-		const c = messageText[x];
+	for (let x = 0; x <= messageTextEmoji.length; x++) {
+		const c = messageTextEmoji[x];
 
 		replaced = false;
 
@@ -63,7 +65,7 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 		}
 
 		if (!replaced) {
-			if (c !== " " && x !== messageText.length) {
+			if (c !== " " && x !== messageTextEmoji.length) {
 				buffer += c;
 				continue;
 			}
