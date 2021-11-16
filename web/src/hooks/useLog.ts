@@ -3,6 +3,7 @@ import { useQuery } from "react-query";
 import { getUserId, isUserId } from "../services/isUserId";
 import { store } from "../store";
 import { Emote, LogMessage, UserLogResponse } from "../types/log";
+import runes from "runes";
 
 
 
@@ -67,12 +68,12 @@ function parseEmotes(messageText: string, emotes: string | undefined): Array<Emo
 
             const startIndex = Number(startPos);
             const endIndex = Number(endPos) + 1;
-
+            
             parsed.push({
                 id,
                 startIndex: startIndex,
                 endIndex: endIndex,
-                code: messageText.substr(startIndex, endIndex - startIndex)
+                code: runes.substr(messageText, startIndex, endIndex - startIndex + 1)
             });
         }
     }
