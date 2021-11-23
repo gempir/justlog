@@ -24,7 +24,7 @@
             "api_key": []
           }
         ],
-        "description": "Will add the channels to log",
+        "description": "Will add the channels to log, only works with userIds",
         "consumes": [
           "application/json"
         ],
@@ -69,7 +69,7 @@
             "api_key": []
           }
         ],
-        "description": "Will remove the channels to log",
+        "description": "Will remove the channels to log, only works with userIds",
         "consumes": [
           "application/json"
         ],
@@ -1187,6 +1187,7 @@
       "type": "object",
       "properties": {
         "channels": {
+          "description": "list of userIds",
           "type": "array",
           "items": {
             "type": "string"
@@ -1200,6 +1201,7 @@
       "type": "object",
       "properties": {
         "channels": {
+          "description": "list of userIds",
           "type": "array",
           "items": {
             "type": "string"

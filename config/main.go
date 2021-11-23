@@ -39,7 +39,6 @@ func NewConfig(filePath string) *Config {
 
 // AddChannels adds channels to the config
 func (cfg *Config) AddChannels(channelIDs ...string) {
-	cfg.Channels = append(cfg.Channels, channelIDs...)
 	for _, id := range channelIDs {
 		cfg.Channels = appendIfMissing(cfg.Channels, id)
 	}
