@@ -40,4 +40,4 @@ Development requires [yarn](https://classic.yarnpkg.com/) and [go-swagger](https
 
 Run `go build && ./justlog` and `yarn start` in the web folder. 
 
-Before committing make sure to run `make` to generate openAPI specs and bundle assets.
+Or run `make container` and `make run_container`
