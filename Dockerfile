@@ -19,5 +19,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 FROM alpine:latest  
 RUN apk --no-cache add ca-certificates
 COPY --from=2 /app/app .
+USER 1000:1000
 CMD ["./app", "--config=/etc/justlog.json"]
 EXPOSE 8025
