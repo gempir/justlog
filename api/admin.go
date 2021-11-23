@@ -18,16 +18,18 @@ func (s *Server) authenticateAdmin(w http.ResponseWriter, r *http.Request) bool 
 }
 
 type channelsDeleteRequest struct {
+	// list of userIds
 	Channels []string `json:"channels"`
 }
 
 type channelConfigsJoinRequest struct {
+	// list of userIds
 	Channels []string `json:"channels"`
 }
 
 // swagger:route POST /admin/channels admin addChannels
 //
-// Will add the channels to log
+// Will add the channels to log, only works with userIds
 //
 //     Consumes:
 //     - application/json
@@ -49,7 +51,7 @@ type channelConfigsJoinRequest struct {
 
 // swagger:route DELETE /admin/channels admin deleteChannels
 //
-// Will remove the channels to log
+// Will remove the channels to log, only works with userIds
 //
 //     Consumes:
 //     - application/json
@@ -115,5 +117,5 @@ func (s *Server) writeChannels(w http.ResponseWriter, r *http.Request) {
 		s.bot.Join(userData.Login)
 	}
 
-	writeJSON(fmt.Sprintf("Doubters? Joined channels %v", request.Channels), http.StatusOK, w, r)
+	writeJSON(fmt.Sprintf("Doubters? Joined channels or already in: %v", request.Channels), http.StatusOK, w, r)
 }
