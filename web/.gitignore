@@ -5,6 +5,8 @@ node_modules
 build/*
 !build/.gitkeep
 
+public/swagger.json
+
 /.pnp
 .pnp.js
 
