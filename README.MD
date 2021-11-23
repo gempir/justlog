@@ -11,6 +11,9 @@ docker run -p 8025:8025 --restart=unless-stopped --user $(id -u):$(id -g) -v $PW
 ```
 
 ### Commands
+
+Only admins can use these commands
+
 - `!justlog status` will respond with uptime
 - `!justlog join gempir,pajlada` will join the channels and append them to the config
 - `!justlog optout gempir,gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
