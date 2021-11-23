@@ -1,3 +1,0 @@
-# Disallow web spiders everywhere
-User-agent: *
-Disallow: /

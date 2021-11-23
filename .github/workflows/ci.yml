@@ -39,10 +39,6 @@ jobs:
     needs: build
     steps:
 
-    - name: trigger update
-      run: |
-        curl -H "x-auth: ${{ secrets.UPDATE_KEY }}" ${{ secrets.UPDATE_URL }}
-
     - name: Set outputs
       id: vars
       run: echo "::set-output name=sha_short::$(echo ${{ github.sha }} | cut -c1-4)"
