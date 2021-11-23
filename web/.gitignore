@@ -2,7 +2,8 @@
 
 # dependencies
 node_modules
-build
+build/*
+!build/.gitkeep
 
 /.pnp
 .pnp.js
