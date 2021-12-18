@@ -20,16 +20,9 @@ type Client struct {
 }
 
 var (
-	cacheMutex          *sync.Mutex
-	userCacheByID       map[string]*UserData
-	userCacheByUsername map[string]*UserData
+	userCacheByID       sync.Map
+	userCacheByUsername sync.Map
 )
-
-func init() {
-	cacheMutex = &sync.Mutex{}
-	userCacheByID = map[string]*UserData{}
-	userCacheByUsername = map[string]*UserData{}
-}
 
 type TwitchApiClient interface {
 	GetUsersByUserIds([]string) (map[string]UserData, error)
@@ -105,7 +98,7 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 	var filteredUserIDs []string
 
 	for _, id := range userIDs {
-		if _, ok := userCacheByID[id]; !ok {
+		if _, ok := userCacheByID.Load(id); !ok {
 			filteredUserIDs = append(filteredUserIDs, id)
 		}
 	}
@@ -136,10 +129,8 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 					ViewCount:       user.ViewCount,
 					Email:           user.Email,
 				}
-				cacheMutex.Lock()
-				userCacheByID[user.ID] = data
-				userCacheByUsername[user.Login] = data
-				cacheMutex.Unlock()
+				userCacheByID.Store(user.ID, data)
+				userCacheByUsername.Store(user.Login, data)
 			}
 		}
 	}
@@ -147,11 +138,12 @@ func (c *Client) GetUsersByUserIds(userIDs []string) (map[string]UserData, error
 	result := make(map[string]UserData)
 
 	for _, id := range userIDs {
-		if _, ok := userCacheByID[id]; !ok {
+		value, ok := userCacheByID.Load(id)
+		if !ok {
 			log.Warningf("Could not find userId, channel might be banned: %s", id)
 			continue
 		}
-		result[id] = *userCacheByID[id]
+		result[id] = *(value.(*UserData))
 	}
 
 	return result, nil
@@ -163,7 +155,7 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 
 	for _, username := range usernames {
 		username = strings.ToLower(username)
-		if _, ok := userCacheByUsername[username]; !ok {
+		if _, ok := userCacheByUsername.Load(username); !ok {
 			filteredUsernames = append(filteredUsernames, username)
 		}
 	}
@@ -194,10 +186,8 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 					ViewCount:       user.ViewCount,
 					Email:           user.Email,
 				}
-				cacheMutex.Lock()
-				userCacheByID[user.ID] = data
-				userCacheByUsername[user.Login] = data
-				cacheMutex.Unlock()
+				userCacheByID.Store(user.ID, data)
+				userCacheByUsername.Store(user.Login, data)
 			}
 		}
 	}
@@ -206,11 +196,12 @@ func (c *Client) GetUsersByUsernames(usernames []string) (map[string]UserData, e
 
 	for _, username := range usernames {
 		username = strings.ToLower(username)
-		if _, ok := userCacheByUsername[username]; !ok {
+		value, ok := userCacheByUsername.Load(username)
+		if !ok {
 			log.Warningf("Could not find username, channel might be banned: %s", username)
 			continue
 		}
-		result[username] = *userCacheByUsername[username]
+		result[username] = *(value.(*UserData))
 	}
 
 	return result, nil

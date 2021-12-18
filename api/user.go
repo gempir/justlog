@@ -39,7 +39,7 @@ type RandomQuoteJSON struct {
 //     Responses:
 //       200: chatLog
 
-// swagger:route GET /channelid/{channelid}/username/{user}/random logs channelIdUserLogsRandom
+// swagger:route GET /channelid/{channelid}/user/{user}/random logs channelIdUserLogsRandom
 //
 // Get a random line from a user in a given channel
 //
@@ -116,7 +116,7 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 //     Responses:
 //       200: chatLog
 
-// swagger:route GET /channelid/{channelid}/username/{username} logs channelIdUserLogs
+// swagger:route GET /channelid/{channelid}/user/{username} logs channelIdUserLogs
 //
 // Get user logs in channel of current month
 //
@@ -160,7 +160,7 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 //     Responses:
 //       200: chatLog
 
-// swagger:route GET /channelid/{channelid}/username/{username}/{year}/{month} logs channelIdUserLogsYearMonth
+// swagger:route GET /channelid/{channelid}/user/{username}/{year}/{month} logs channelIdUserLogsYearMonth
 //
 // Get user logs in channel of given year month
 //
