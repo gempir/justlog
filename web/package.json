@@ -11,7 +11,7 @@
     "react-dom": "^17.0.1",
     "react-linkify": "^1.0.0-alpha",
     "react-query": "^3.21.0",
-    "react-scripts": "^4.0.3",
+    "react-scripts": "^4",
     "react-window": "^1.8.6",
     "runes": "^0.4.3",
     "swagger-ui-react": "^4.0.0-beta.4",
@@ -37,9 +37,9 @@
       "not op_mini all"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
     ]
   },
   "devDependencies": {
