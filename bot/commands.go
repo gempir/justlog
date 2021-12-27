@@ -25,6 +25,9 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 	}
 
 	args := strings.Fields(message.Message[len(commandPrefix):])
+	if len(args) < 1 {
+		return
+	}
 	commandName := args[0]
 	args = args[1:]
 
