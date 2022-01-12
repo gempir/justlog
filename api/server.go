@@ -18,7 +18,7 @@ import (
 	"github.com/gempir/justlog/helix"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/gempir/go-twitch-irc/v3"
 	"github.com/gempir/justlog/filelog"
 )
 

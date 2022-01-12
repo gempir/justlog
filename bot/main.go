@@ -9,7 +9,7 @@ import (
 	"github.com/gempir/justlog/config"
 	"github.com/gempir/justlog/filelog"
 
-	twitch "github.com/gempir/go-twitch-irc/v2"
+	twitch "github.com/gempir/go-twitch-irc/v3"
 	"github.com/gempir/justlog/helix"
 	log "github.com/sirupsen/logrus"
 )
@@ -100,7 +100,7 @@ func (b *Bot) Join(channelNames ...string) {
 func (b *Bot) newClient() *twitch.Client {
 	client := twitch.NewClient(b.cfg.Username, "oauth:"+b.cfg.OAuth)
 	if b.cfg.BotVerified {
-		client.SetRateLimiter(twitch.CreateVerifiedRateLimiter())
+		client.SetJoinRateLimiter(twitch.CreateVerifiedRateLimiter())
 	}
 
 	b.worker = append(b.worker, &worker{client, []string{}})

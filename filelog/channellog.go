@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/gempir/go-twitch-irc/v3"
 	log "github.com/sirupsen/logrus"
 )
 
