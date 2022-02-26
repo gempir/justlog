@@ -11,13 +11,11 @@ export function use7tvChannelEmotes(channelId: string): Array<ThirdPartyEmote> {
 
 		return fetch(`https://api.7tv.app/v2/users/${channelId}/emotes`).then(res => {
 			if (res.ok) {
-				return res.json();
+				return res.json() as Promise<StvChannelEmotesResponse>;
 			}
 
 			return Promise.reject(res.statusText);
-		}).then(res =>
-			res.json() as Promise<StvChannelEmotesResponse>
-		);
+		});
 	}, QueryDefaults);
 
 	if (isLoading) {

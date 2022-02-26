@@ -7,13 +7,11 @@ export function use7tvGlobalEmotes(): Array<ThirdPartyEmote> {
 	const { isLoading, error, data } = useQuery("7tv:global", () => {
 		return fetch("https://api.7tv.app/v2/emotes/global").then(res => {
 			if (res.ok) {
-				return res.json();
+				return res.json() as Promise<StvGlobalEmotesResponse>;
 			}
 
 			return Promise.reject(res.statusText);
-		}).then(res =>
-			res.json() as Promise<StvGlobalEmotesResponse>
-		);
+		});
 	}, QueryDefaults);
 
 	if (isLoading || !data) {
