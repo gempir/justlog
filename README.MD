@@ -3,6 +3,11 @@
 ### What is this?
 Justlog is an twitch irc bot. It focuses on logging and providing an api for the logs.
 
+### API
+
+API documentation can be viewed via the justlog frontend by clicking the "docs" symbol:  
+![image](https://user-images.githubusercontent.com/1629196/159481078-0de98f01-2816-49bd-8e17-ba7cf66cb064.png)
+
 ### Docker
 
 ```
