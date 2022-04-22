@@ -213,7 +213,7 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 
 	if err != nil {
 		log.Error(err)
-		http.Error(w, "could not load logs", http.StatusInternalServerError)
+		http.Error(w, "could not load logs", http.StatusNotFound)
 		return true
 	}
 
