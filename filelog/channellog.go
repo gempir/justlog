@@ -163,8 +163,6 @@ func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
 	randomDayIndex := rand.Intn(len(days))
 	randomDayPath := days[randomDayIndex] + "/channel.txt"
 
-	log.Infof("path %s", randomDayPath)
-
 	f, _ := os.Open(randomDayPath)
 	scanner := bufio.NewScanner(f)
 
