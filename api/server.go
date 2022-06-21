@@ -195,10 +195,9 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 
 	var logs *chatLog
 	if request.time.random {
-	    if requst.isUserRequest {
+	    if request.isUserRequest {
 		    logs, err = s.getRandomQuote(request)
-	    }
-	    else {
+	    } else {
 		    logs, err = s.getChannelRandomQuote(request)
 	    }
 	} else if request.time.from != "" && request.time.to != "" {

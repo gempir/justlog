@@ -5,9 +5,11 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"strings"
+	"io"
+	"io/ioutil"
+	"math/rand"
 
 	"github.com/gempir/go-twitch-irc/v3"
 	log "github.com/sirupsen/logrus"
@@ -124,7 +126,7 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 	return content, nil
 }
 
-func (l *Logger) ReadRandomMessageForChannel(channelID) (string, error) {
+func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
 	var days []string
 	var lines []string
 
@@ -139,11 +141,17 @@ func (l *Logger) ReadRandomMessageForChannel(channelID) (string, error) {
 		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
 		for _, monthDir := range months {
 			month := monthDir.Name()
-			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", l.logPath, channelID, year, month, userID)
-			if _, err := os.Stat(path); err == nil {
-				days = append(days, path)
-			} else if _, err := os.Stat(path + ".gz"); err == nil {
-				days = append(days, path+".gz")
+			dayFiles, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/" + month)
+
+			for _, dayFile := range dayFiles {
+				if !dayFile.IsDir() {
+					continue
+				}
+
+				day := dayFile.Name()
+				dayFilePath := l.logPath + "/" + channelID + "/" + year + "/" + month + "/" + day
+
+				days = append(days, dayFilePath)
 			}
 		}
 	}
@@ -153,7 +161,9 @@ func (l *Logger) ReadRandomMessageForChannel(channelID) (string, error) {
 	}
 
 	randomDayIndex := rand.Intn(len(days))
-	randomDayPath := days[randomDayIndex]
+	randomDayPath := days[randomDayIndex] + "/channel.txt"
+
+	log.Infof("path %s", randomDayPath)
 
 	f, _ := os.Open(randomDayPath)
 	scanner := bufio.NewScanner(f)
@@ -169,6 +179,10 @@ func (l *Logger) ReadRandomMessageForChannel(channelID) (string, error) {
 	}
 
 	f.Close()
+
+	if len(lines) < 1 {
+		return "", errors.New("no lines found")
+	}
 
 	randomLineNumber := rand.Intn(len(lines))
 	return lines[randomLineNumber], nil
