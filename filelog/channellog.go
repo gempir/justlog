@@ -123,3 +123,53 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 
 	return content, nil
 }
+
+func (l *Logger) ReadRandomMessageForChannel(channelID) (string, error) {
+	var days []string
+	var lines []string
+
+	if channelID == "" {
+		return "", errors.New("missing channelID")
+	}
+
+	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
+
+	for _, yearDir := range years {
+		year := yearDir.Name()
+		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
+		for _, monthDir := range months {
+			month := monthDir.Name()
+			path := fmt.Sprintf("%s/%s/%s/%s/%s.txt", l.logPath, channelID, year, month, userID)
+			if _, err := os.Stat(path); err == nil {
+				days = append(days, path)
+			} else if _, err := os.Stat(path + ".gz"); err == nil {
+				days = append(days, path+".gz")
+			}
+		}
+	}
+
+	if len(days) < 1 {
+		return "", errors.New("no log found")
+	}
+
+	randomDayIndex := rand.Intn(len(days))
+	randomDayPath := days[randomDayIndex]
+
+	f, _ := os.Open(randomDayPath)
+	scanner := bufio.NewScanner(f)
+
+	if strings.HasSuffix(randomDayPath, ".gz") {
+		gz, _ := gzip.NewReader(f)
+		scanner = bufio.NewScanner(gz)
+	}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		lines = append(lines, line)
+	}
+
+	f.Close()
+
+	randomLineNumber := rand.Intn(len(lines))
+	return lines[randomLineNumber], nil
+}

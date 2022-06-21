@@ -7,6 +7,48 @@ import (
 	"github.com/gempir/go-twitch-irc/v3"
 )
 
+// RandomQuoteJSON response when request a random message
+type RandomChannelQuoteJSON struct {
+	Channel     string    `json:"channel"`
+	Username    string    `json:"username"`
+	DisplayName string    `json:"displayName"`
+	Message     string    `json:"message"`
+	Timestamp   timestamp `json:"timestamp"`
+}
+
+// swagger:route GET /channel/{channel}/random logs randomChannelLog
+//
+// Get a random line from the entire channel log's history
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+
+// swagger:route GET /channelid/{channelid}/random logs randomChannelLog
+//
+// Get a random line from the entire channel log's history
+//
+//     Produces:
+//     - application/json
+//     - text/plain
+//
+//     Responses:
+//       200: chatLog
+func (s *Server) getChannelRandomQuote(request logRequest) (*chatLog, error) {
+	rawMessage, err := s.fileLogger.ReadRandomMessageForChannel(request.channelid)
+	if err != nil {
+		return &chatLog{}, err
+	}
+	parsedMessage := twitch.ParseMessage(rawMessage)
+
+	chatMsg := createChatMessage(parsedMessage)
+
+	return &chatLog{Messages: []chatMessage{chatMsg}}, nil
+}
+
 // swagger:route GET /channel/{channel} logs channelLogs
 //
 // Get entire channel logs of current day
