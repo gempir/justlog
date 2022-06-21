@@ -127,7 +127,7 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 }
 
 func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
-	var days []string
+	var dayFileList []string
 	var lines []string
 
 	if channelID == "" {
@@ -141,27 +141,31 @@ func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
 		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
 		for _, monthDir := range months {
 			month := monthDir.Name()
-			dayFiles, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/" + month)
+			days, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/" + month)
 
-			for _, dayFile := range dayFiles {
-				if !dayFile.IsDir() {
+			for _, dayDir := range days {
+				if !dayDir.IsDir() {
 					continue
 				}
 
-				day := dayFile.Name()
-				dayFilePath := l.logPath + "/" + channelID + "/" + year + "/" + month + "/" + day
 
-				days = append(days, dayFilePath)
+				dayDirPath := l.logPath + "/" + channelID + "/" + year + "/" + month + "/" + dayDir.Name()
+				logFiles, _ := ioutil.ReadDir(dayDirPath)
+
+				for _, logFile := range logFiles {
+					logFilePath := dayDirPath + "/" + logFile.Name()
+					dayFileList = append(dayFileList, logFilePath)
+				}
 			}
 		}
 	}
 
-	if len(days) < 1 {
+	if len(dayFileList) < 1 {
 		return "", errors.New("no log found")
 	}
 
-	randomDayIndex := rand.Intn(len(days))
-	randomDayPath := days[randomDayIndex] + "/channel.txt"
+	randomDayIndex := rand.Intn(len(dayFileList))
+	randomDayPath := dayFileList[randomDayIndex]
 
 	f, _ := os.Open(randomDayPath)
 	scanner := bufio.NewScanner(f)
@@ -179,6 +183,7 @@ func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
 	f.Close()
 
 	if len(lines) < 1 {
+		log.Infof("path %s", randomDayPath)
 		return "", errors.New("no lines found")
 	}
 
