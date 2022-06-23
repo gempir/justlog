@@ -5,9 +5,11 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"strings"
+	"io"
+	"io/ioutil"
+	"math/rand"
 
 	"github.com/gempir/go-twitch-irc/v3"
 	log "github.com/sirupsen/logrus"
@@ -122,4 +124,69 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 	}
 
 	return content, nil
+}
+
+func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
+	var dayFileList []string
+	var lines []string
+
+	if channelID == "" {
+		return "", errors.New("missing channelID")
+	}
+
+	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
+
+	for _, yearDir := range years {
+		year := yearDir.Name()
+		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
+		for _, monthDir := range months {
+			month := monthDir.Name()
+			days, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/" + month)
+
+			for _, dayDir := range days {
+				if !dayDir.IsDir() {
+					continue
+				}
+
+
+				dayDirPath := l.logPath + "/" + channelID + "/" + year + "/" + month + "/" + dayDir.Name()
+				logFiles, _ := ioutil.ReadDir(dayDirPath)
+
+				for _, logFile := range logFiles {
+					logFilePath := dayDirPath + "/" + logFile.Name()
+					dayFileList = append(dayFileList, logFilePath)
+				}
+			}
+		}
+	}
+
+	if len(dayFileList) < 1 {
+		return "", errors.New("no log found")
+	}
+
+	randomDayIndex := rand.Intn(len(dayFileList))
+	randomDayPath := dayFileList[randomDayIndex]
+
+	f, _ := os.Open(randomDayPath)
+	scanner := bufio.NewScanner(f)
+
+	if strings.HasSuffix(randomDayPath, ".gz") {
+		gz, _ := gzip.NewReader(f)
+		scanner = bufio.NewScanner(gz)
+	}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		lines = append(lines, line)
+	}
+
+	f.Close()
+
+	if len(lines) < 1 {
+		log.Infof("path %s", randomDayPath)
+		return "", errors.New("no lines found")
+	}
+
+	randomLineNumber := rand.Intn(len(lines))
+	return lines[randomLineNumber], nil
 }

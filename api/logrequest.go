@@ -103,6 +103,8 @@ func (s *Server) newLogRequestFromURL(r *http.Request) (logRequest, error) {
 		request.time.day = params[5]
 	} else if request.isUserRequest && len(params) == 6 && params[5] == "random" {
 		request.time.random = true
+	} else if request.isChannelRequest && len(params) == 4 && params[3] == "random" {
+		request.time.random = true
 	} else {
 		if request.isChannelRequest {
 			request.time.year = fmt.Sprintf("%d", time.Now().Year())
