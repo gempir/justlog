@@ -3,7 +3,7 @@
 # dependencies
 node_modules
 build/*
-!build/gitkeep
+!build/.gitkeep
 
 public/swagger.json
 
