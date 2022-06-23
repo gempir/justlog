@@ -5,11 +5,11 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"os"
-	"strings"
 	"io"
 	"io/ioutil"
 	"math/rand"
+	"os"
+	"strings"
 
 	"github.com/gempir/go-twitch-irc/v3"
 	log "github.com/sirupsen/logrus"
@@ -141,16 +141,15 @@ func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
 		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
 		for _, monthDir := range months {
 			month := monthDir.Name()
-			days, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/" + month)
 
-			for _, dayDir := range days {
-				if !dayDir.IsDir() {
+			possibleDays := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
+
+			for _, day := range possibleDays {
+				dayDirPath := l.logPath + "/" + channelID + "/" + year + "/" + month + "/" + fmt.Sprint(day)
+				logFiles, err := ioutil.ReadDir(dayDirPath)
+				if err != nil {
 					continue
 				}
-
-
-				dayDirPath := l.logPath + "/" + channelID + "/" + year + "/" + month + "/" + dayDir.Name()
-				logFiles, _ := ioutil.ReadDir(dayDirPath)
 
 				for _, logFile := range logFiles {
 					logFilePath := dayDirPath + "/" + logFile.Name()
