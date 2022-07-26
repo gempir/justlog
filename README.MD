@@ -31,7 +31,7 @@ Only admins can use these commands
 {
     "admins": ["gempir"], // will only respond to commands executed by these users
     "logsDirectory": "./logs", // the directory to log into
-    "adminAPIKey": "noshot", // your secret api key to access the admin api (documented below)
+    "adminAPIKey": "noshot", // your secret api key to access the admin api, can be any string, used in api request to admin endpoints
     "username": "gempbot", // bot username (can be justinfan123123 if you don't want to use an account)
     "oauth": "oauthtokenforchat", // bot token can be anything if justinfan123123
     "botVerified": true, // increase ratelimits if you have a verified bot, so the bot can join faster, false by default
