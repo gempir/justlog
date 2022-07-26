@@ -20,10 +20,10 @@ docker run -p 8025:8025 --restart=unless-stopped -v $PWD/config.json:/etc/justlo
 Only admins can use these commands
 
 - `!justlog status` will respond with uptime
-- `!justlog join gempir,pajlada` will join the channels and append them to the config
-- `!justlog part gempir,pajlada` will part the channels and remove them from the config
-- `!justlog optout gempir,gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
-- `!justlog optin gempir,gempbot` will revert the opt out
+- `!justlog join gempir pajlada` will join the channels and append them to the config
+- `!justlog part gempir pajlada` will part the channels and remove them from the config
+- `!justlog optout gempir gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
+- `!justlog optin gempir gempbot` will revert the opt out
 
 ### Config
 
