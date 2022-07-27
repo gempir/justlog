@@ -37,7 +37,7 @@ Only admins can use these commands
     "botVerified": true, // increase ratelimits if you have a verified bot, so the bot can join faster, false by default
     "clientID": "mytwitchclientid", // your client ID, needed for fetching userids or usernames etc
     "clientSecret": "mysecret", // your twitch client secret
-    "logLevel": "info", // the log level, keep this to info probably, all options are: trace, debug, info, warn, error, fatal, and panic
+    "logLevel": "info", // the log level, keep this to info probably, all options are: trace, debug, info, warn, error, fatal, and panic, logs output is stdout
     "channels": ["77829817", "11148817"], // the channels (userids) you want to log
     "archive": true // probably keep to true, will disable gzipping of old logs if false, useful if you setup compression on your own
 }
