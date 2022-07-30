@@ -20,9 +20,10 @@ docker run -p 8025:8025 --restart=unless-stopped -v $PWD/config.json:/etc/justlo
 Only admins can use these commands
 
 - `!justlog status` will respond with uptime
-- `!justlog join gempir,pajlada` will join the channels and append them to the config
-- `!justlog optout gempir,gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
-- `!justlog optin gempir,gempbot` will revert the opt out
+- `!justlog join gempir pajlada` will join the channels and append them to the config
+- `!justlog part gempir pajlada` will part the channels and remove them from the config
+- `!justlog optout gempir gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
+- `!justlog optin gempir gempbot` will revert the opt out
 
 ### Config
 
@@ -30,13 +31,13 @@ Only admins can use these commands
 {
     "admins": ["gempir"], // will only respond to commands executed by these users
     "logsDirectory": "./logs", // the directory to log into
-    "adminAPIKey": "noshot", // your secret api key to access the admin api (documented below)
+    "adminAPIKey": "noshot", // your secret api key to access the admin api, can be any string, used in api request to admin endpoints
     "username": "gempbot", // bot username (can be justinfan123123 if you don't want to use an account)
     "oauth": "oauthtokenforchat", // bot token can be anything if justinfan123123
     "botVerified": true, // increase ratelimits if you have a verified bot, so the bot can join faster, false by default
     "clientID": "mytwitchclientid", // your client ID, needed for fetching userids or usernames etc
     "clientSecret": "mysecret", // your twitch client secret
-    "logLevel": "info", // the log level, keep this to info probably
+    "logLevel": "info", // the log level, keep this to info probably, all options are: trace, debug, info, warn, error, fatal, and panic, logs output is stdout
     "channels": ["77829817", "11148817"], // the channels (userids) you want to log
     "archive": true // probably keep to true, will disable gzipping of old logs if false, useful if you setup compression on your own
 }
