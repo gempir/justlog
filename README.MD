@@ -3,6 +3,10 @@
 ### What is this?
 Justlog is an twitch irc bot. It focuses on logging and providing an api for the logs.
 
+### Optout
+
+Click the X icon on the web ui to find a explanation how to opt out.
+
 ### API
 
 API documentation can be viewed via the justlog frontend by clicking the "docs" symbol:  
