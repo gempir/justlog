@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { useChannels } from "../hooks/useChannels";
 import { store } from "../store";
 import { Docs } from "./Docs";
+import { Optout } from "./Optout";
 import { Settings } from "./Settings";
 
 const FiltersContainer = styled.form`
@@ -66,6 +67,7 @@ export function Filters() {
             <Button variant="contained" color="primary" size="large" type="submit">load</Button>
             <Settings />
             <Docs />
+            <Optout />
         </FiltersContainer>
     </FiltersWrapper>
 }

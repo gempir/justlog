@@ -23,6 +23,7 @@ type Bot struct {
 	worker      []*worker
 	channels    map[string]helix.UserData
 	clearchats  sync.Map
+	OptoutCodes sync.Map
 }
 
 type worker struct {
@@ -43,6 +44,7 @@ func NewBot(cfg *config.Config, helixClient helix.TwitchApiClient, fileLogger *f
 		fileLogger:  fileLogger,
 		channels:    channels,
 		worker:      []*worker{},
+		OptoutCodes: sync.Map{},
 	}
 }
 
