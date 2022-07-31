@@ -131,6 +131,11 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if url == "/optout" && r.Method == http.MethodPost {
+		s.writeOptOutCode(w, r)
+		return
+	}
+
 	if strings.HasPrefix(url, "/admin/channels") {
 		success := s.authenticateAdmin(w, r)
 		if success {
@@ -195,11 +200,11 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 
 	var logs *chatLog
 	if request.time.random {
-	    if request.isUserRequest {
-		    logs, err = s.getRandomQuote(request)
-	    } else {
-		    logs, err = s.getChannelRandomQuote(request)
-	    }
+		if request.isUserRequest {
+			logs, err = s.getRandomQuote(request)
+		} else {
+			logs, err = s.getChannelRandomQuote(request)
+		}
 	} else if request.time.from != "" && request.time.to != "" {
 		if request.isUserRequest {
 			logs, err = s.getUserLogsRange(request)

@@ -20,10 +20,6 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 		return
 	}
 
-	if !contains(b.cfg.Admins, message.User.Name) {
-		return
-	}
-
 	args := strings.Fields(message.Message[len(commandPrefix):])
 	if len(args) < 1 {
 		return
@@ -33,19 +29,30 @@ func (b *Bot) handlePrivateMessageCommands(message twitch.PrivateMessage) {
 
 	switch commandName {
 	case "status":
+		if !contains(b.cfg.Admins, message.User.Name) {
+			return
+		}
 		uptime := humanize.TimeSince(b.startTime)
 		b.Say(message.Channel, fmt.Sprintf("%s, uptime: %s", message.User.DisplayName, uptime))
 
 	case "join":
+		if !contains(b.cfg.Admins, message.User.Name) {
+			return
+		}
 		b.handleJoin(message, args)
 
 	case "part":
+		if !contains(b.cfg.Admins, message.User.Name) {
+			return
+		}
 		b.handlePart(message, args)
 
 	case "optout":
 		b.handleOptOut(message, args)
-
 	case "optin":
+		if !contains(b.cfg.Admins, message.User.Name) {
+			return
+		}
 		b.handleOptIn(message, args)
 	}
 }
@@ -97,6 +104,16 @@ func (b *Bot) handlePart(message twitch.PrivateMessage, args []string) {
 func (b *Bot) handleOptOut(message twitch.PrivateMessage, args []string) {
 	if len(args) < 1 {
 		b.Say(message.Channel, message.User.DisplayName+errNoUsernames)
+		return
+	}
+
+	if _, ok := b.OptoutCodes.LoadAndDelete(args[0]); ok {
+		b.cfg.OptOutUsers(message.User.ID)
+		b.Say(message.Channel, fmt.Sprintf("%s, opted you out", message.User.DisplayName))
+		return
+	}
+
+	if !contains(b.cfg.Admins, message.User.Name) {
 		return
 	}
 
