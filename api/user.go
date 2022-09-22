@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/gempir/go-twitch-irc/v3"
 )
@@ -54,12 +55,12 @@ type RandomQuoteJSON struct {
 //
 // Get a random line from a user in a given channel
 //
-//     Produces:
-//     - application/json
-//     - text/plain
+//	Produces:
+//	- application/json
+//	- text/plain
 //
-//     Responses:
-//       200: chatLog
+//	Responses:
+//	  200: chatLog
 func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 	rawMessage, err := s.fileLogger.ReadRandomMessageForUser(request.channelid, request.userid)
 	if err != nil {
@@ -76,14 +77,14 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 //
 // Lists available logs of a user
 //
-//     Produces:
-//     - application/json
-//     - text/plain
+//	Produces:
+//	- application/json
+//	- text/plain
 //
-//     Schemes: https
+//	Schemes: https
 //
-//     Responses:
-//       200: logList
+//	Responses:
+//	  200: logList
 func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q url.Values) {
 	logs, err := s.fileLogger.GetAvailableLogsForUser(q.Get("channelid"), q.Get("userid"))
 	if err != nil {
@@ -92,6 +93,7 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 	}
 
 	writeJSON(&logList{logs}, http.StatusOK, w, r)
+	writeCacheControl(w, r, time.Hour)
 }
 
 // swagger:route GET /channel/{channel}/user/{username} logs channelUserLogs
@@ -175,12 +177,12 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 //
 // Get user logs in channel of given year month
 //
-//     Produces:
-//     - application/json
-//     - text/plain
+//	Produces:
+//	- application/json
+//	- text/plain
 //
-//     Responses:
-//       200: chatLog
+//	Responses:
+//	  200: chatLog
 func (s *Server) getUserLogs(request logRequest) (*chatLog, error) {
 	logMessages, err := s.fileLogger.ReadLogForUser(request.channelid, request.userid, request.time.year, request.time.month)
 	if err != nil {
