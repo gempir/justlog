@@ -61,9 +61,9 @@ export function Filters() {
                 defaultValue={state.currentChannel}
                 getOptionLabel={(channel: string) => channel}
                 clearOnBlur={false}
-                renderInput={(params) => <TextField {...params} name="channel" label="channel" variant="filled" autoFocus={state.currentChannel === null} />}
+                renderInput={(params) => <TextField {...params} name="channel" label="channel or id:123" variant="filled" autoFocus={state.currentChannel === null} />}
             />
-            <TextField error={state.error} name="username" label="username" variant="filled" autoComplete="off" defaultValue={state.currentUsername} autoFocus={state.currentChannel !== null && state.currentUsername === null} />
+            <TextField error={state.error} name="username" label="username or id:123" variant="filled" autoComplete="off" defaultValue={state.currentUsername} autoFocus={state.currentChannel !== null && state.currentUsername === null} />
             <Button variant="contained" color="primary" size="large" type="submit">load</Button>
             <Settings />
             <Docs />
