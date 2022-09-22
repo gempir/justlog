@@ -232,7 +232,7 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 	currentYear := fmt.Sprintf("%d", int(time.Now().Year()))
 	currentMonth := fmt.Sprintf("%d", int(time.Now().Month()))
 
-	if request.time.year < currentYear || (request.time.year == currentYear && request.time.month < currentMonth) {
+	if (request.time.year != "" && request.time.month != "") && (request.time.year < currentYear || (request.time.year == currentYear && request.time.month < currentMonth)) {
 		writeCacheControl(w, r, time.Hour*8760)
 	}
 
