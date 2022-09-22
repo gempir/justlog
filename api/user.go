@@ -92,8 +92,8 @@ func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q ur
 		return
 	}
 
-	writeJSON(&logList{logs}, http.StatusOK, w, r)
 	writeCacheControl(w, r, time.Hour)
+	writeJSON(&logList{logs}, http.StatusOK, w, r)
 }
 
 // swagger:route GET /channel/{channel}/user/{username} logs channelUserLogs
