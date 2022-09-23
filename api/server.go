@@ -234,6 +234,8 @@ func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
 
 	if (request.time.year != "" && request.time.month != "") && (request.time.year < currentYear || (request.time.year == currentYear && request.time.month < currentMonth)) {
 		writeCacheControl(w, r, time.Hour*8760)
+	} else {
+		writeCacheControlNoCache(w, r)
 	}
 
 	if request.responseType == responseTypeJSON {
@@ -327,6 +329,10 @@ func writeJSON(data interface{}, code int, w http.ResponseWriter, r *http.Reques
 
 func writeCacheControl(w http.ResponseWriter, r *http.Request, cacheDuration time.Duration) {
 	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%.0f", cacheDuration.Seconds()))
+}
+
+func writeCacheControlNoCache(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-cache")
 }
 
 func writeRaw(cLog *chatLog, code int, w http.ResponseWriter, r *http.Request) {
