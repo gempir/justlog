@@ -194,6 +194,74 @@ func (l *Logger) GetAvailableLogsForUser(channelID, userID string) ([]UserLogFil
 	return logFiles, errors.New("No logs file")
 }
 
+type ChannelLogFile struct {
+	path  string
+	Year  string `json:"year"`
+	Month string `json:"month"`
+	Day   string `json:"day"`
+}
+
+func (l *Logger) GetAvailableLogsForChannel(channelID string) ([]ChannelLogFile, error) {
+	if channelID == "" {
+		return []ChannelLogFile{}, fmt.Errorf("Invalid channelID: %s", channelID)
+	}
+
+	logFiles := []ChannelLogFile{}
+
+	years, _ := ioutil.ReadDir(l.logPath + "/" + channelID)
+
+	for _, yearDir := range years {
+		year := yearDir.Name()
+		months, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/")
+		for _, monthDir := range months {
+			month := monthDir.Name()
+
+			days, _ := ioutil.ReadDir(l.logPath + "/" + channelID + "/" + year + "/" + month + "/")
+			for _, dayDir := range days {
+				day := dayDir.Name()
+				path := fmt.Sprintf("%s/%s/%s/%s/%s/channel.txt", l.logPath, channelID, year, month, day)
+
+				if _, err := os.Stat(path); err == nil {
+					logFile := ChannelLogFile{path, year, month, day}
+					logFiles = append(logFiles, logFile)
+				} else if _, err := os.Stat(path + ".gz"); err == nil {
+					logFile := ChannelLogFile{path + ".gz", year, month, day}
+					logFiles = append(logFiles, logFile)
+				}
+			}
+		}
+	}
+
+	sort.Slice(logFiles, func(i, j int) bool {
+		yearA, _ := strconv.Atoi(logFiles[i].Year)
+		yearB, _ := strconv.Atoi(logFiles[j].Year)
+		monthA, _ := strconv.Atoi(logFiles[i].Month)
+		monthB, _ := strconv.Atoi(logFiles[j].Month)
+		dayA, _ := strconv.Atoi(logFiles[j].Day)
+		dayB, _ := strconv.Atoi(logFiles[j].Day)
+
+		if yearA == yearB {
+			if monthA == monthB {
+				return dayA > dayB
+			}
+
+			return monthA > monthB
+		}
+
+		if monthA == monthB {
+			return dayA > dayB
+		}
+
+		return yearA > yearB
+	})
+
+	if len(logFiles) > 0 {
+		return logFiles, nil
+	}
+
+	return logFiles, errors.New("No logs file")
+}
+
 // ReadLogForUser fetch logs
 func (l *Logger) ReadLogForUser(channelID, userID string, year string, month string) ([]string, error) {
 	if channelID == "" || userID == "" {
