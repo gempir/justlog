@@ -82,6 +82,11 @@ type logList struct {
 	AvailableLogs []filelog.UserLogFile `json:"availableLogs"`
 }
 
+// swagger:model
+type channelLogList struct {
+	AvailableLogs []filelog.ChannelLogFile `json:"availableLogs"`
+}
+
 type chatMessage struct {
 	Text        string             `json:"text"`
 	Username    string             `json:"username"`

@@ -75,7 +75,7 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 
 // swagger:route GET /list logs list
 //
-// Lists available logs of a user
+// Lists available logs of a user or channel, channel response also includes the day. OpenAPI 2 does not support multiple responses with the same http code right now.
 //
 //	Produces:
 //	- application/json
@@ -86,9 +86,24 @@ func (s *Server) getRandomQuote(request logRequest) (*chatLog, error) {
 //	Responses:
 //	  200: logList
 func (s *Server) writeAvailableLogs(w http.ResponseWriter, r *http.Request, q url.Values) {
-	logs, err := s.fileLogger.GetAvailableLogsForUser(q.Get("channelid"), q.Get("userid"))
+	channelid := q.Get("channelid")
+	userid := q.Get("userid")
+
+	if userid == "" {
+		logs, err := s.fileLogger.GetAvailableLogsForChannel(channelid)
+		if err != nil {
+			http.Error(w, "failed to get available channel logs: "+err.Error(), http.StatusNotFound)
+			return
+		}
+
+		writeCacheControl(w, r, time.Hour)
+		writeJSON(&channelLogList{logs}, http.StatusOK, w, r)
+		return
+	}
+
+	logs, err := s.fileLogger.GetAvailableLogsForUser(channelid, userid)
 	if err != nil {
-		http.Error(w, "failed to get available logs: "+err.Error(), http.StatusNotFound)
+		http.Error(w, "failed to get available user logs: "+err.Error(), http.StatusNotFound)
 		return
 	}
 
