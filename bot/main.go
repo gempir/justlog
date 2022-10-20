@@ -19,7 +19,7 @@ type Bot struct {
 	startTime   time.Time
 	cfg         *config.Config
 	helixClient helix.TwitchApiClient
-	fileLogger  *filelog.Logger
+	logger      filelog.Logger
 	worker      []*worker
 	channels    map[string]helix.UserData
 	clearchats  sync.Map
@@ -39,7 +39,7 @@ func newWorker(client *twitch.Client) *worker {
 }
 
 // NewBot create new bot instance
-func NewBot(cfg *config.Config, helixClient helix.TwitchApiClient, fileLogger *filelog.Logger) *Bot {
+func NewBot(cfg *config.Config, helixClient helix.TwitchApiClient, fileLogger filelog.Logger) *Bot {
 	channels, err := helixClient.GetUsersByUserIds(cfg.Channels)
 	if err != nil {
 		log.Fatalf("[bot] failed to load configured channels %s", err.Error())
@@ -48,7 +48,7 @@ func NewBot(cfg *config.Config, helixClient helix.TwitchApiClient, fileLogger *f
 	return &Bot{
 		cfg:         cfg,
 		helixClient: helixClient,
-		fileLogger:  fileLogger,
+		logger:      fileLogger,
 		channels:    channels,
 		worker:      []*worker{},
 		OptoutCodes: sync.Map{},
@@ -150,14 +150,14 @@ func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
 	}
 
 	go func() {
-		err := b.fileLogger.LogPrivateMessageForUser(message.User, message)
+		err := b.logger.LogPrivateMessageForUser(message.User, message)
 		if err != nil {
 			log.Error(err.Error())
 		}
 	}()
 
 	go func() {
-		err := b.fileLogger.LogPrivateMessageForChannel(message)
+		err := b.logger.LogPrivateMessageForChannel(message)
 		if err != nil {
 			log.Error(err.Error())
 		}
@@ -170,7 +170,7 @@ func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
 	}
 
 	go func() {
-		err := b.fileLogger.LogUserNoticeMessageForUser(message.User.ID, message)
+		err := b.logger.LogUserNoticeMessageForUser(message.User.ID, message)
 		if err != nil {
 			log.Error(err.Error())
 		}
@@ -178,7 +178,7 @@ func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
 
 	if _, ok := message.Tags["msg-param-recipient-id"]; ok {
 		go func() {
-			err := b.fileLogger.LogUserNoticeMessageForUser(message.Tags["msg-param-recipient-id"], message)
+			err := b.logger.LogUserNoticeMessageForUser(message.Tags["msg-param-recipient-id"], message)
 			if err != nil {
 				log.Error(err.Error())
 			}
@@ -186,7 +186,7 @@ func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
 	}
 
 	go func() {
-		err := b.fileLogger.LogUserNoticeMessageForChannel(message)
+		err := b.logger.LogUserNoticeMessageForChannel(message)
 		if err != nil {
 			log.Error(err.Error())
 		}
@@ -223,14 +223,14 @@ func (b *Bot) handleClearChat(message twitch.ClearChatMessage) {
 	}
 
 	go func() {
-		err := b.fileLogger.LogClearchatMessageForUser(message.TargetUserID, message)
+		err := b.logger.LogClearchatMessageForUser(message.TargetUserID, message)
 		if err != nil {
 			log.Error(err.Error())
 		}
 	}()
 
 	go func() {
-		err := b.fileLogger.LogClearchatMessageForChannel(message)
+		err := b.logger.LogClearchatMessageForChannel(message)
 		if err != nil {
 			log.Error(err.Error())
 		}

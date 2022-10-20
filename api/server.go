@@ -28,13 +28,13 @@ type Server struct {
 	logPath       string
 	bot           *bot.Bot
 	cfg           *config.Config
-	fileLogger    *filelog.Logger
+	fileLogger    filelog.Logger
 	helixClient   helix.TwitchApiClient
 	assetsHandler http.Handler
 }
 
 // NewServer create api Server
-func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger *filelog.Logger, helixClient helix.TwitchApiClient, assets fs.FS) Server {
+func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger filelog.Logger, helixClient helix.TwitchApiClient, assets fs.FS) Server {
 	build, err := fs.Sub(assets, "web/build")
 	if err != nil {
 		log.Fatal("failed to read public assets")

@@ -17,17 +17,34 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Logger struct {
+type Logger interface {
+	LogPrivateMessageForUser(user twitch.User, message twitch.PrivateMessage) error
+	LogClearchatMessageForUser(userID string, message twitch.ClearChatMessage) error
+	LogUserNoticeMessageForUser(userID string, message twitch.UserNoticeMessage) error
+	GetLastLogYearAndMonthForUser(channelID, userID string) (int, int, error)
+	GetAvailableLogsForUser(channelID, userID string) ([]UserLogFile, error)
+	ReadLogForUser(channelID, userID string, year string, month string) ([]string, error)
+	ReadRandomMessageForUser(channelID, userID string) (string, error)
+
+	LogPrivateMessageForChannel(message twitch.PrivateMessage) error
+	LogClearchatMessageForChannel(message twitch.ClearChatMessage) error
+	LogUserNoticeMessageForChannel(message twitch.UserNoticeMessage) error
+	ReadLogForChannel(channelID string, year int, month int, day int) ([]string, error)
+	ReadRandomMessageForChannel(channelID string) (string, error)
+	GetAvailableLogsForChannel(channelID string) ([]ChannelLogFile, error)
+}
+
+type FileLogger struct {
 	logPath string
 }
 
-func NewFileLogger(logPath string) Logger {
-	return Logger{
+func NewFileLogger(logPath string) FileLogger {
+	return FileLogger{
 		logPath: logPath,
 	}
 }
 
-func (l *Logger) LogPrivateMessageForUser(user twitch.User, message twitch.PrivateMessage) error {
+func (l *FileLogger) LogPrivateMessageForUser(user twitch.User, message twitch.PrivateMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 
@@ -49,7 +66,7 @@ func (l *Logger) LogPrivateMessageForUser(user twitch.User, message twitch.Priva
 	return nil
 }
 
-func (l *Logger) LogClearchatMessageForUser(userID string, message twitch.ClearChatMessage) error {
+func (l *FileLogger) LogClearchatMessageForUser(userID string, message twitch.ClearChatMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 
@@ -71,7 +88,7 @@ func (l *Logger) LogClearchatMessageForUser(userID string, message twitch.ClearC
 	return nil
 }
 
-func (l *Logger) LogUserNoticeMessageForUser(userID string, message twitch.UserNoticeMessage) error {
+func (l *FileLogger) LogUserNoticeMessageForUser(userID string, message twitch.UserNoticeMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 
@@ -99,7 +116,7 @@ type UserLogFile struct {
 	Month string `json:"month"`
 }
 
-func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, int, error) {
+func (l *FileLogger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, int, error) {
 	if channelID == "" || userID == "" {
 		return 0, 0, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
 	}
@@ -148,7 +165,7 @@ func (l *Logger) GetLastLogYearAndMonthForUser(channelID, userID string) (int, i
 	return 0, 0, errors.New("No logs file")
 }
 
-func (l *Logger) GetAvailableLogsForUser(channelID, userID string) ([]UserLogFile, error) {
+func (l *FileLogger) GetAvailableLogsForUser(channelID, userID string) ([]UserLogFile, error) {
 	if channelID == "" || userID == "" {
 		return []UserLogFile{}, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
 	}
@@ -201,7 +218,7 @@ type ChannelLogFile struct {
 	Day   string `json:"day"`
 }
 
-func (l *Logger) GetAvailableLogsForChannel(channelID string) ([]ChannelLogFile, error) {
+func (l *FileLogger) GetAvailableLogsForChannel(channelID string) ([]ChannelLogFile, error) {
 	if channelID == "" {
 		return []ChannelLogFile{}, fmt.Errorf("Invalid channelID: %s", channelID)
 	}
@@ -263,7 +280,7 @@ func (l *Logger) GetAvailableLogsForChannel(channelID string) ([]ChannelLogFile,
 }
 
 // ReadLogForUser fetch logs
-func (l *Logger) ReadLogForUser(channelID, userID string, year string, month string) ([]string, error) {
+func (l *FileLogger) ReadLogForUser(channelID, userID string, year string, month string) ([]string, error) {
 	if channelID == "" || userID == "" {
 		return []string{}, fmt.Errorf("Invalid channelID: %s or userID: %s", channelID, userID)
 	}
@@ -310,7 +327,7 @@ func (l *Logger) ReadLogForUser(channelID, userID string, year string, month str
 	return content, nil
 }
 
-func (l *Logger) ReadRandomMessageForUser(channelID, userID string) (string, error) {
+func (l *FileLogger) ReadRandomMessageForUser(channelID, userID string) (string, error) {
 	var userLogs []string
 	var lines []string
 
