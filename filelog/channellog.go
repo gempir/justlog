@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (l *Logger) LogPrivateMessageForChannel(message twitch.PrivateMessage) error {
+func (l *FileLogger) LogPrivateMessageForChannel(message twitch.PrivateMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
@@ -38,7 +38,7 @@ func (l *Logger) LogPrivateMessageForChannel(message twitch.PrivateMessage) erro
 	return nil
 }
 
-func (l *Logger) LogClearchatMessageForChannel(message twitch.ClearChatMessage) error {
+func (l *FileLogger) LogClearchatMessageForChannel(message twitch.ClearChatMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
@@ -61,7 +61,7 @@ func (l *Logger) LogClearchatMessageForChannel(message twitch.ClearChatMessage) 
 	return nil
 }
 
-func (l *Logger) LogUserNoticeMessageForChannel(message twitch.UserNoticeMessage) error {
+func (l *FileLogger) LogUserNoticeMessageForChannel(message twitch.UserNoticeMessage) error {
 	year := message.Time.Year()
 	month := int(message.Time.Month())
 	day := message.Time.Day()
@@ -84,7 +84,7 @@ func (l *Logger) LogUserNoticeMessageForChannel(message twitch.UserNoticeMessage
 	return nil
 }
 
-func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day int) ([]string, error) {
+func (l *FileLogger) ReadLogForChannel(channelID string, year int, month int, day int) ([]string, error) {
 	filename := fmt.Sprintf(l.logPath+"/%s/%d/%d/%d/channel.txt", channelID, year, month, day)
 
 	if _, err := os.Stat(filename); err != nil {
@@ -126,7 +126,7 @@ func (l *Logger) ReadLogForChannel(channelID string, year int, month int, day in
 	return content, nil
 }
 
-func (l *Logger) ReadRandomMessageForChannel(channelID string) (string, error) {
+func (l *FileLogger) ReadRandomMessageForChannel(channelID string) (string, error) {
 	var dayFileList []string
 	var lines []string
 
