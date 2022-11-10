@@ -119,7 +119,10 @@ func (s *Server) Init() {
 func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.EscapedPath()
 
-	query := s.fillUserids(w, r)
+	query, err := s.fillUserids(w, r)
+	if err != nil {
+		return
+	}
 
 	if url == "/list" {
 		if s.cfg.IsOptedOut(query.Get("userid")) || s.cfg.IsOptedOut(query.Get("channelid")) {
@@ -157,7 +160,7 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values {
+func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) (url.Values, error) {
 	query := r.URL.Query()
 
 	if query.Get("userid") == "" && query.Get("user") != "" {
@@ -166,7 +169,7 @@ func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values 
 		users, err := s.helixClient.GetUsersByUsernames([]string{username})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return nil
+			return nil, err
 		}
 
 		query.Set("userid", users[username].ID)
@@ -178,13 +181,13 @@ func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) url.Values 
 		users, err := s.helixClient.GetUsersByUsernames([]string{channelName})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return nil
+			return nil, err
 		}
 
 		query.Set("channelid", users[channelName].ID)
 	}
 
-	return query
+	return query, nil
 }
 
 func (s *Server) routeLogs(w http.ResponseWriter, r *http.Request) bool {
