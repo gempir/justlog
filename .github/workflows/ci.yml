@@ -42,7 +42,3 @@ jobs:
     - name: Set outputs
       id: vars
       run: echo "::set-output name=sha_short::$(echo ${{ github.sha }} | cut -c1-4)"
-
-    - name: announce update
-      run: |
-        echo -en "PASS ${{ secrets.TMI_TOKEN }}\r\nNICK gempbot\r\nPRIVMSG #pajlada :nymnREACT $(echo '${{ github.event.head_commit.message }}' | tr '\n' ' ' | cut -c -200) github.com/gempir/justlog/commit/${{ steps.vars.outputs.sha_short }} | justlog update\r\n" | openssl s_client -connect irc.chat.twitch.tv:6697

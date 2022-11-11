@@ -171,6 +171,11 @@ func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) (url.Values
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil, err
 		}
+		if len(users) == 0 {
+			err := fmt.Errorf("could not find users")
+			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+			return nil, err
+		}
 
 		query.Set("userid", users[username].ID)
 	}
@@ -181,6 +186,11 @@ func (s *Server) fillUserids(w http.ResponseWriter, r *http.Request) (url.Values
 		users, err := s.helixClient.GetUsersByUsernames([]string{channelName})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return nil, err
+		}
+		if len(users) == 0 {
+			err := fmt.Errorf("could not find users")
+			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 			return nil, err
 		}
 
