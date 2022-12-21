@@ -108,7 +108,11 @@ func (b *Bot) Join(channelNames ...string) {
 				// already joined but join again in case it was a temporary ban
 				worker.client.Join(channel)
 				joined = true
-			} else if len(worker.joinedChannels) < 50 {
+			}
+		}
+
+		for _, worker := range b.worker {
+			if len(worker.joinedChannels) < 50 {
 				log.Info("[bot] joining " + channel)
 				worker.client.Join(channel)
 				worker.joinedChannels[channel] = true
@@ -116,6 +120,7 @@ func (b *Bot) Join(channelNames ...string) {
 				break
 			}
 		}
+
 		if !joined {
 			client := b.newClient()
 			go client.Connect()
