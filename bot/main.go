@@ -8,6 +8,7 @@ import (
 
 	"github.com/gempir/justlog/config"
 	"github.com/gempir/justlog/filelog"
+	expiremap "github.com/nursik/go-expire-map"
 
 	twitch "github.com/gempir/go-twitch-irc/v3"
 	"github.com/gempir/justlog/helix"
@@ -24,6 +25,7 @@ type Bot struct {
 	channels    map[string]helix.UserData
 	clearchats  sync.Map
 	OptoutCodes sync.Map
+	msgMap      *expiremap.ExpireMap
 }
 
 type worker struct {
@@ -52,6 +54,7 @@ func NewBot(cfg *config.Config, helixClient helix.TwitchApiClient, fileLogger fi
 		channels:    channels,
 		worker:      []*worker{},
 		OptoutCodes: sync.Map{},
+		msgMap:      expiremap.New(),
 	}
 }
 
@@ -72,6 +75,7 @@ func (b *Bot) Connect() {
 		log.Info("[bot] joining as user " + b.cfg.Username)
 	}
 
+	defer b.msgMap.Close()
 	log.Fatal(client.Connect())
 }
 
@@ -146,6 +150,11 @@ func (b *Bot) newClient() *twitch.Client {
 }
 
 func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
+	if _, ok := b.msgMap.Get(message.ID); ok {
+		return
+	}
+	b.msgMap.Set(message.ID, true, time.Second*3)
+
 	b.handlePrivateMessageCommands(message)
 
 	if b.cfg.IsOptedOut(message.User.ID) || b.cfg.IsOptedOut(message.RoomID) {
@@ -168,6 +177,11 @@ func (b *Bot) handlePrivateMessage(message twitch.PrivateMessage) {
 }
 
 func (b *Bot) handleUserNotice(message twitch.UserNoticeMessage) {
+	if _, ok := b.msgMap.Get(message.ID); ok {
+		return
+	}
+	b.msgMap.Set(message.ID, true, time.Second*3)
+
 	if b.cfg.IsOptedOut(message.User.ID) || b.cfg.IsOptedOut(message.RoomID) {
 		return
 	}
