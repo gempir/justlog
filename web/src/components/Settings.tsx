@@ -1,5 +1,5 @@
-import { IconButton, Menu, MenuItem } from "@material-ui/core";
-import { Check, Clear, Settings as SettingsIcon } from "@material-ui/icons";
+import { IconButton, Menu, MenuItem } from "@mui/material";
+import { Check, Clear, Settings as SettingsIcon } from "@mui/icons-material";
 import React, { MouseEvent, useContext, useState } from "react";
 import styled from "styled-components";
 import { Setting, store } from "../store";

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
-import DescriptionIcon from '@material-ui/icons/Description';
-import { IconButton } from "@material-ui/core";
+import DescriptionIcon from '@mui/icons-material/Description';
+import { IconButton } from "@mui/material";
 import SwaggerUI from "swagger-ui-react"
 import "swagger-ui-react/swagger-ui.css"
 import ReactDOM from "react-dom";

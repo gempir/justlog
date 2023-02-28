@@ -4,12 +4,12 @@ import ReactDOM from 'react-dom';
 import { QueryClientProvider } from 'react-query';
 import { Page } from './components/Page';
 import { StateProvider, store } from './store';
-import { unstable_createMuiStrictModeTheme as createMuiTheme } from '@material-ui/core';
-import { ThemeProvider } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 
-const pageTheme = createMuiTheme({
+const pageTheme = createTheme({
 	palette: {
-		type: 'dark'
+		mode: 'dark'
 	},
 });
 

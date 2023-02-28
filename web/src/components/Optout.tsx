@@ -1,8 +1,8 @@
-import { IconButton, Button } from "@material-ui/core";
+import { IconButton, Button } from "@mui/material";
 import { useContext, useState } from "react";
 import styled from "styled-components";
 import { store } from "../store";
-import CancelIcon from '@material-ui/icons/Cancel';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const OptoutWrapper = styled.div`
 
