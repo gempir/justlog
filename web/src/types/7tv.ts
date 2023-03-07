@@ -1,35 +1,43 @@
-export type StvGlobalEmotesResponse = StvChannelEmote[]
-export type StvChannelEmotesResponse = StvChannelEmote[]
+export type StvGlobalEmotesResponse = StvGlobal
+export type StvChannelEmotesResponse = StvChannel
 
-export interface StvChannelEmote {
-    id: string
-    name: string
-    owner: Owner
-    visibility: number
-    visibility_simple: string[]
-    mime: string
-    status: number
-    tags: string[]
-    width: number[]
-    height: number[]
-    urls: string[][]
+interface StvGlobal {
+    emotes: StvEmote[];
 }
 
-export interface Owner {
-    id: string
-    twitch_id: string
-    login: string
-    display_name: string
-    role: Role
-    profile_picture_id?: string
+interface StvChannel {
+    emote_set: StvEmoteSet;
 }
 
-export interface Role {
-    id: string
-    name: string
-    position: number
-    color: number
-    allowed: number
-    denied: number
-    default?: boolean
+interface StvEmoteSet {
+    id: string;
+    name: string;
+    emotes: StvEmote[];
+}
+
+
+interface StvEmote {
+    id: string;
+    name: string;
+    data: StvEmoteData;
+}
+
+interface StvEmoteData {
+    id: string;
+    name: string;
+    listed: boolean;
+    animated: boolean;
+    host: StvEmoteHost;
+}
+
+interface StvEmoteHost {
+    url: string;
+    files: StvEmoteFile[];
+}
+
+interface StvEmoteFile {
+    name: string;
+    width: number;
+    height: number;
+    format: string;
 }
