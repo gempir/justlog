@@ -1,6 +1,6 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import { useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from 'react-query';
 import { Page } from './components/Page';
 import { StateProvider, store } from './store';
@@ -21,13 +21,15 @@ function App() {
 	</QueryClientProvider>
 }
 
-ReactDOM.render(
-	<React.StrictMode>
+const container = document.getElementById('root') as Element;
+const root = createRoot(container);
+
+root.render(
+	<StrictMode>
 		<StateProvider>
 			<ThemeProvider theme={pageTheme}>
 				<App />
 			</ThemeProvider>
 		</StateProvider>
-	</React.StrictMode>,
-	document.getElementById('root')
-);
+	</StrictMode>
+	);
