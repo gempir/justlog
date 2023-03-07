@@ -35,7 +35,7 @@ type Server struct {
 
 // NewServer create api Server
 func NewServer(cfg *config.Config, bot *bot.Bot, fileLogger filelog.Logger, helixClient helix.TwitchApiClient, assets fs.FS) Server {
-	build, err := fs.Sub(assets, "web/build")
+	build, err := fs.Sub(assets, "web/dist")
 	if err != nil {
 		log.Fatal("failed to read public assets")
 	}

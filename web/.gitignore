@@ -2,8 +2,8 @@
 
 # dependencies
 node_modules
-build/*
-!build/.gitkeep
+dist/*
+!dist/.gitkeep
 
 public/swagger.json
 

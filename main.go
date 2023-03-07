@@ -13,7 +13,8 @@ import (
 )
 
 // content holds our static web server content.
-//go:embed web/build/*
+//
+//go:embed web/dist/*
 var assets embed.FS
 
 func main() {

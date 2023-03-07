@@ -13,7 +13,7 @@ web: init_web
 	cd web && yarn build
 
 init_web:
-	cd web && yarn install
+	cd web && yarn install --ignore-optional
 
 container:
 	docker build -t gempir/justlog .

@@ -1,4 +1,4 @@
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import React, { useContext, useState } from "react";
 import styled from "styled-components";
 import { Txt } from "../icons/Txt";

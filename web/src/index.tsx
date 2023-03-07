@@ -1,15 +1,15 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import { useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from 'react-query';
 import { Page } from './components/Page';
 import { StateProvider, store } from './store';
-import { unstable_createMuiStrictModeTheme as createMuiTheme } from '@material-ui/core';
-import { ThemeProvider } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 
-const pageTheme = createMuiTheme({
+const pageTheme = createTheme({
 	palette: {
-		type: 'dark'
+		mode: 'dark'
 	},
 });
 
@@ -21,13 +21,15 @@ function App() {
 	</QueryClientProvider>
 }
 
-ReactDOM.render(
-	<React.StrictMode>
+const container = document.getElementById('root') as Element;
+const root = createRoot(container);
+
+root.render(
+	<StrictMode>
 		<StateProvider>
 			<ThemeProvider theme={pageTheme}>
 				<App />
 			</ThemeProvider>
 		</StateProvider>
-	</React.StrictMode>,
-	document.getElementById('root')
-);
+	</StrictMode>
+	);
