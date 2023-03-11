@@ -1,11 +1,11 @@
 # justlog [![Build Status](https://github.com/gempir/justlog/workflows/ci/badge.svg)](https://github.com/gempir/justlog/actions?query=workflow%3Aci)
 
 ### What is this?
-Justlog is an twitch irc bot. It focuses on logging and providing an api for the logs.
+Justlog is a twitch irc bot. It focuses on logging and providing an api for the logs.
 
 ### Optout
 
-Click the X icon on the web ui to find a explanation how to opt out.
+Click the X icon on the web ui to find an explanation for how to opt out.
 
 ### API
 
@@ -23,11 +23,11 @@ docker run -p 8025:8025 --restart=unless-stopped -v $PWD/config.json:/etc/justlo
 
 Only admins can use these commands
 
-- `!justlog status` will respond with uptime
-- `!justlog join gempir pajlada` will join the channels and append them to the config
-- `!justlog part gempir pajlada` will part the channels and remove them from the config
-- `!justlog optout gempir gempbot` will opt out users of message logging or querying previous logs of that user, same applies to users own channel
-- `!justlog optin gempir gempbot` will revert the opt out
+- `!justlog status` will respond with uptime.
+- `!justlog join gempir pajlada` will join the channels and append them to the config.
+- `!justlog part gempir pajlada` will part the channels and remove them from the config.
+- `!justlog optout gempir gempbot` will opt out users of message logging or querying previous logs of that user. the same applies to a user's own channel.
+- `!justlog optin gempir gempbot` will revert the opt out.
 
 ### Config
 
