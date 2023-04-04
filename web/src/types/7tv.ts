@@ -6,7 +6,7 @@ interface StvGlobal {
 }
 
 interface StvChannel {
-    emote_set: StvEmoteSet;
+    emote_set: StvEmoteSet | null;
 }
 
 interface StvEmoteSet {
