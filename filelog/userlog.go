@@ -254,7 +254,7 @@ func (l *FileLogger) GetAvailableLogsForChannel(channelID string) ([]ChannelLogF
 		yearB, _ := strconv.Atoi(logFiles[j].Year)
 		monthA, _ := strconv.Atoi(logFiles[i].Month)
 		monthB, _ := strconv.Atoi(logFiles[j].Month)
-		dayA, _ := strconv.Atoi(logFiles[j].Day)
+		dayA, _ := strconv.Atoi(logFiles[i].Day)
 		dayB, _ := strconv.Atoi(logFiles[j].Day)
 
 		if yearA == yearB {
