@@ -33,7 +33,7 @@ export function ContentLog({ year, month }: { year: string, month: string }) {
     const [searchText, setSearchText] = useState("");
 
     const logs = useLog(state.currentChannel ?? "", state.currentUsername ?? "", year, month)
-        .filter(log => log.text.toLowerCase().includes(searchText.toLowerCase()));
+        .filter(log => (log.text + log.systemText).toLowerCase().includes(searchText.toLowerCase()));
 
     const Row = ({ index, style }: { index: number, style: CSSProperties }) => (
         <div style={style}><LogLine key={logs[index].id ? logs[index].id : index} message={logs[index]} /></div>
