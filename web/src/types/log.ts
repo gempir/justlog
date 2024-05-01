@@ -9,6 +9,7 @@ export interface LogMessage extends Omit<RawLogMessage, "timestamp"> {
 
 export interface RawLogMessage {
     text: string,
+    systemText: string,
     username: string,
     displayName: string,
     channel: string,

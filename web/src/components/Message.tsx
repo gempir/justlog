@@ -7,7 +7,6 @@ import { ThirdPartyEmote } from "../types/ThirdPartyEmote";
 import runes from "runes";
 
 const MessageContainer = styled.div`
-
 	a {
 		margin: 0 2px;
 		color: var(--theme2);
@@ -17,6 +16,10 @@ const MessageContainer = styled.div`
 			color: var(--theme2-bright);
 		}
 	}
+`;
+
+const SystemMessageWrapper = styled.span`
+font-style: italic;
 `;
 
 const Emote = styled.img`
@@ -35,10 +38,8 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 
 	let messageText = message.text;
 	let renderMessagePrefix = "";
-	if (message.tags['system-msg']) {
-		messageText = messageText.replace(message.tags['system-msg'] + " ", "");
-
-		renderMessagePrefix = `${message.tags['system-msg']} `;
+	if (message.systemText) {
+		renderMessagePrefix = `${message.systemText}`;
 	}
 
 	const messageTextEmoji = runes(messageText);
@@ -105,7 +106,10 @@ export function Message({ message, thirdPartyEmotes }: { message: LogMessage, th
 		}
 	}
 
+	const prefixElement = renderMessagePrefix ? 
+		<SystemMessageWrapper>{renderMessagePrefix}</SystemMessageWrapper> : null;
+
 	return <MessageContainer className="message">
-		{renderMessagePrefix}{renderMessage}
+		{prefixElement}{renderMessagePrefix && renderMessage ? ' ' : ''}{renderMessage}
 	</MessageContainer>;
 };

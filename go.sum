@@ -7,10 +7,8 @@ github.com/golang-jwt/jwt v3.2.1+incompatible h1:73Z+4BJcrTC+KczS6WvTPvRGOp1WmfE
 github.com/golang-jwt/jwt v3.2.1+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
 github.com/nicklaw5/helix v1.25.0 h1:Mrz537izZVsGdM3I46uGAAlslj61frgkhS/9xQqyT/M=
 github.com/nicklaw5/helix v1.25.0/go.mod h1:yvXZFapT6afIoxnAvlWiJiUMsYnoHl7tNs+t0bloAMw=
-github.com/nursik/go-expire-map v1.1.0 h1:C+OJ81JtHDSPJXfuu0g3e8RRjHLd5of8dVzyfDOB9KY=
-github.com/nursik/go-expire-map v1.1.0/go.mod h1:wdQsai5n32Uw1IuVXXZoopePGCFh5vb0Dka/TRcboHs=
-github.com/nursik/go-ordered-set v0.0.0-20190626022851-0e8872c36517 h1:jau4pavdQo5lHeVTjZEGrm4+zvVGZj8SFQt4awsLLXE=
-github.com/nursik/go-ordered-set v0.0.0-20190626022851-0e8872c36517/go.mod h1:qFI7Mmmx8i+Qz8a52FarvpgPQzylvD3w77JAwvnFtKg=
+github.com/nursik/go-expire-map v1.2.0 h1:3yl3sVLSnfw4vbo6OVZWP1tFND4CBm4hrYCrrAT5jkU=
+github.com/nursik/go-expire-map v1.2.0/go.mod h1:Mrqzxpk2G81At+TAlfImiNrKECj0gfVw7URv3p/eLzU=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=

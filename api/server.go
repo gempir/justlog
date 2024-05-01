@@ -89,6 +89,7 @@ type channelLogList struct {
 
 type chatMessage struct {
 	Text        string             `json:"text"`
+	SystemText  string             `json:"systemText"`
 	Username    string             `json:"username"`
 	DisplayName string             `json:"displayName"`
 	Channel     string             `json:"channel"`
@@ -457,7 +458,7 @@ func createChatMessage(parsedMessage twitch.Message) chatMessage {
 			Timestamp:   timestamp{message.Time},
 			Username:    message.TargetUsername,
 			DisplayName: message.TargetUsername,
-			Text:        buildClearChatMessageText(*message),
+			SystemText:  buildClearChatMessageText(*message),
 			Type:        message.Type,
 			Channel:     message.Channel,
 			Raw:         message.Raw,
@@ -468,7 +469,8 @@ func createChatMessage(parsedMessage twitch.Message) chatMessage {
 			Timestamp:   timestamp{message.Time},
 			Username:    message.User.Name,
 			DisplayName: message.User.DisplayName,
-			Text:        message.SystemMsg + " " + message.Message,
+			Text:        message.Message,
+			SystemText:  message.SystemMsg,
 			Type:        message.Type,
 			Channel:     message.Channel,
 			Raw:         message.Raw,
