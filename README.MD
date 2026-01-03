@@ -1,5 +1,11 @@
 # justlog [![Build Status](https://github.com/gempir/justlog/workflows/ci/badge.svg)](https://github.com/gempir/justlog/actions?query=workflow%3Aci)
 
+## Archived
+
+This project is no longer maintained. I recommend the excellent project rustlog which has a compatible API, is more efficient and stores logs in ClickHouse.
+
+https://github.com/boring-nick/rustlog
+
 ### What is this?
 Justlog is a twitch irc bot. It focuses on logging and providing an api for the logs.
 
